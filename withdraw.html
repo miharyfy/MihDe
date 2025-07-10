@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="mg">
+<head>
+  <meta charset="UTF-8">
+  <title>Retrait TRX</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>💸 Retrait</h1>
+    <input type="email" placeholder="Gmail (login)" id="emailRetrait">
+    <input type="text" placeholder="Adresse TRX" id="trxAddress">
+    <input type="number" placeholder="Habetsahana TRX" id="amountRetrait">
+    <button onclick="submitRetrait()">Alefa</button>
+    <p id="resRetrait"></p>
+
+    <a href="index.html">⏪ Miverina</a>
+  </div>
+
+  <script>
+    function submitRetrait() {
+      document.getElementById("resRetrait").innerText = "✅ Fangatahanao dia voaray! (Test mode)";
+    }
+  </script>
+</body>
+</html>
