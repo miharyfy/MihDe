@@ -1,144 +1,27 @@
 <!DOCTYPE html>
 <html lang="mg">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MihDe Store</title>
-  <style>
-    /* Reset */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
-
-    body {
-      background-color: #1e3a8a; /* manga matanjaka */
-      color: white;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Sidebar / Header menu */
-    header {
-      background-color: #2563eb; /* manga mazava kokoa */
-      display: flex;
-      align-items: center;
-      padding: 10px 20px;
-      gap: 30px;
-    }
-
-    /* Logo placeholder */
-    .logo-placeholder {
-      font-weight: bold;
-      font-size: 1.5rem;
-      border: 2px dashed white;
-      padding: 8px 20px;
-      border-radius: 8px;
-      user-select: none;
-    }
-
-    nav {
-      display: flex;
-      gap: 25px;
-      flex-grow: 1;
-    }
-
-    nav a {
-      color: white;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 1.1rem;
-      padding: 6px 10px;
-      border-radius: 6px;
-      transition: background-color 0.3s;
-    }
-
-    nav a:hover {
-      background-color: #3b82f6;
-    }
-
-    /* Buttons for login/signup */
-    .auth-buttons {
-      display: flex;
-      gap: 15px;
-    }
-
-    .auth-buttons a {
-      background-color: white;
-      color: #1e3a8a;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-weight: 600;
-      text-decoration: none;
-      transition: background-color 0.3s;
-    }
-
-    .auth-buttons a:hover {
-      background-color: #93c5fd;
-    }
-
-    /* Main content */
-    main {
-      flex-grow: 1;
-      padding: 30px 20px;
-    }
-
-    .app-list-placeholder {
-      margin-top: 20px;
-      background-color: #2563eb;
-      border-radius: 12px;
-      height: 400px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-      font-weight: 600;
-      color: #bfdbfe;
-      border: 2px dashed #bfdbfe;
-      user-select: none;
-    }
-
-    /* Responsive */
-    @media (max-width: 600px) {
-      nav {
-        gap: 15px;
-      }
-      .auth-buttons a {
-        padding: 6px 12px;
-        font-size: 0.9rem;
-      }
-      main {
-        padding: 20px 10px;
-      }
-      .app-list-placeholder {
-        height: 300px;
-        font-size: 1.1rem;
-      }
-    }
-  </style>
+  <meta charset="UTF-8">
+  <title>TRX Miner Gratuit</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <div class="logo-placeholder">ATO NO ATAO ILAY LOGO</div>
-    <nav>
-      <a href="#">Home</a>
-      <a href="#">Apps</a>
-      <a href="#">About</a>
-      <a href="#">Contact</a>
-    </nav>
-    <div class="auth-buttons">
-      <a href="/login">Hiditra</a>
-      <a href="/signup">Misoratra</a>
-    </div>
-  </header>
+  <div class="container">
+    <img src="https://cryptologos.cc/logos/tron-trx-logo.png" alt="TRX Logo" class="logo" />
+    <h1>TRX Miner</h1>
+    <p>Midira ny mail-nao FaucetPay eto ambany</p>
 
-  <main>
-    <div class="app-list-placeholder">
-      Eto no atao ny lisitra karatra
+    <input type="email" id="email" placeholder="Email FaucetPay">
+    <button onclick="startMining()">Atombohy ny Mining</button>
+
+    <div class="mining-box" id="miningBox" style="display:none;">
+      <p>Mined: <span id="amount">0</span> TRX</p>
+      <p>Status: <span id="status">Miketrika...</span></p>
     </div>
-  </main>
+
+    <p id="result"></p>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
