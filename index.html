@@ -4,87 +4,141 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MihDe Store</title>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap"
-    rel="stylesheet"
-  />
   <style>
+    /* Reset */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Poppins', sans-serif;
+      font-family: Arial, sans-serif;
     }
+
     body {
-      background: linear-gradient(135deg, #72a6fb, #4e82e9);
-      color: #fff;
+      background-color: #1e3a8a; /* manga matanjaka */
+      color: white;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
+    }
+
+    /* Sidebar / Header menu */
+    header {
+      background-color: #2563eb; /* manga mazava kokoa */
+      display: flex;
+      align-items: center;
+      padding: 10px 20px;
+      gap: 30px;
+    }
+
+    /* Logo placeholder */
+    .logo-placeholder {
+      font-weight: bold;
+      font-size: 1.5rem;
+      border: 2px dashed white;
+      padding: 8px 20px;
+      border-radius: 8px;
+      user-select: none;
+    }
+
+    nav {
+      display: flex;
+      gap: 25px;
+      flex-grow: 1;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.1rem;
+      padding: 6px 10px;
+      border-radius: 6px;
+      transition: background-color 0.3s;
+    }
+
+    nav a:hover {
+      background-color: #3b82f6;
+    }
+
+    /* Buttons for login/signup */
+    .auth-buttons {
+      display: flex;
+      gap: 15px;
+    }
+
+    .auth-buttons a {
+      background-color: white;
+      color: #1e3a8a;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background-color 0.3s;
+    }
+
+    .auth-buttons a:hover {
+      background-color: #93c5fd;
+    }
+
+    /* Main content */
+    main {
+      flex-grow: 1;
+      padding: 30px 20px;
+    }
+
+    .app-list-placeholder {
+      margin-top: 20px;
+      background-color: #2563eb;
+      border-radius: 12px;
+      height: 400px;
+      display: flex;
       align-items: center;
       justify-content: center;
-      height: 100vh;
-      padding: 20px;
-      text-align: center;
-    }
-    header img {
-      width: 130px;
-      margin-bottom: 25px;
-      filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
-    }
-    h1 {
-      font-size: 3rem;
+      font-size: 1.3rem;
       font-weight: 600;
-      margin-bottom: 12px;
-      text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      color: #bfdbfe;
+      border: 2px dashed #bfdbfe;
+      user-select: none;
     }
-    p {
-      font-size: 1.2rem;
-      margin-bottom: 40px;
-      opacity: 0.9;
-      max-width: 360px;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    }
-    .btn-group a {
-      display: inline-block;
-      margin: 0 15px;
-      padding: 14px 32px;
-      background-color: #fff;
-      color: #4e82e9;
-      text-decoration: none;
-      border-radius: 50px;
-      font-weight: 600;
-      box-shadow: 0 5px 10px rgba(255,255,255,0.4);
-      transition: all 0.3s ease;
-    }
-    .btn-group a:hover {
-      background-color: #4e82e9;
-      color: white;
-      box-shadow: 0 6px 15px rgba(255,255,255,0.7);
-      transform: translateY(-3px);
-    }
-    @media (max-width: 480px) {
-      h1 {
-        font-size: 2.2rem;
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      nav {
+        gap: 15px;
       }
-      p {
-        font-size: 1rem;
+      .auth-buttons a {
+        padding: 6px 12px;
+        font-size: 0.9rem;
       }
-      .btn-group a {
-        padding: 12px 26px;
-        margin: 0 8px;
+      main {
+        padding: 20px 10px;
+      }
+      .app-list-placeholder {
+        height: 300px;
+        font-size: 1.1rem;
       }
     }
   </style>
 </head>
 <body>
   <header>
-    <img src="logo.png" alt="MihDe Store Logo" />
-    <h1>MihDe Store</h1>
-    <p>Misintona sy mizara application APK amin'ny fomba tsotra sy haingana.</p>
-    <div class="btn-group">
+    <div class="logo-placeholder">ATO NO ATAO ILAY LOGO</div>
+    <nav>
+      <a href="#">Home</a>
+      <a href="#">Apps</a>
+      <a href="#">About</a>
+      <a href="#">Contact</a>
+    </nav>
+    <div class="auth-buttons">
       <a href="/login">Hiditra</a>
-      <a href="/signup">Misoratra anarana</a>
+      <a href="/signup">Misoratra</a>
     </div>
   </header>
+
+  <main>
+    <div class="app-list-placeholder">
+      Eto no atao ny lisitra karatra
+    </div>
+  </main>
 </body>
 </html>
