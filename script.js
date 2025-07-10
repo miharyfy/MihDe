@@ -4,7 +4,7 @@ let interval;
 function startMining() {
   const gmail = document.getElementById("gmail").value;
   if (!gmail || !gmail.includes("@gmail.com")) {
-    alert("Ampidiro Gmail marina.");
+    alert("Please enter a valid Gmail address.");
     return;
   }
 
