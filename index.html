@@ -2,24 +2,26 @@
 <html lang="mg">
 <head>
   <meta charset="UTF-8">
-  <title>TRX Miner Gratuit</title>
+  <title>TRX Miner - MihDe</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <img src="https://cryptologos.cc/logos/tron-trx-logo.png" alt="TRX Logo" class="logo" />
-    <h1>TRX Miner</h1>
-    <p>Midira ny mail-nao FaucetPay eto ambany</p>
+    <img src="public/logo.png" alt="Logo MihDe" class="logo" />
+    <h1>🚀 TRX Miner</h1>
+    
+    <input type="email" id="gmail" placeholder="Ampidiro Gmail anao">
+    <button onclick="startMining()">Login & Start Mining</button>
 
-    <input type="email" id="email" placeholder="Email FaucetPay">
-    <button onclick="startMining()">Atombohy ny Mining</button>
-
-    <div class="mining-box" id="miningBox" style="display:none;">
+    <div id="miningBox" style="display:none;">
+      <img src="public/loader.gif" class="loader" />
       <p>Mined: <span id="amount">0</span> TRX</p>
-      <p>Status: <span id="status">Miketrika...</span></p>
     </div>
 
-    <p id="result"></p>
+    <div class="nav-links">
+      <a href="deposit.html">➡️ Dépôt</a> |
+      <a href="withdraw.html">⬅️ Retrait</a>
+    </div>
   </div>
 
   <script src="script.js"></script>
