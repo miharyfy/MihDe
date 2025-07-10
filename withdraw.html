@@ -1,26 +1,28 @@
 <!DOCTYPE html>
-<html lang="mg">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Retrait TRX</title>
+  <title>Withdraw TRX</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <h1>💸 Retrait</h1>
-    <input type="email" placeholder="Gmail (login)" id="emailRetrait">
-    <input type="text" placeholder="Adresse TRX" id="trxAddress">
-    <input type="number" placeholder="Habetsahana TRX" id="amountRetrait">
-    <button onclick="submitRetrait()">Alefa</button>
+    <h1>📤 Withdraw TRX</h1>
+    <input type="email" id="emailRetrait" placeholder="Your Gmail">
+    <input type="text" id="trxAddress" placeholder="Your TRX Address">
+    <input type="number" id="amountRetrait" placeholder="Amount in TRX">
+    <button onclick="submitWithdraw()">Request Withdrawal</button>
     <p id="resRetrait"></p>
 
-    <a href="index.html">⏪ Miverina</a>
-  </div>
+    <div class="nav-links">
+      <a href="index.html">← Back to Mining</a>
+    </div>
 
-  <script>
-    function submitRetrait() {
-      document.getElementById("resRetrait").innerText = "✅ Fangatahanao dia voaray! (Test mode)";
-    }
-  </script>
+    <script>
+      function submitWithdraw() {
+        document.getElementById("resRetrait").innerText = "✅ Your withdrawal request has been submitted (simulation only)";
+      }
+    </script>
+  </div>
 </body>
 </html>
