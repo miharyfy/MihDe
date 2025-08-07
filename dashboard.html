@@ -2,116 +2,32 @@
 <html lang="mg">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dashboard - Mi-talky</title>
+  <title>Dashboard Mi-talky</title>
   <style>
-    body {
-      margin: 0; padding: 0;
-      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: start;
-      min-height: 100vh;
-      padding: 30px 0;
-      color: #333;
-    }
-    #profile-container {
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 8px 20px rgba(255, 182, 193, 0.6);
-      width: 360px;
-      padding: 30px;
-      text-align: center;
-      user-select: none;
-    }
-    h2 {
-      color: #d6336c;
-      margin-bottom: 20px;
-    }
-    input[type="text"], select {
-      width: 100%;
-      padding: 12px 15px;
-      margin: 10px 0 20px;
-      border-radius: 12px;
-      border: 2px solid #d6336c;
-      font-size: 16px;
-      transition: border-color 0.3s ease;
-    }
-    input[type="text"]:focus, select:focus {
-      border-color: #ff4f8b;
-      outline: none;
-    }
-    #photo-preview {
-      width: 140px;
-      height: 140px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin: 10px auto 20px;
-      border: 3px solid #d6336c;
-      background-color: #fce4ec;
-      display: block;
-    }
-    label.upload-label {
-      display: inline-block;
-      background: #d6336c;
-      color: white;
-      padding: 10px 25px;
-      border-radius: 25px;
-      cursor: pointer;
-      font-weight: 700;
-      margin-bottom: 15px;
-      transition: background 0.3s ease;
-    }
-    label.upload-label:hover {
-      background: #ff4f8b;
-    }
-    input[type="file"] {
-      display: none;
-    }
-    button {
-      width: 100%;
-      padding: 14px;
-      border-radius: 25px;
-      border: none;
-      background-color: #d6336c;
-      color: white;
-      font-size: 18px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.3s ease;
-      user-select: none;
-    }
-    button:hover {
-      background-color: #ff4f8b;
-    }
-    #logoutBtn {
-      margin-top: 25px;
-      background-color: #5a2053;
-    }
-    #logoutBtn:hover {
-      background-color: #3f1435;
-    }
-    p {
-      font-size: 15px;
-      color: #5a2053;
-    }
-    .readonly-input {
-      background: #f8f8f8;
-      border-color: #ccc !important;
-      cursor: not-allowed;
-    }
-    select.readonly-input {
-      pointer-events: none;
-    }
+    body { font-family: Arial; background:#f0f2f5; padding:20px; }
+    #profile-container { background: white; padding: 20px; border-radius: 10px; max-width: 400px; margin: auto; }
+    #photo-preview { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; }
+    input, select, button { width: 100%; margin: 10px 0; padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
+    button { background: #1877f2; color: white; border:none; cursor:pointer; }
   </style>
 </head>
 <body>
 
 <div id="profile-container">
-  <!-- Profile content will be injected here -->
+  <h2>Profilanao</h2>
+  <img id="photo-preview" src="https://i.imgur.com/5qHPeIp.png" alt="Profile photo" />
+  <input type="file" id="photo-upload" accept="image/*" />
+  <input type="text" id="name" placeholder="Anarana" />
+  <select id="gender">
+    <option value="">Misafidiana Genre</option>
+    <option value="Fille">Fille</option>
+    <option value="Garçon">Garçon</option>
+    <option value="Autre">Tsy Aiko</option>
+  </select>
+  <button id="save-btn">Tehirizo</button>
+  <button id="logoutBtn" style="background:#e74c3c; margin-top:10px;">Hivoaka</button>
+  <p id="status"></p>
 </div>
-<button id="logoutBtn">Hivoaka</button>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -119,7 +35,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
 <script>
-  // Firebase config - soloy amin'ny anao raha ilaina
   const firebaseConfig = {
     apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
     authDomain: "mitalky.firebaseapp.com",
@@ -135,138 +50,93 @@
   const storage = firebase.storage();
 
   let currentUser = null;
-  let currentData = null;
   let photoFile = null;
+
+  const photoPreview = document.getElementById("photo-preview");
+  const photoUpload = document.getElementById("photo-upload");
+  const nameInput = document.getElementById("name");
+  const genderSelect = document.getElementById("gender");
+  const saveBtn = document.getElementById("save-btn");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const statusP = document.getElementById("status");
 
   auth.onAuthStateChanged(user => {
     if (!user) {
-      window.location.href = "nextpage.html"; // redirect raha tsy logged in
+      window.location.href = "nextpage.html";
       return;
     }
     currentUser = user;
     loadProfile();
   });
 
+  photoUpload.addEventListener("change", e => {
+    if (e.target.files && e.target.files[0]) {
+      photoFile = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = evt => {
+        photoPreview.src = evt.target.result;
+      };
+      reader.readAsDataURL(photoFile);
+    }
+  });
+
   function loadProfile() {
-    const uid = currentUser.uid;
-    db.collection("users").doc(uid).get().then(doc => {
-      if (!doc.exists) {
-        // Mamorona profil vaovao miaraka ID manokana
-        const newID = generateUniqueID();
-        db.collection("users").doc(uid).set({
-          name: "",
-          photo: "",
-          id: newID,
-          email: currentUser.email || currentUser.phoneNumber || "",
-          gender: ""
-        }).then(() => {
-          showForm(false);
-        });
-      } else {
-        currentData = doc.data();
-        // Raha mbola tsy feno profil, asehoy form azo ovaina
-        if (!currentData.name || !currentData.photo) {
-          showForm(false);
+    db.collection("users").doc(currentUser.uid).get()
+      .then(doc => {
+        if (doc.exists) {
+          const data = doc.data();
+          if (data.photo) photoPreview.src = data.photo;
+          if (data.name) nameInput.value = data.name;
+          if (data.gender) genderSelect.value = data.gender;
+          statusP.textContent = "";
         } else {
-          // Raha efa feno, asehoy profil readonly
-          showForm(true);
+          statusP.textContent = "Profil tsy mbola misy, fenoy azafady.";
         }
-      }
-    }).catch(err => {
-      alert("Nisy olana tamin'ny famakiana profil: " + err.message);
-    });
+      })
+      .catch(err => {
+        statusP.textContent = "Nisy olana tamin'ny famakiana profil: " + err.message;
+      });
   }
 
-  function showForm(readonly) {
-    const container = document.getElementById("profile-container");
-    if (readonly) {
-      container.innerHTML = `
-        <h2>Profilanao</h2>
-        <img src="${currentData.photo}" alt="Profile" id="photo-preview" />
-        <p><strong>Anarana:</strong> ${currentData.name}</p>
-        <p><strong>Genre:</strong> ${currentData.gender}</p>
-        <p><strong>ID Manokana:</strong> PSFY-${currentData.id}</p>
-        <p><strong>Email:</strong> ${currentData.email || ''}</p>
-        <p style="color:red; font-weight:bold; margin-top: 20px;">Tsy azo ovaina intsony ny profilanao.</p>
-      `;
-    } else {
-      container.innerHTML = `
-        <h2>Mamoròna profil manga anao</h2>
-
-        <img id="photo-preview" src="${currentData.photo || 'https://i.imgur.com/5qHPeIp.png'}" alt="Preview Sary" />
-
-        <label class="upload-label" for="photo-upload">Misafidiana Sary Profile</label>
-        <input type="file" id="photo-upload" accept="image/*" ${readonly ? 'disabled' : ''} />
-
-        <input type="text" id="name" placeholder="Anarana" value="${currentData.name || ''}" ${readonly ? 'readonly class="readonly-input"' : ''} />
-        
-        <select id="gender" ${readonly ? 'disabled class="readonly-input"' : ''}>
-          <option value="">Misafidiana Genre</option>
-          <option value="Fille" ${currentData.gender === 'Fille' ? 'selected' : ''}>Fille</option>
-          <option value="Garçon" ${currentData.gender === 'Garçon' ? 'selected' : ''}>Garçon</option>
-          <option value="Autre" ${currentData.gender === 'Autre' ? 'selected' : ''}>Tsy Aiko</option>
-        </select>
-
-        <button onclick="saveProfile()" ${readonly ? 'disabled' : ''}>Tehirizo</button>
-      `;
-
-      if (!readonly) {
-        const photoPreview = document.getElementById("photo-preview");
-        const photoUpload = document.getElementById("photo-upload");
-
-        photoUpload.addEventListener("change", (e) => {
-          if (e.target.files && e.target.files[0]) {
-            photoFile = e.target.files[0];
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-              photoPreview.src = evt.target.result;
-            };
-            reader.readAsDataURL(photoFile);
-          }
-        });
-      }
-    }
-  }
-
-  async function saveProfile() {
-    const name = document.getElementById("name").value.trim();
-    const gender = document.getElementById("gender").value;
-
-    if (!name) {
-      alert("Fenoy azafady ny anarana");
+  saveBtn.addEventListener("click", async () => {
+    const name = nameInput.value.trim();
+    const gender = genderSelect.value;
+    if (!name || !gender) {
+      alert("Fenoy azafady ny anarana sy ny genre.");
       return;
     }
-    if (!gender) {
-      alert("Misafidiana genre azafady");
-      return;
-    }
-
-    let photoURL = currentData.photo || "";
+    statusP.textContent = "Mitahiry profil...";
+    let photoURL = photoPreview.src;
     if (photoFile) {
       try {
-        const storageRef = storage.ref();
-        const fileRef = storageRef.child(`profile_photos/${currentUser.uid}_${Date.now()}`);
-        await fileRef.put(photoFile);
-        photoURL = await fileRef.getDownloadURL();
-      } catch (error) {
-        alert("Nisy olana tamin'ny upload sary: " + error.message);
+        const ref = storage.ref(`profile_photos/${currentUser.uid}_${Date.now()}`);
+        await ref.put(photoFile);
+        photoURL = await ref.getDownloadURL();
+      } catch (err) {
+        alert("Nisy olana tamin'ny upload sary: " + err.message);
+        statusP.textContent = "";
         return;
       }
     }
-
-    db.collection("users").doc(currentUser.uid).update({
+    db.collection("users").doc(currentUser.uid).set({
       name: name,
+      gender: gender,
       photo: photoURL,
-      gender: gender
-    }).then(() => {
-      alert("Profil voatahiry soa aman-tsara!");
-      loadProfile(); // refresh profil
-    }).catch(err => {
+      email: currentUser.email || currentUser.phoneNumber || "",
+      id: generateUniqueID()
+    }, {merge:true})
+    .then(() => {
+      statusP.textContent = "Profil voatahiry tsara!";
+      photoFile = null;
+      loadProfile();
+    })
+    .catch(err => {
       alert("Nisy olana tamin'ny fanoratana profil: " + err.message);
+      statusP.textContent = "";
     });
-  }
+  });
 
-  document.getElementById("logoutBtn").addEventListener("click", () => {
+  logoutBtn.addEventListener("click", () => {
     auth.signOut().then(() => {
       window.location.href = "nextpage.html";
     });
