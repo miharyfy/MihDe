@@ -87,5 +87,70 @@ const db = firebase.firestore();
     function generateUniqueID() {
       return Math.floor(100000000 + Math.random() * 900000000);
     }
+if (!doc.exists) {
+  // Mamorona profil vaovao
+  const emailOrPhone = user.email || user.phoneNumber;
+  const newId = generateUniqueID();
+
+  db.collection("users").doc(uid).set({
+    name: "",
+    photo: "",
+    email: emailOrPhone,
+    id: newId
+  }).then(() => {
+    // Rehefa vita set dia reload ilay page
+    location.reload();
+  });
+
+  return; // Atsaharo aloha
+}
+auth.onAuthStateChanged(user => {
+  if (!user) {
+    window.location.href = "nextpage.html";
+    return;
+  }
+
+  const uid = user.uid;
+
+  db.collection("users").doc(uid).get().then(doc => {
+    if (!doc.exists) {
+      const emailOrPhone = user.email || user.phoneNumber;
+      const newId = generateUniqueID();
+
+      db.collection("users").doc(uid).set({
+        name: "",
+        photo: "",
+        email: emailOrPhone,
+        id: newId
+      }).then(() => {
+        location.reload();
+      });
+
+      return;
+    }
+
+    const data = doc.data();
+
+    if (data.name === "" || data.photo === "") {
+      document.getElementById("profile-container").innerHTML = `
+        <h3>Mamoròna profil</h3>
+        <input id="name" placeholder="Anarana" />
+        <input id="photo" placeholder="Lien sary (URL)" />
+        <button onclick="saveProfile()">Enregistrer</button>
+      `;
+    } else {
+      document.getElementById("profile-container").innerHTML = `
+        <img src="${data.photo}" width="100" style="border-radius: 50%" />
+        <h2>${data.name}</h2>
+        <p>ID manokana: <strong>${data.id}</strong></p>
+        <p>Email: ${data.email || user.phoneNumber}</p>
+      `;
+    }
+  });
+});
+function generateUniqueID() {
+  return "PSFY-" + Math.floor(100000 + Math.random() * 900000);
+}
+
   </script>
 </body>
