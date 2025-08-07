@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <title>Mi-talky</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       margin: 0;
       padding: 0;
       font-family: Arial, sans-serif;
-      background-color: #e9ebee; /* Theme manga mitovy amin'ny Facebook */
+      background-color: #e9ebee;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -17,20 +18,21 @@
 
     .container {
       background-color: white;
-      width: 360px;
-      padding: 40px 30px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      width: 90%;
+      max-width: 420px;
+      padding: 50px 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
       text-align: center;
     }
 
     .circle {
-      width: 120px;
-      height: 120px;
+      width: 140px;
+      height: 140px;
       border-radius: 50%;
       overflow: hidden;
       border: 2px solid #1877f2;
-      margin: 0 auto 20px auto;
+      margin: 0 auto 25px auto;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -43,23 +45,23 @@
     }
 
     .title {
-      font-size: 24px;
-      margin-bottom: 20px;
+      font-size: 26px;
+      margin-bottom: 25px;
       color: #1877f2;
       font-weight: bold;
     }
 
     .dots {
-      margin: 20px 0;
+      margin: 30px 0;
     }
 
     .dot {
       display: inline-block;
-      width: 12px;
-      height: 12px;
+      width: 14px;
+      height: 14px;
       background: lightgray;
       border-radius: 50%;
-      margin: 0 5px;
+      margin: 0 6px;
     }
 
     .dot.active {
@@ -67,16 +69,16 @@
     }
 
     .buttons {
-      margin-top: 20px;
+      margin-top: 30px;
     }
 
     button {
-      padding: 10px 20px;
-      font-size: 16px;
-      margin: 0 10px;
+      padding: 12px 22px;
+      font-size: 18px;
+      margin: 0 12px;
       cursor: pointer;
       border: none;
-      border-radius: 4px;
+      border-radius: 6px;
       color: #fff;
     }
 
