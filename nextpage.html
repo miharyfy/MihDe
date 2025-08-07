@@ -170,6 +170,44 @@ function signup() {
       togglePassword.style.fill = '#1877f2';
     }
   });
+const db = firebase.firestore();
+
+function signup() {
+  errorElement.textContent = "";
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+
+  if (!email || !password) {
+    errorElement.textContent = "Veuillez remplir tous les champs.";
+    return;
+  }
+
+  auth.createUserWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
+      const idManokana = generateUniqueID();
+
+      // Mamorona profil voalohany ao amin'ny Firestore
+      return db.collection("users").doc(user.uid).set({
+        email: email,
+        id: idManokana,
+        name: "", // Ho fenoina ao amin'ny dashboard
+        photo: "" // Ho fenoina koa
+      });
+    })
+    .then(() => {
+      alert("Inscription réussie !");
+      window.location.href = "dashboard.html";
+    })
+    .catch((error) => {
+      if (error.code === "auth/email-already-in-use") {
+        alert("Cet email est déjà utilisé. Veuillez vous connecter.");
+      } else {
+        errorElement.textContent = error.message;
+      }
+    });
+}
+
 </script>
 
 </body>
