@@ -1,172 +1,165 @@
+---
+📄 **dashboard.html** – Profil sy fidirana amin'ny chat
+---
+
+```html
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
   <title>Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: Arial;
-      background: linear-gradient(to right, #c2e9fb, #81a4fd);
-      margin: 0;
-      padding: 20px;
-    }
-    #dashboard {
-      background: white;
-      padding: 30px;
-      border-radius: 15px;
-      max-width: 400px;
-      margin: auto;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    input {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
-    button {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      background: #4c8bf5;
-      color: white;
-      cursor: pointer;
-      font-size: 16px;
-    }
-    button:hover {
-      background: #2e6cf2;
-    }
-    .info {
-      margin-top: 20px;
-      font-size: 15px;
-    }
-  </style>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
+  <div id="profile"></div>
+  <button id="logoutBtn">Hivoaka</button>
 
-<div id="dashboard">
-  <div id="profile-container"></div>
-  <button id="logoutBtn" style="margin-top: 20px;">Hivoaka</button>
-</div>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
+      authDomain: "mitalky.firebaseapp.com",
+      projectId: "mitalky",
+      storageBucket: "mitalky.appspot.com",
+      messagingSenderId: "753557195623",
+      appId: "1:753557195623:web:abc3b37eca5d67c9157dc2"
+    };
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
-    authDomain: "mitalky.firebaseapp.com",
-    projectId: "mitalky",
-    storageBucket: "mitalky.appspot.com",
-    messagingSenderId: "753557195623",
-    appId: "1:753557195623:web:abc3b37eca5d67c9157dc2"
-  };
+    auth.onAuthStateChanged(user => {
+      if (!user) return (window.location.href = "nextpage.html");
+      const uid = user.uid;
 
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-
-  // Maka paramètre avy amin'ny URL
-  function getURLParameter(name) {
-    const params = new URLSearchParams(window.location.search);
-    return params.get(name);
-  }
-
-  const urlID = getURLParameter("id");
-
-  // Listener rehefa mi-connect
-  auth.onAuthStateChanged(user => {
-    if (!user) {
-      window.location.href = "nextpage.html";
-      return;
-    }
-
-    const uid = user.uid;
-
-    db.collection("users").doc(uid).get().then(doc => {
-      if (!doc.exists || !doc.data().name) {
-        // Raha tsy mbola feno profil dia alefa formulaire
-        document.getElementById("profile-container").innerHTML = `
-          <h3>Fenoina ny mombamomba</h3>
-          <input id="name" placeholder="Anaranao" />
-          <button onclick="saveProfile()">Alefa</button>
-        `;
-      } else {
-// Aseho profil
-const data = doc.data();
-document.getElementById("profile-container").innerHTML = `
-  <h2>Salama ${data.name}!</h2>
-  <div class="info"><strong>ID manokana:</strong> ${data.id}</div>
-  <div class="info"><strong>Email/Phone:</strong> ${data.email || user.phoneNumber}</div>
-  <br>
-  <button onclick="goToChat('${data.id}')">Mankanesa amin'ny chat</button>
-`;
-
-if (urlID) {
-  document.getElementById("profile-container").innerHTML += `
-    <div class="info"><strong>ID avy amin’ny URL:</strong> ${urlID}</div>
-  `;
-}
-function goToChat(id) {
-  window.location.href = `chat.html?id=${id}`;
-}
-
-
-
-        // Raha misy ID ao amin’ny URL dia aseho koa
-        if (urlID) {
-          document.getElementById("profile-container").innerHTML += `
-            <div class="info"><strong>ID avy amin’ny URL:</strong> ${urlID}</div>
+      db.collection("users").doc(uid).get().then(doc => {
+        if (!doc.exists) {
+          document.getElementById("profile").innerHTML = `
+            <h3>Mamorona profil</h3>
+            <input id="name" placeholder="Anarana" />
+            <select id="genre">
+              <option value="">Genre</option>
+              <option value="garçon">Garçon</option>
+              <option value="fille">Fille</option>
+              <option value="autre">Autre</option>
+            </select>
+            <button onclick="saveProfile()">Enregistrer</button>
+          `;
+        } else {
+          const data = doc.data();
+          document.getElementById("profile").innerHTML = `
+            <h2>${data.name}</h2>
+            <p>Genre: ${data.genre || "-"}</p>
+            <p>ID: ${data.id}</p>
+            <p>Email: ${data.email || user.phoneNumber}</p>
+            <a href="chat.html?uid=${uid}">Mankanesa amin'ny chat</a>
           `;
         }
-      }
-    }).catch(error => {
-      document.getElementById("profile-container").innerHTML = `
-        <p style="color:red;">Nisy olana tamin'ny Firestore: ${error.message}</p>
-      `;
+      });
     });
-  });
 
-  // Save profile
-  function saveProfile() {
-    const name = document.getElementById("name").value.trim();
-    const uid = auth.currentUser.uid;
+    function saveProfile() {
+      const uid = auth.currentUser.uid;
+      const name = document.getElementById("name").value.trim();
+      const genre = document.getElementById("genre").value;
+      const id = Math.floor(100000 + Math.random() * 900000);
+      const email = auth.currentUser.email || auth.currentUser.phoneNumber;
 
-    if (!name) {
-      alert("Fenoy aloha ny anaranao");
-      return;
+      db.collection("users").doc(uid).set({ name, genre, id, email }).then(() => location.reload());
     }
 
-    const id = generateUniqueID();
+    document.getElementById("logoutBtn").onclick = () => auth.signOut().then(() => location.href = "nextpage.html");
+  </script>
+</body>
+</html>
+```
 
-    db.collection("users").doc(uid).set({
-      name: name,
-      id: id,
-      email: auth.currentUser.email || auth.currentUser.phoneNumber
-    }, { merge: true }).then(() => {
-      alert("Vita ny fisoratana anarana!");
-      window.location.href = `dashboard.html?id=${id}`;
-    }).catch(error => {
-      alert("Nisy olana: " + error.message);
+---
+📄 **chat.html** – Fifampiresahana (Text-only)
+---
+
+```html
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <h2>Chat</h2>
+  <input id="targetId" placeholder="ID olona hafa" />
+  <button onclick="loadChat()">Ampidiro olona</button>
+
+  <div id="chatBox" style="border:1px solid #ccc; padding:10px; margin-top:10px; height:200px; overflow:auto"></div>
+  <input id="msg" placeholder="Lazao hafatra" />
+  <button onclick="sendMsg()">Alefa</button>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
+      authDomain: "mitalky.firebaseapp.com",
+      projectId: "mitalky",
+      storageBucket: "mitalky.appspot.com",
+      messagingSenderId: "753557195623",
+      appId: "1:753557195623:web:abc3b37eca5d67c9157dc2"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    let myUid, myId, otherUid;
+
+    auth.onAuthStateChanged(user => {
+      if (!user) return (window.location.href = "nextpage.html");
+      myUid = user.uid;
+      db.collection("users").doc(myUid).get().then(doc => {
+        myId = doc.data().id;
+      });
     });
-  }
 
-  // Random ID
-  function generateUniqueID() {
-    return Math.floor(100000000 + Math.random() * 900000000);
-  }
+    function loadChat() {
+      const targetId = document.getElementById("targetId").value;
+      db.collection("users").where("id", "==", parseInt(targetId)).get().then(snapshot => {
+        if (!snapshot.empty) {
+          otherUid = snapshot.docs[0].id;
+          listenToMessages();
+        } else {
+          alert("Tsy hita ilay olona");
+        }
+      });
+    }
 
-  // Logout
-  document.getElementById("logoutBtn").addEventListener("click", () => {
-    auth.signOut().then(() => {
-      window.location.href = "nextpage.html";
-    });
-  });
-</script>
+    function listenToMessages() {
+      const chatId = [myUid, otherUid].sort().join("_");
+      db.collection("chats").doc(chatId).collection("messages").orderBy("time")
+        .onSnapshot(snapshot => {
+          const box = document.getElementById("chatBox");
+          box.innerHTML = "";
+          snapshot.forEach(doc => {
+            const msg = doc.data();
+            box.innerHTML += `<p><strong>${msg.from === myUid ? "Izaho" : "Izy"}:</strong> ${msg.text}</p>`;
+          });
+          box.scrollTop = box.scrollHeight;
+        });
+    }
 
+    function sendMsg() {
+      const text = document.getElementById("msg").value.trim();
+      if (!text || !otherUid) return;
+      const chatId = [myUid, otherUid].sort().join("_");
+      db.collection("chats").doc(chatId).collection("messages").add({
+        from: myUid,
+        text,
+        time: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      document.getElementById("msg").value = "";
+    }
+  </script>
 </body>
 </html>
