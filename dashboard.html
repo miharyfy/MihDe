@@ -3,45 +3,32 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dashboard Manga Style</title>
+  <title>Dashboard - Mi-talky</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-
     body {
       margin: 0; padding: 0;
       background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-      font-family: 'Roboto', sans-serif;
-      min-height: 100vh;
+      font-family: Arial, sans-serif;
       display: flex;
       justify-content: center;
       align-items: start;
+      min-height: 100vh;
       padding: 30px 0;
       color: #333;
     }
-
     #profile-container {
-      background: #fff;
+      background: white;
       border-radius: 16px;
       box-shadow: 0 8px 20px rgba(255, 182, 193, 0.6);
       width: 360px;
       padding: 30px;
       text-align: center;
-      font-weight: 400;
       user-select: none;
     }
-
     h2 {
-      font-weight: 700;
-      margin-bottom: 12px;
       color: #d6336c;
-      font-size: 26px;
-    }
-
-    h3 {
       margin-bottom: 20px;
-      color: #5a2053;
     }
-
     input[type="text"], select {
       width: 100%;
       padding: 12px 15px;
@@ -55,7 +42,6 @@
       border-color: #ff4f8b;
       outline: none;
     }
-
     #photo-preview {
       width: 140px;
       height: 140px;
@@ -65,13 +51,11 @@
       border: 3px solid #d6336c;
       background-color: #fce4ec;
       display: block;
-      user-select: none;
     }
-
     label.upload-label {
       display: inline-block;
       background: #d6336c;
-      color: #fff;
+      color: white;
       padding: 10px 25px;
       border-radius: 25px;
       cursor: pointer;
@@ -85,14 +69,13 @@
     input[type="file"] {
       display: none;
     }
-
     button {
       width: 100%;
       padding: 14px;
       border-radius: 25px;
       border: none;
       background-color: #d6336c;
-      color: #fff;
+      color: white;
       font-size: 18px;
       font-weight: 700;
       cursor: pointer;
@@ -102,7 +85,6 @@
     button:hover {
       background-color: #ff4f8b;
     }
-
     #logoutBtn {
       margin-top: 25px;
       background-color: #5a2053;
@@ -110,23 +92,24 @@
     #logoutBtn:hover {
       background-color: #3f1435;
     }
-
     p {
-      margin: 5px 0;
-      font-weight: 500;
       font-size: 15px;
       color: #5a2053;
     }
-
-    .profile-info p strong {
-      color: #d6336c;
+    .readonly-input {
+      background: #f8f8f8;
+      border-color: #ccc !important;
+      cursor: not-allowed;
+    }
+    select.readonly-input {
+      pointer-events: none;
     }
   </style>
 </head>
 <body>
 
 <div id="profile-container">
-  <!-- JS content -->
+  <!-- Profile content will be injected here -->
 </div>
 <button id="logoutBtn">Hivoaka</button>
 
@@ -136,6 +119,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
 <script>
+  // Firebase config - soloy amin'ny anao raha ilaina
   const firebaseConfig = {
     apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
     authDomain: "mitalky.firebaseapp.com",
@@ -156,7 +140,7 @@
 
   auth.onAuthStateChanged(user => {
     if (!user) {
-      window.location.href = "nextpage.html";
+      window.location.href = "nextpage.html"; // redirect raha tsy logged in
       return;
     }
     currentUser = user;
@@ -167,6 +151,7 @@
     const uid = currentUser.uid;
     db.collection("users").doc(uid).get().then(doc => {
       if (!doc.exists) {
+        // Mamorona profil vaovao miaraka ID manokana
         const newID = generateUniqueID();
         db.collection("users").doc(uid).set({
           name: "",
@@ -175,62 +160,78 @@
           email: currentUser.email || currentUser.phoneNumber || "",
           gender: ""
         }).then(() => {
-          showForm();
+          showForm(false);
         });
       } else {
         currentData = doc.data();
+        // Raha mbola tsy feno profil, asehoy form azo ovaina
         if (!currentData.name || !currentData.photo) {
-          showForm();
+          showForm(false);
         } else {
-          showProfile();
+          // Raha efa feno, asehoy profil readonly
+          showForm(true);
         }
       }
+    }).catch(err => {
+      alert("Nisy olana tamin'ny famakiana profil: " + err.message);
     });
   }
 
-  function showForm() {
-    document.getElementById("profile-container").innerHTML = `
-      <h2>Mamoròna profil manga anao</h2>
+  function showForm(readonly) {
+    const container = document.getElementById("profile-container");
+    if (readonly) {
+      container.innerHTML = `
+        <h2>Profilanao</h2>
+        <img src="${currentData.photo}" alt="Profile" id="photo-preview" />
+        <p><strong>Anarana:</strong> ${currentData.name}</p>
+        <p><strong>Genre:</strong> ${currentData.gender}</p>
+        <p><strong>ID Manokana:</strong> PSFY-${currentData.id}</p>
+        <p><strong>Email:</strong> ${currentData.email || ''}</p>
+        <p style="color:red; font-weight:bold; margin-top: 20px;">Tsy azo ovaina intsony ny profilanao.</p>
+      `;
+    } else {
+      container.innerHTML = `
+        <h2>Mamoròna profil manga anao</h2>
 
-      <img id="photo-preview" src="https://i.imgur.com/5qHPeIp.png" alt="Preview Sary" />
+        <img id="photo-preview" src="${currentData.photo || 'https://i.imgur.com/5qHPeIp.png'}" alt="Preview Sary" />
 
-      <label class="upload-label" for="photo-upload">Misafidiana Sary Profile</label>
-      <input type="file" id="photo-upload" accept="image/*" />
+        <label class="upload-label" for="photo-upload">Misafidiana Sary Profile</label>
+        <input type="file" id="photo-upload" accept="image/*" ${readonly ? 'disabled' : ''} />
 
-      <input type="text" id="name" placeholder="Anarana" value="${currentData && currentData.name ? currentData.name : ''}" />
-      
-      <select id="gender" >
-        <option value="">Misafidiana Genre</option>
-        <option value="Fille" ${currentData && currentData.gender === 'Fille' ? 'selected' : ''}>Fille</option>
-        <option value="Garçon" ${currentData && currentData.gender === 'Garçon' ? 'selected' : ''}>Garçon</option>
-        <option value="Autre" ${currentData && currentData.gender === 'Autre' ? 'selected' : ''}>Tsy Aiko</option>
-      </select>
+        <input type="text" id="name" placeholder="Anarana" value="${currentData.name || ''}" ${readonly ? 'readonly class="readonly-input"' : ''} />
+        
+        <select id="gender" ${readonly ? 'disabled class="readonly-input"' : ''}>
+          <option value="">Misafidiana Genre</option>
+          <option value="Fille" ${currentData.gender === 'Fille' ? 'selected' : ''}>Fille</option>
+          <option value="Garçon" ${currentData.gender === 'Garçon' ? 'selected' : ''}>Garçon</option>
+          <option value="Autre" ${currentData.gender === 'Autre' ? 'selected' : ''}>Tsy Aiko</option>
+        </select>
 
-      <button onclick="saveProfile()">Tehirizo</button>
-    `;
+        <button onclick="saveProfile()" ${readonly ? 'disabled' : ''}>Tehirizo</button>
+      `;
 
-    const photoPreview = document.getElementById("photo-preview");
-    const photoUpload = document.getElementById("photo-upload");
+      if (!readonly) {
+        const photoPreview = document.getElementById("photo-preview");
+        const photoUpload = document.getElementById("photo-upload");
 
-    photoUpload.addEventListener("change", (e) => {
-      if (e.target.files && e.target.files[0]) {
-        photoFile = e.target.files[0];
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-          photoPreview.src = evt.target.result;
-        };
-        reader.readAsDataURL(photoFile);
+        photoUpload.addEventListener("change", (e) => {
+          if (e.target.files && e.target.files[0]) {
+            photoFile = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+              photoPreview.src = evt.target.result;
+            };
+            reader.readAsDataURL(photoFile);
+          }
+        });
       }
-    });
-
-    if (currentData && currentData.photo) {
-      photoPreview.src = currentData.photo;
     }
   }
 
   async function saveProfile() {
     const name = document.getElementById("name").value.trim();
     const gender = document.getElementById("gender").value;
+
     if (!name) {
       alert("Fenoy azafady ny anarana");
       return;
@@ -240,12 +241,17 @@
       return;
     }
 
-    let photoURL = currentData && currentData.photo ? currentData.photo : "";
+    let photoURL = currentData.photo || "";
     if (photoFile) {
-      const storageRef = storage.ref();
-      const fileRef = storageRef.child(`profile_photos/${currentUser.uid}_${Date.now()}`);
-      await fileRef.put(photoFile);
-      photoURL = await fileRef.getDownloadURL();
+      try {
+        const storageRef = storage.ref();
+        const fileRef = storageRef.child(`profile_photos/${currentUser.uid}_${Date.now()}`);
+        await fileRef.put(photoFile);
+        photoURL = await fileRef.getDownloadURL();
+      } catch (error) {
+        alert("Nisy olana tamin'ny upload sary: " + error.message);
+        return;
+      }
     }
 
     db.collection("users").doc(currentUser.uid).update({
@@ -254,22 +260,10 @@
       gender: gender
     }).then(() => {
       alert("Profil voatahiry soa aman-tsara!");
-      loadProfile();
+      loadProfile(); // refresh profil
     }).catch(err => {
       alert("Nisy olana tamin'ny fanoratana profil: " + err.message);
     });
-  }
-
-  function showProfile() {
-    const html = `
-      <h2>Profilanao</h2>
-      <img src="${currentData.photo}" alt="Profile" id="photo-preview" />
-      <p><strong>Anarana:</strong> ${currentData.name}</p>
-      <p><strong>Genre:</strong> ${currentData.gender}</p>
-      <p><strong>ID Manokana:</strong> PSFY-${currentData.id}</p>
-      <p><strong>Email:</strong> ${currentData.email || ''}</p>
-    `;
-    document.getElementById("profile-container").innerHTML = html;
   }
 
   document.getElementById("logoutBtn").addEventListener("click", () => {
@@ -282,5 +276,6 @@
     return Math.floor(100000 + Math.random() * 900000);
   }
 </script>
+
 </body>
 </html>
