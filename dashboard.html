@@ -96,13 +96,26 @@
           <button onclick="saveProfile()">Alefa</button>
         `;
       } else {
-        // Aseho profil
-        const data = doc.data();
-        document.getElementById("profile-container").innerHTML = `
-          <h2>Salama ${data.name}!</h2>
-          <div class="info"><strong>ID manokana:</strong> ${data.id}</div>
-          <div class="info"><strong>Email/Phone:</strong> ${data.email || user.phoneNumber}</div>
-        `;
+// Aseho profil
+const data = doc.data();
+document.getElementById("profile-container").innerHTML = `
+  <h2>Salama ${data.name}!</h2>
+  <div class="info"><strong>ID manokana:</strong> ${data.id}</div>
+  <div class="info"><strong>Email/Phone:</strong> ${data.email || user.phoneNumber}</div>
+  <br>
+  <button onclick="goToChat('${data.id}')">Mankanesa amin'ny chat</button>
+`;
+
+if (urlID) {
+  document.getElementById("profile-container").innerHTML += `
+    <div class="info"><strong>ID avy amin’ny URL:</strong> ${urlID}</div>
+  `;
+}
+function goToChat(id) {
+  window.location.href = `chat.html?id=${id}`;
+}
+
+
 
         // Raha misy ID ao amin’ny URL dia aseho koa
         if (urlID) {
