@@ -28,6 +28,7 @@
       border-radius: 6px;
       border: 1px solid #ccc;
       font-size: 16px;
+      box-sizing: border-box;
     }
     button {
       background-color: #1877f2;
@@ -42,6 +43,29 @@
       color: red;
       font-size: 14px;
     }
+
+    /* Wrapper ho an'ny password + icon */
+    .password-wrapper {
+      position: relative;
+      width: 100%;
+    }
+    .password-wrapper input {
+      padding-right: 40px; /* espace ho an'ny icon */
+    }
+    .toggle-password {
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      fill: #888;
+      transition: fill 0.2s;
+    }
+    .toggle-password:hover {
+      fill: #1877f2;
+    }
   </style>
 </head>
 <body>
@@ -50,7 +74,15 @@
   <h2>Inscription / Connexion</h2>
 
   <input id="email" type="email" placeholder="Email" required />
-  <input id="password" type="password" placeholder="Mot de passe" required />
+
+  <div class="password-wrapper">
+    <input id="password" type="password" placeholder="Mot de passe" required />
+    <!-- Eye icon SVG -->
+    <svg id="togglePassword" class="toggle-password" viewBox="0 0 24 24" >
+      <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
+      <circle cx="12" cy="12" r="2.5"/>
+    </svg>
+  </div>
 
   <button onclick="signup()">S'inscrire</button>
   <button onclick="login()">Se connecter</button>
@@ -90,7 +122,7 @@
     auth.createUserWithEmailAndPassword(email, password)
       .then(() => {
         alert("Inscription réussie !");
-        window.location.href = "dashboard.html"; // mankany pejy hafa rehefa vita
+        window.location.href = "dashboard.html";
       })
       .catch((error) => {
         errorElement.textContent = error.message;
@@ -110,12 +142,28 @@
     auth.signInWithEmailAndPassword(email, password)
       .then(() => {
         alert("Connexion réussie !");
-        window.location.href = "dashboard.html"; // mankany pejy hafa rehefa vita
+        window.location.href = "dashboard.html";
       })
       .catch((error) => {
         errorElement.textContent = error.message;
       });
   }
+
+  // Toggle password visibility
+  const togglePassword = document.getElementById('togglePassword');
+  const passwordInput = document.getElementById('password');
+
+  togglePassword.addEventListener('click', function () {
+    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordInput.setAttribute('type', type);
+
+    // Optionnel: ovao ny loko na endrika ny icon raha tianao
+    if(type === 'password') {
+      togglePassword.style.fill = '#888';
+    } else {
+      togglePassword.style.fill = '#1877f2';
+    }
+  });
 </script>
 
 </body>
