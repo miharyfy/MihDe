@@ -1,51 +1,178 @@
-auth.onAuthStateChanged(user => {
-  if (!user) {
-    window.location.href = "nextpage.html";
-    return;
-  }
-
-  const uid = user.uid;
-
-  db.collection("users").doc(uid).get().then(doc => {
-    if (!doc.exists) {
-      // Mamoròna profil vaovao
-      const emailOrPhone = user.email || user.phoneNumber;
-      const newId = generateUniqueID();
-
-      db.collection("users").doc(uid).set({
-        name: "",
-        photo: "",
-        email: emailOrPhone,
-        id: newId
-      }).then(() => {
-        location.reload(); // Rehefa vita, mamerina ilay page
-      });
-
-      return;
+<!DOCTYPE html>
+<html lang="mg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: start;
+      min-height: 100vh;
     }
 
-    const data = doc.data();
+    #profile-container {
+      background: white;
+      padding: 20px;
+      margin-top: 50px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 400px;
+    }
 
-    if (data.name === "" || data.photo === "") {
-      // Raha mbola tsy feno profil
+    input {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background-color: #1877f2;
+      color: white;
+      border: none;
+      padding: 10px;
+      width: 100%;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #145dbf;
+    }
+
+    img {
+      display: block;
+      margin: 0 auto 10px;
+    }
+
+    h2, h3, p {
+      text-align: center;
+    }
+
+    #logoutBtn {
+      margin-top: 20px;
+      background-color: #e53935;
+    }
+
+    #logoutBtn:hover {
+      background-color: #c62828;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="profile-container"></div>
+  <button id="logoutBtn">Hivoaka</button>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
+      authDomain: "mitalky.firebaseapp.com",
+      projectId: "mitalky",
+      storageBucket: "mitalky.appspot.com",
+      messagingSenderId: "753557195623",
+      appId: "1:753557195623:web:abc3b37eca5d67c9157dc2"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = "nextpage.html"; // redirect raha tsy tafiditra
+        return;
+      }
+
+      const uid = user.uid;
+
+      db.collection("users").doc(uid).get().then(doc => {
+        if (!doc.exists) {
+          // Raha tsy misy document dia mamorona vaovao
+          const newID = generateUniqueID();
+          db.collection("users").doc(uid).set({
+            name: "",
+            photo: "",
+            id: newID,
+            email: user.email || user.phoneNumber || ""
+          }).then(() => {
+            showProfileForm();
+          });
+        } else {
+          const data = doc.data();
+          if (data.name === "" || data.photo === "") {
+            showProfileForm();
+          } else {
+            showProfile(data);
+          }
+        }
+      });
+    });
+
+    function showProfileForm() {
       document.getElementById("profile-container").innerHTML = `
         <h3>Mamoròna profil</h3>
         <input id="name" placeholder="Anarana" />
         <input id="photo" placeholder="Lien sary (URL)" />
         <button onclick="saveProfile()">Enregistrer</button>
       `;
-    } else {
-      // Aseho profil raha efa feno
+    }
+
+    function showProfile(data) {
       document.getElementById("profile-container").innerHTML = `
         <img src="${data.photo}" width="100" style="border-radius: 50%" />
         <h2>${data.name}</h2>
         <p>ID manokana: <strong>${data.id}</strong></p>
-        <p>Email: ${data.email || user.phoneNumber}</p>
+        <p>${data.email || ""}</p>
       `;
     }
-  });
-});
-function generateUniqueID() {
-  return "PSFY-" + Math.floor(100000 + Math.random() * 900000);
-}
 
+    function saveProfile() {
+      const name = document.getElementById("name").value.trim();
+      const photo = document.getElementById("photo").value.trim();
+      const uid = auth.currentUser.uid;
+
+      if (!name || !photo) {
+        alert("Fenoina daholo ny anarana sy sary");
+        return;
+      }
+
+      db.collection("users").doc(uid).update({
+        name: name,
+        photo: photo
+      }).then(() => {
+        alert("Profil voatahiry!");
+        location.reload();
+      });
+    }
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      auth.signOut().then(() => {
+        window.location.href = "nextpage.html";
+      });
+    });
+
+    function generateUniqueID() {
+      return Math.floor(100000000 + Math.random() * 900000000);
+    }
+  </script>
+
+</body>
+</html>
