@@ -109,25 +109,29 @@
 
   const errorElement = document.getElementById("error");
 
-  function signup() {
-    errorElement.textContent = "";
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
+function signup() {
+  errorElement.textContent = "";
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
 
-    if (!email || !password) {
-      errorElement.textContent = "Veuillez remplir tous les champs.";
-      return;
-    }
-
-    auth.createUserWithEmailAndPassword(email, password)
-      .then(() => {
-        alert("Inscription réussie !");
-        window.location.href = "dashboard.html";
-      })
-      .catch((error) => {
-        errorElement.textContent = error.message;
-      });
+  if (!email || !password) {
+    errorElement.textContent = "Veuillez remplir tous les champs.";
+    return;
   }
+
+  auth.createUserWithEmailAndPassword(email, password)
+    .then(() => {
+      alert("Inscription réussie !");
+      window.location.href = "dashboard.html"; // mankany pejy hafa rehefa vita
+    })
+    .catch((error) => {
+      if (error.code === "auth/email-already-in-use") {
+        alert("Cet email est déjà utilisé. Veuillez vous connecter.");
+      } else {
+        errorElement.textContent = error.message;
+      }
+    });
+}
 
   function login() {
     errorElement.textContent = "";
