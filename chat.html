@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chat</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e9ebee;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100vh;
+    }
+    h2 {
+      color: #1877f2;
+      margin: 20px 0 0 0;
+    }
+    #container {
+      background: #fff;
+      max-width: 600px;
+      width: 100%;
+      margin-top: 15px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ccc;
+      display: flex;
+      flex-direction: column;
+      height: 80vh;
+    }
+    #userAdd {
+      display: flex;
+      margin-bottom: 15px;
+    }
+    #targetId {
+      flex-grow: 1;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px 0 0 8px;
+      outline: none;
+    }
+    #userAdd button {
+      background-color: #1877f2;
+      border: none;
+      color: white;
+      padding: 0 20px;
+      font-size: 16px;
+      border-radius: 0 8px 8px 0;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    #userAdd button:hover {
+      background-color: #145dbf;
+    }
+    #chatBox {
+      flex-grow: 1;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      padding: 10px;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+    }
+    .message {
+      max-width: 70%;
+      padding: 10px 15px;
+      margin-bottom: 10px;
+      border-radius: 15px;
+      line-height: 1.4;
+      font-size: 15px;
+      word-wrap: break-word;
+    }
+    .sent {
+      background-color: #d2e3fc;
+      align-self: flex-end;
+      border-bottom-right-radius: 0;
+    }
+    .received {
+      background-color: #f1f0f0;
+      align-self: flex-start;
+      border-bottom-left-radius: 0;
+    }
+    #sendMsgDiv {
+      margin-top: 10px;
+      display: flex;
+    }
+    #msg {
+      flex-grow: 1;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px 0 0 8px;
+      outline: none;
+    }
+    #sendBtn {
+      background-color: #1877f2;
+      border: none;
+      color: white;
+      padding: 0 25px;
+      font-size: 16px;
+      border-radius: 0 8px 8px 0;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    #sendBtn:hover {
+      background-color: #145dbf;
+    }
+  </style>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <h2>Chat</h2>
+  <div id="container">
+    <div id="userAdd">
+      <input id="targetId" placeholder="ID olona hafa" />
+      <button onclick="loadChat()">Ampidiro olona</button>
+    </div>
+
+    <div id="chatBox"></div>
+
+    <div id="sendMsgDiv">
+      <input id="msg" placeholder="Lazao hafatra" />
+      <button id="sendBtn" onclick="sendMsg()">Alefa</button>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
+      authDomain: "mitalky.firebaseapp.com",
+      projectId: "mitalky",
+      storageBucket: "mitalky.appspot.com",
+      messagingSenderId: "753557195623",
+      appId: "1:753557195623:web:abc3b37eca5d67c9157dc2"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    let myUid, myId, otherUid;
+
+    auth.onAuthStateChanged(user => {
+      if (!user) return window.location.href = "nextpage.html";
+      myUid = user.uid;
+      db.collection("users").doc(myUid).get().then(doc => {
+        if (!doc.exists) {
+          alert("Tsy misy profil anao, azafady miverena mamorona profil aloha.");
+          return window.location.href = "dashboard.html";
+        }
+        myId = doc.data().id;
+      });
+    });
+
+    function loadChat() {
+      const targetId = document.getElementById("targetId").value.trim();
+      if (!targetId) return alert("Ampidiro ny ID olona tianao ampiana.");
+
+      db.collection("users").where("id", "==", parseInt(targetId)).get().then(snapshot => {
+        if (!snapshot.empty) {
+          otherUid = snapshot.docs[0].id;
+          listenToMessages();
+        } else {
+          alert("Tsy hita ilay olona misy io ID io.");
+        }
+      });
+    }
+
+    function listenToMessages() {
+      const chatId = [myUid, otherUid].sort().join("_");
+      db.collection("chats").doc(chatId).collection("messages")
+        .orderBy("time")
+        .onSnapshot(snapshot => {
+          const box = document.getElementById("chatBox");
+          box.innerHTML = "";
+          snapshot.forEach(doc => {
+            const msg = doc.data();
+            const div = document.createElement("div");
+            div.classList.add("message");
+            div.classList.add(msg.from === myUid ? "sent" : "received");
+            div.textContent = (msg.from === myUid ? "Izaho: " : "Izy: ") + msg.text;
+            box.appendChild(div);
+          });
+          box.scrollTop = box.scrollHeight;
+        });
+    }
+
+    function sendMsg() {
+      const text = document.getElementById("msg").value.trim();
+      if (!text) return;
+      if (!otherUid) return alert("Ampidiro aloha ny ID olona hifampiresahana.");
+
+      const chatId = [myUid, otherUid].sort().join("_");
+      db.collection("chats").doc(chatId).collection("messages").add({
+        from: myUid,
+        text: text,
+        time: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      document.getElementById("msg").value = "";
+    }
+  </script>
+</body>
+</html>
