@@ -1,38 +1,60 @@
 <!DOCTYPE html>
-<html lang="mg">
+<html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Dashboard Mi-talky</title>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: Arial; background:#f0f2f5; padding:20px; }
-    #profile-container { background: white; padding: 20px; border-radius: 10px; max-width: 400px; margin: auto; }
-    #photo-preview { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; }
-    input, select, button { width: 100%; margin: 10px 0; padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
-    button { background: #1877f2; color: white; border:none; cursor:pointer; }
+    body {
+      font-family: Arial;
+      background: linear-gradient(to right, #c2e9fb, #81a4fd);
+      margin: 0;
+      padding: 20px;
+    }
+    #dashboard {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      max-width: 400px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background: #4c8bf5;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background: #2e6cf2;
+    }
+    .info {
+      margin-top: 20px;
+      font-size: 15px;
+    }
   </style>
 </head>
 <body>
 
-<div id="profile-container">
-  <h2>Profilanao</h2>
-  <img id="photo-preview" src="https://i.imgur.com/5qHPeIp.png" alt="Profile photo" />
-  <input type="file" id="photo-upload" accept="image/*" />
-  <input type="text" id="name" placeholder="Anarana" />
-  <select id="gender">
-    <option value="">Misafidiana Genre</option>
-    <option value="Fille">Fille</option>
-    <option value="Garçon">Garçon</option>
-    <option value="Autre">Tsy Aiko</option>
-  </select>
-  <button id="save-btn">Tehirizo</button>
-  <button id="logoutBtn" style="background:#e74c3c; margin-top:10px;">Hivoaka</button>
-  <p id="status"></p>
+<div id="dashboard">
+  <div id="profile-container"></div>
+  <button id="logoutBtn" style="margin-top: 20px;">Hivoaka</button>
 </div>
 
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
 <script>
   const firebaseConfig = {
@@ -47,104 +69,90 @@
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
-  const storage = firebase.storage();
 
-  let currentUser = null;
-  let photoFile = null;
+  // Maka paramètre avy amin'ny URL
+  function getURLParameter(name) {
+    const params = new URLSearchParams(window.location.search);
+    return params.get(name);
+  }
 
-  const photoPreview = document.getElementById("photo-preview");
-  const photoUpload = document.getElementById("photo-upload");
-  const nameInput = document.getElementById("name");
-  const genderSelect = document.getElementById("gender");
-  const saveBtn = document.getElementById("save-btn");
-  const logoutBtn = document.getElementById("logoutBtn");
-  const statusP = document.getElementById("status");
+  const urlID = getURLParameter("id");
 
+  // Listener rehefa mi-connect
   auth.onAuthStateChanged(user => {
     if (!user) {
       window.location.href = "nextpage.html";
       return;
     }
-    currentUser = user;
-    loadProfile();
-  });
 
-  photoUpload.addEventListener("change", e => {
-    if (e.target.files && e.target.files[0]) {
-      photoFile = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = evt => {
-        photoPreview.src = evt.target.result;
-      };
-      reader.readAsDataURL(photoFile);
-    }
-  });
+    const uid = user.uid;
 
-  function loadProfile() {
-    db.collection("users").doc(currentUser.uid).get()
-      .then(doc => {
-        if (doc.exists) {
-          const data = doc.data();
-          if (data.photo) photoPreview.src = data.photo;
-          if (data.name) nameInput.value = data.name;
-          if (data.gender) genderSelect.value = data.gender;
-          statusP.textContent = "";
-        } else {
-          statusP.textContent = "Profil tsy mbola misy, fenoy azafady.";
+    db.collection("users").doc(uid).get().then(doc => {
+      if (!doc.exists || !doc.data().name) {
+        // Raha tsy mbola feno profil dia alefa formulaire
+        document.getElementById("profile-container").innerHTML = `
+          <h3>Fenoina ny mombamomba</h3>
+          <input id="name" placeholder="Anaranao" />
+          <button onclick="saveProfile()">Alefa</button>
+        `;
+      } else {
+        // Aseho profil
+        const data = doc.data();
+        document.getElementById("profile-container").innerHTML = `
+          <h2>Salama ${data.name}!</h2>
+          <div class="info"><strong>ID manokana:</strong> ${data.id}</div>
+          <div class="info"><strong>Email/Phone:</strong> ${data.email || user.phoneNumber}</div>
+        `;
+
+        // Raha misy ID ao amin’ny URL dia aseho koa
+        if (urlID) {
+          document.getElementById("profile-container").innerHTML += `
+            <div class="info"><strong>ID avy amin’ny URL:</strong> ${urlID}</div>
+          `;
         }
-      })
-      .catch(err => {
-        statusP.textContent = "Nisy olana tamin'ny famakiana profil: " + err.message;
-      });
-  }
-
-  saveBtn.addEventListener("click", async () => {
-    const name = nameInput.value.trim();
-    const gender = genderSelect.value;
-    if (!name || !gender) {
-      alert("Fenoy azafady ny anarana sy ny genre.");
-      return;
-    }
-    statusP.textContent = "Mitahiry profil...";
-    let photoURL = photoPreview.src;
-    if (photoFile) {
-      try {
-        const ref = storage.ref(`profile_photos/${currentUser.uid}_${Date.now()}`);
-        await ref.put(photoFile);
-        photoURL = await ref.getDownloadURL();
-      } catch (err) {
-        alert("Nisy olana tamin'ny upload sary: " + err.message);
-        statusP.textContent = "";
-        return;
       }
-    }
-    db.collection("users").doc(currentUser.uid).set({
-      name: name,
-      gender: gender,
-      photo: photoURL,
-      email: currentUser.email || currentUser.phoneNumber || "",
-      id: generateUniqueID()
-    }, {merge:true})
-    .then(() => {
-      statusP.textContent = "Profil voatahiry tsara!";
-      photoFile = null;
-      loadProfile();
-    })
-    .catch(err => {
-      alert("Nisy olana tamin'ny fanoratana profil: " + err.message);
-      statusP.textContent = "";
+    }).catch(error => {
+      document.getElementById("profile-container").innerHTML = `
+        <p style="color:red;">Nisy olana tamin'ny Firestore: ${error.message}</p>
+      `;
     });
   });
 
-  logoutBtn.addEventListener("click", () => {
+  // Save profile
+  function saveProfile() {
+    const name = document.getElementById("name").value.trim();
+    const uid = auth.currentUser.uid;
+
+    if (!name) {
+      alert("Fenoy aloha ny anaranao");
+      return;
+    }
+
+    const id = generateUniqueID();
+
+    db.collection("users").doc(uid).set({
+      name: name,
+      id: id,
+      email: auth.currentUser.email || auth.currentUser.phoneNumber
+    }, { merge: true }).then(() => {
+      alert("Vita ny fisoratana anarana!");
+      window.location.href = `dashboard.html?id=${id}`;
+    }).catch(error => {
+      alert("Nisy olana: " + error.message);
+    });
+  }
+
+  // Random ID
+  function generateUniqueID() {
+    return Math.floor(100000000 + Math.random() * 900000000);
+  }
+
+  // Logout
+  document.getElementById("logoutBtn").addEventListener("click", () => {
     auth.signOut().then(() => {
       window.location.href = "nextpage.html";
     });
   });
-
-  function generateUniqueID() {
-    return Math.floor(100000 + Math.random() * 900000);
-  }
 </script>
 
 </body>
