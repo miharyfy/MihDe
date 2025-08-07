@@ -1,109 +1,3 @@
-<body>
-  <div id="profile-container"></div>
-  <button id="logoutBtn">Hivoaka</button>
-
-  <!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
-
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
-      authDomain: "mitalky.firebaseapp.com",
-      projectId: "mitalky",
-      storageBucket: "mitalky.appspot.com",
-      messagingSenderId: "753557195623",
-      appId: "1:753557195623:web:abc3b37eca5d67c9157dc2"
-    };
-
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-
-    auth.onAuthStateChanged(user => {
-      if (!user) {
-        window.location.href = "nextpage.html";
-        return;
-      }
-
-      const uid = user.uid;
-
-      db.collection("users").doc(uid).get().then(doc => {
-        if (!doc.exists) {
-          document.getElementById("profile-container").innerHTML = "<p>Profil non trouvé.</p>";
-          return;
-        }
-
-        const data = doc.data();
-
-        if (data.name === "" || data.photo === "") {
-          // Raha mbola tsy feno profil
-          document.getElementById("profile-container").innerHTML = `
-            <h3>Mamoròna profil</h3>
-            <input id="name" placeholder="Anarana" />
-            <input id="photo" placeholder="Lien sary (URL)" />
-            <button onclick="saveProfile()">Enregistrer</button>
-          `;
-        } else {
-          // Aseho profil raha efa feno
-          document.getElementById("profile-container").innerHTML = `
-            <img src="${data.photo}" width="100" style="border-radius: 50%" />
-            <h2>${data.name}</h2>
-            <p>ID manokana: <strong>${data.id}</strong></p>
-            <p>Email: ${data.email || user.phoneNumber}</p>
-          `;
-        }
-      });
-    });
-
-    function saveProfile() {
-      const name = document.getElementById("name").value.trim();
-      const photo = document.getElementById("photo").value.trim();
-      const uid = auth.currentUser.uid;
-
-      if (!name || !photo) {
-        alert("Fenoina daholo ny anarana sy sary");
-        return;
-      }
-
-      db.collection("users").doc(uid).update({
-        name: name,
-        photo: photo
-      }).then(() => {
-        alert("Profil voatahiry!");
-        location.reload(); // Refresh
-      });
-    }
-
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-      auth.signOut().then(() => {
-        window.location.href = "nextpage.html";
-      });
-    });
-
-    function generateUniqueID() {
-      return Math.floor(100000000 + Math.random() * 900000000);
-    }
-if (!doc.exists) {
-  // Mamorona profil vaovao
-  const emailOrPhone = user.email || user.phoneNumber;
-  const newId = generateUniqueID();
-
-  db.collection("users").doc(uid).set({
-    name: "",
-    photo: "",
-    email: emailOrPhone,
-    id: newId
-  }).then(() => {
-    // Rehefa vita set dia reload ilay page
-    location.reload();
-  });
-
-  return; // Atsaharo aloha
-}
 auth.onAuthStateChanged(user => {
   if (!user) {
     window.location.href = "nextpage.html";
@@ -114,6 +8,7 @@ auth.onAuthStateChanged(user => {
 
   db.collection("users").doc(uid).get().then(doc => {
     if (!doc.exists) {
+      // Mamoròna profil vaovao
       const emailOrPhone = user.email || user.phoneNumber;
       const newId = generateUniqueID();
 
@@ -123,7 +18,7 @@ auth.onAuthStateChanged(user => {
         email: emailOrPhone,
         id: newId
       }).then(() => {
-        location.reload();
+        location.reload(); // Rehefa vita, mamerina ilay page
       });
 
       return;
@@ -132,6 +27,7 @@ auth.onAuthStateChanged(user => {
     const data = doc.data();
 
     if (data.name === "" || data.photo === "") {
+      // Raha mbola tsy feno profil
       document.getElementById("profile-container").innerHTML = `
         <h3>Mamoròna profil</h3>
         <input id="name" placeholder="Anarana" />
@@ -139,6 +35,7 @@ auth.onAuthStateChanged(user => {
         <button onclick="saveProfile()">Enregistrer</button>
       `;
     } else {
+      // Aseho profil raha efa feno
       document.getElementById("profile-container").innerHTML = `
         <img src="${data.photo}" width="100" style="border-radius: 50%" />
         <h2>${data.name}</h2>
@@ -152,5 +49,3 @@ function generateUniqueID() {
   return "PSFY-" + Math.floor(100000 + Math.random() * 900000);
 }
 
-  </script>
-</body>
