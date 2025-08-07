@@ -8,7 +8,7 @@
       margin: 0;
       padding: 0;
       font-family: Arial, sans-serif;
-      background-color: #fff;
+      background-color: #e9ebee; /* Theme manga mitovy amin'ny Facebook */
       display: flex;
       justify-content: center;
       align-items: center;
@@ -16,16 +16,21 @@
     }
 
     .container {
+      background-color: white;
+      width: 360px;
+      padding: 40px 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
       text-align: center;
     }
 
     .circle {
-      width: 130px;
-      height: 130px;
+      width: 120px;
+      height: 120px;
       border-radius: 50%;
       overflow: hidden;
-      border: 2px solid #000;
-      margin: 20px auto;
+      border: 2px solid #1877f2;
+      margin: 0 auto 20px auto;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -38,18 +43,10 @@
     }
 
     .title {
-      font-size: 22px;
-      margin: 10px 0;
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #1877f2;
       font-weight: bold;
-    }
-
-    .box {
-      width: 250px;
-      height: 100px;
-      background-color: #3498db;
-      border: 2px solid #2980b9;
-      border-radius: 15px;
-      margin: 20px auto;
     }
 
     .dots {
@@ -66,7 +63,7 @@
     }
 
     .dot.active {
-      background: black;
+      background: #1877f2;
     }
 
     .buttons {
@@ -74,13 +71,21 @@
     }
 
     button {
-      padding: 10px 18px;
+      padding: 10px 20px;
       font-size: 16px;
-      margin: 0 8px;
+      margin: 0 10px;
       cursor: pointer;
       border: none;
-      border-bottom: 2px solid #000;
-      background-color: transparent;
+      border-radius: 4px;
+      color: #fff;
+    }
+
+    button:nth-child(1) {
+      background-color: #bbb;
+    }
+
+    button:nth-child(2) {
+      background-color: #1877f2;
     }
   </style>
 </head>
@@ -93,8 +98,6 @@
     </div>
 
     <h2 class="title">Soratra</h2>
-
-    <div class="box"></div>
 
     <div class="dots">
       <span class="dot active"></span>
