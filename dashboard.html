@@ -2,9 +2,23 @@
   <div id="profile-container"></div>
   <button id="logoutBtn">Hivoaka</button>
 
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
   <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
+      authDomain: "mitalky.firebaseapp.com",
+      projectId: "mitalky",
+      storageBucket: "mitalky.appspot.com",
+      messagingSenderId: "753557195623",
+      appId: "1:753557195623:web:abc3b37eca5d67c9157dc2"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
     const db = firebase.firestore();
 
     auth.onAuthStateChanged(user => {
@@ -37,7 +51,7 @@
             <img src="${data.photo}" width="100" style="border-radius: 50%" />
             <h2>${data.name}</h2>
             <p>ID manokana: <strong>${data.id}</strong></p>
-            <p>Email: ${data.email}</p>
+            <p>Email: ${data.email || user.phoneNumber}</p>
           `;
         }
       });
