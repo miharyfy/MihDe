@@ -8,5 +8,39 @@
 <body>
   <h1>Tonga soa eto amin'ny Dashboard!</h1>
   <p>Ato no miseho ny pejy rehefa tafiditra.</p>
+
+  <button id="logoutBtn">Hivoaka</button>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
+      authDomain: "mitalky.firebaseapp.com",
+      projectId: "mitalky",
+      storageBucket: "mitalky.firebasestorage.app",
+      messagingSenderId: "753557195623",
+      appId: "1:753557195623:web:abc3b37eca5d67c9157dc2"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Mamela ny user hiditra ihany raha efa authenticated
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        // Raha tsy misy user logged in, averina any amin'ny login/inscription
+        window.location.href = "nextpage.html";
+      }
+    });
+
+    // Logout function
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      auth.signOut().then(() => {
+        window.location.href = "nextpage.html";
+      });
+    });
+  </script>
 </body>
 </html>
