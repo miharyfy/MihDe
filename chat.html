@@ -6,7 +6,37 @@
 <title>Chat - Moderne (Android friendly)</title>
 <!-- Styles: moderne, responsive, animations -->
 <style>
-  :root{
+  .typing {
+  font-style: italic;
+  color: var(--muted);
+  padding: 10px;
+  display: inline-block;
+  position: relative;
+  width: 50px;
+}
+
+.typing span {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin: 0 2px;
+  background: var(--primary);
+  border-radius: 50%;
+  opacity: 0.4;
+  animation: blink 1.4s infinite;
+}
+
+.typing span:nth-child(1) { animation-delay: 0s; }
+.typing span:nth-child(2) { animation-delay: 0.2s; }
+.typing span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes blink {
+  0%, 80%, 100% { opacity: 0.4; }
+  40% { opacity: 1; }
+}
+
+
+:root{
     --primary:#1877f2;
     --surface:#ffffff;
     --muted:#9aa4b2;
@@ -199,21 +229,32 @@
 <body>
 
 <div class="app" id="app">
-  <!-- Sidebar: search + users -->
-  <div class="sidebar" id="sidebar">
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;">
-      <div style="display:flex;gap:12px;align-items:center">
-        <div class="logo">M</div>
-        <div>
-          <div style="font-size:14px;color:#0b1220;font-weight:700">MiTalk</div>
-          <div style="font-size:12px;color:var(--muted)">Chat</div>
-        </div>
+<div class="sidebar" id="sidebar">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;flex-direction: column;">
+    <div style="display:flex;gap:12px;align-items:center;width:100%">
+      <div class="logo">M</div>
+      <div>
+        <div style="font-size:14px;color:#0b1220;font-weight:700">MiTalk</div>
+        <div style="font-size:12px;color:var(--muted)">Chat</div>
       </div>
-      <!-- close button for mobile -->
-      <button id="closeSidebar" style="display:none;background:transparent;border:none;font-size:20px;cursor:pointer">✕</button>
     </div>
 
-    <div class="searchWrap">
+    <!-- Ity no profil mpampiasa -->
+    <div id="sidebarProfile" style="margin-top:16px;display:flex;align-items:center;gap:12px;width:100%;padding:8px;border-radius:12px;background:#f5f7fa;box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+      <div id="sidebarAvatar" style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#6a9cff,#2b6ef6);background-size:cover;background-position:center;color:white;font-weight:700;display:grid;place-items:center;font-size:22px;">U</div>
+      <div style="flex:1;min-width:0;">
+        <div id="sidebarName" style="font-weight:700; font-size:16px; color: var(--primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Utilisateur</div>
+        <div id="sidebarEmail" style="font-size:13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">email@example.com</div>
+      </div>
+    </div>
+
+    <!-- Bouton close pour mobile -->
+    <button id="closeSidebar" style="display:none;background:transparent;border:none;font-size:20px;cursor:pointer">✕</button>
+  </div>
+
+  <!-- Ensuite ny sisa amin'ny sidebar -->
+  <div class="searchWrap">
+  ...
       <div class="search">
         <input id="globalSearch" placeholder="Vous recherchez quelqu'un par son nom ou ID..." />
       </div>
@@ -246,6 +287,7 @@
     </div>
 
     <div class="chatMain" id="chatMain">
+    <div class="typing"><span></span><span></span><span></span></div>
       <!-- messages injected here -->
       <div style="opacity:0.6;color:var(--muted);margin:auto">n'a jamais discuté — sélectionnez une personne dans la liste ou saisissez votre ID</div>
     </div>
@@ -501,25 +543,42 @@ document.getElementById('btnAdd').addEventListener('click', ()=>{
     return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   }
 
-  // Auth state: get current user profile from users collection
-  auth.onAuthStateChanged(async user=>{
-    if(!user){
-      alert("Pas encore connecté — veuillez d'abord vous connecter.");
-      return;
-    }
-    myUid = user.uid;
-    const doc = await db.collection('users').doc(myUid).get();
-    if(!doc.exists){
-      alert("Nous n'avons pas pu trouver votre profil dans la collection d'utilisateurs. Créez d'abord un profil.");
-      return;
-    }
-    myProfile = doc.data();
-    loadUsers();
-    // live update users
-    db.collection('users').onSnapshot(snap => {
-      renderUserList(snap.docs);
-    });
+auth.onAuthStateChanged(async user=>{
+  if(!user){
+    alert("Pas encore connecté — veuillez d'abord vous connecter.");
+    return;
+  }
+  myUid = user.uid;
+  const doc = await db.collection('users').doc(myUid).get();
+  if(!doc.exists){
+    alert("Nous n'avons pas pu trouver votre profil dans la collection d'utilisateurs. Créez d'abord un profil.");
+    return;
+  }
+  myProfile = doc.data();
+
+  // Mise à jour profil sidebar
+  const sidebarAvatar = document.getElementById('sidebarAvatar');
+  const sidebarName = document.getElementById('sidebarName');
+  const sidebarEmail = document.getElementById('sidebarEmail');
+
+  if(myProfile.photo){
+    sidebarAvatar.style.backgroundImage = `url('${myProfile.photo}')`;
+    sidebarAvatar.textContent = '';
+  } else {
+    // Afficher initiales
+    const initials = (myProfile.name||'U').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+    sidebarAvatar.textContent = initials;
+    sidebarAvatar.style.backgroundImage = '';
+  }
+  sidebarName.textContent = myProfile.name || 'Utilisateur';
+  sidebarEmail.textContent = myProfile.gmail || '—';
+
+  loadUsers();
+  db.collection('users').onSnapshot(snap => {
+    renderUserList(snap.docs);
   });
+});
+
 
   // ensure sidebar close button visibility on load/resizes
   function updateSidebarButtons(){
