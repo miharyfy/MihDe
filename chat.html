@@ -1,546 +1,282 @@
+aza ovaina ny script fa ilay forme any ilay izy fotsiny somary ovay tsara koko asio mandefa vocal 
+
+ataovy tsaratsara koko ito azafady raha mety 
+
 <!DOCTYPE html>
 <html lang="mg">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>MiTalk - Chat Moderne (Android friendly)</title>
-
+<title>Chat - Moderne (Android friendly)</title>
+<!-- Styles: moderne, responsive, animations -->
 <style>
-  :root {
-    --primary: #1877f2;
-    --primary-hover: #0f5cc1;
-    --surface: #fff;
-    --muted: #9aa4b2;
-    --bg: #f0f2f5;
-    --radius: 14px;
-    --shadow-light: rgba(15, 23, 42, 0.08);
-    --shadow-heavy: rgba(12, 18, 33, 0.1);
-  }
-
-  *, *::before, *::after {
-    box-sizing: border-box;
-  }
-  
-  body {
-    margin: 0;
-    font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
-    background: var(--bg);
-    min-height: 100vh;
-    -webkit-font-smoothing: antialiased;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .app {
-    max-width: 1100px;
-    margin: 18px auto;
-    background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(250,250,250,0.98));
-    border-radius: var(--radius);
-    box-shadow: 0 8px 30px var(--shadow-light);
-    display: flex;
-    height: 82vh;
-    overflow: hidden;
-  }
-
-  /* SIDEBAR */
-  .sidebar {
-    flex: 0 0 320px;
-    background: var(--surface);
-    border-right: 1px solid rgba(15, 23, 42, 0.04);
-    display: flex;
-    flex-direction: column;
-    transition: transform 0.22s ease, width 0.18s ease;
-  }
-
-  .brand {
-    padding: 16px;
-    display: flex;
-    gap: 12px;
-    align-items: center;
-  }
-
-  .logo {
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, var(--primary), #4aa3ff);
-    display: grid;
-    place-items: center;
-    color: white;
-    font-weight: 700;
-    font-size: 22px;
-    box-shadow: 0 4px 12px rgba(24,119,242,0.18);
-  }
-
-  .brand h1 {
-    font-size: 16px;
-    margin: 0;
-    color: var(--primary);
-  }
-
-  .searchWrap {
-    padding: 12px;
-    border-bottom: 1px solid rgba(15, 23, 42, 0.03);
-  }
-
-  .search {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-
-  .search input {
-    flex: 1;
-    padding: 10px 12px;
-    border-radius: 9999px;
-    border: 1px solid rgba(15, 23, 42, 0.06);
-    font-size: 14px;
-    background: #fbfdff;
-    outline: none;
-    transition: box-shadow 0.18s ease, transform 0.12s ease;
-  }
-
-  .search input:focus {
-    box-shadow: 0 6px 18px rgba(24, 119, 242, 0.12);
-    transform: translateY(-1px);
-  }
-
-  .addById {
-    display: flex;
-    gap: 8px;
-    margin-top: 10px;
-  }
-
-  .addById input {
-    flex: 1;
-    padding: 10px;
-    border-radius: var(--radius);
-    border: 1px solid rgba(15, 23, 42, 0.06);
-    font-size: 14px;
-  }
-
-  .btn {
-    background: var(--primary);
-    color: white;
-    border: none;
-    padding: 9px 16px;
-    border-radius: var(--radius);
-    cursor: pointer;
-    box-shadow: 0 6px 14px rgba(24, 119, 242, 0.12);
-    font-weight: 600;
-    transition: background-color 0.2s ease;
-    user-select: none;
-  }
-
-  .btn:hover {
-    background-color: var(--primary-hover);
-  }
-
-  .btn:active {
-    transform: translateY(1px);
-  }
-
-  .list {
-    padding: 10px;
-    overflow-y: auto;
-    flex-grow: 1;
-  }
-
-  .userItem {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    padding: 10px;
-    border-radius: 12px;
-    cursor: pointer;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(248, 249, 250, 0.9));
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    transition: transform 0.18s ease, box-shadow 0.12s ease;
-  }
-
-  .userItem:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 30px rgba(12, 18, 33, 0.06);
-  }
-
-  .avatar {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    display: grid;
-    place-items: center;
-    font-weight: 700;
-    color: white;
-    background: linear-gradient(135deg, #6a9cff, #2b6ef6);
-    font-size: 18px;
-    user-select: none;
-  }
-
-  .userMeta {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-  }
-
-  .userName {
-    font-weight: 600;
-    color: #111;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .userSub {
-    font-size: 13px;
-    color: var(--muted);
-    margin-top: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  /* CHAT AREA */
-  .chatArea {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background: linear-gradient(180deg, #f7f9fb, #fbfdff);
-    border-radius: 0 var(--radius) var(--radius) 0;
-    box-shadow: inset 0 0 10px #e0e7f2;
-  }
-
-  .chatTop {
-    padding: 12px 20px;
-    background: linear-gradient(90deg, var(--primary), #2c8bf7);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    user-select: none;
-  }
-
-  .chatTop .left {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-  }
-
-  .chatTop .title {
-    font-weight: 700;
-    font-size: 18px;
-  }
-
-  .chatTop .sub {
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.9);
-    margin-top: 2px;
-  }
-
-  .chatMain {
-    padding: 18px 24px;
-    flex: 1;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .msg {
-    max-width: 72%;
-    padding: 14px 18px;
-    border-radius: var(--radius);
-    font-size: 15px;
-    line-height: 1.35;
-    animation: msgIn 0.26s ease;
-    box-shadow: 0 6px 18px rgba(12, 18, 33, 0.04);
-    word-wrap: break-word;
-    white-space: pre-wrap;
-    user-select: text;
-  }
-
-  .msg.me {
-    align-self: flex-end;
-    background: linear-gradient(180deg, #d8e9ff, #c6deff);
-    border-bottom-right-radius: 6px;
-  }
-
-  .msg.them {
-    align-self: flex-start;
-    background: #fff;
-    border-bottom-left-radius: 6px;
-  }
-
-  @keyframes msgIn {
-    from {
-      opacity: 0;
-      transform: translateY(8px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
-
-  .chatInput {
-    padding: 12px 24px;
-    background: var(--surface);
-    display: flex;
-    gap: 10px;
-    border-top: 1px solid rgba(12, 18, 33, 0.04);
-    align-items: center;
-  }
-
-  .chatInput textarea {
-    flex: 1;
-    border-radius: var(--radius);
-    padding: 12px 16px;
-    border: 1px solid rgba(12, 18, 33, 0.06);
-    resize: none;
-    font-size: 15px;
-    height: 48px;
-    font-family: inherit;
-  }
-
-  .sendBtn {
-    background: var(--primary);
-    color: white;
-    border: none;
-    padding: 12px 18px;
-    border-radius: var(--radius);
-    cursor: pointer;
-    font-weight: 700;
-    transition: background-color 0.2s ease;
-    user-select: none;
-  }
-
-  .sendBtn:hover {
-    background-color: var(--primary-hover);
-  }
-
-  .sendBtn:active {
-    transform: translateY(1px);
-  }
-
-  /* TYPING ANIMATION */
   .typing {
     font-style: italic;
     color: var(--muted);
     padding: 10px;
-    display: inline-flex;
+    display: inline-block;
     position: relative;
-    width: 60px;
-    justify-content: center;
-    gap: 6px;
+    width: 50px;
   }
-
   .typing span {
     display: inline-block;
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
+    margin: 0 2px;
     background: var(--primary);
     border-radius: 50%;
     opacity: 0.4;
     animation: blink 1.4s infinite;
   }
-
   .typing span:nth-child(1) { animation-delay: 0s; }
   .typing span:nth-child(2) { animation-delay: 0.2s; }
   .typing span:nth-child(3) { animation-delay: 0.4s; }
-
   @keyframes blink {
     0%, 80%, 100% { opacity: 0.4; }
     40% { opacity: 1; }
   }
 
-  /* MODAL */
-  .modal {
-    position: fixed;
-    inset: 0;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    background: rgba(2, 6, 23, 0.48);
-    z-index: 1000;
+  :root{
+    --primary:#1877f2;
+    --surface:#ffffff;
+    --muted:#9aa4b2;
+    --bg:#f0f2f5;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:Inter, "Segoe UI", Roboto, Arial, sans-serif;
+    background:var(--bg);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  .modal.active {
-    display: flex;
+  .app {
+    width:100%;
+    max-width:1100px;
+    margin:18px auto;
+    background:linear-gradient(180deg, rgba(255,255,255,0.95), rgba(250,250,250,0.98));
+    border-radius:18px;
+    box-shadow:0 8px 30px rgba(15,23,42,0.08);
+    overflow:hidden;
+    display:flex;
+    height:82vh;
   }
-
-  .modalCard {
-    width: 92%;
-    max-width: 360px;
-    border-radius: var(--radius);
-    background: var(--surface);
-    padding: 24px 24px 32px;
-    box-shadow: 0 10px 40px rgba(2, 6, 23, 0.2);
-    animation: pop 0.18s ease forwards;
+  .sidebar{
+    width:320px;
+    min-width:250px;
+    background:var(--surface);
+    border-right:1px solid rgba(15,23,42,0.04);
+    display:flex;
+    flex-direction:column;
+    transition: transform .22s ease, width .18s ease;
   }
-
-  .modalHeader {
-    display: flex;
-    gap: 16px;
-    align-items: center;
+  .brand{
+    padding:16px;
+    display:flex;
+    gap:12px;
+    align-items:center;
   }
-
-  .modalAvatar {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    font-size: 24px;
-    color: white;
-    background: linear-gradient(135deg, #6a9cff, #2b6ef6);
-    user-select: none;
+  .logo{
+    width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--primary),#4aa3ff);
+    display:grid;place-items:center;color:white;font-weight:700;
+    box-shadow:0 4px 12px rgba(24,119,242,0.18);
   }
-
-  .modalName {
-    font-size: 20px;
-    font-weight: 700;
+  .brand h1{font-size:16px;margin:0;color:var(--primary);}
+  .searchWrap{
+    padding:12px;
+    border-bottom:1px solid rgba(15,23,42,0.03);
   }
-
-  .modalRow {
-    margin-top: 14px;
-    color: #333;
-    font-size: 15px;
+  .search{
+    display:flex;gap:8px;align-items:center;
   }
-
-  .closeBtn {
-    margin-top: 24px;
-    background: var(--primary);
-    color: white;
-    padding: 12px 16px;
-    border-radius: var(--radius);
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-    width: 100%;
+  .search input{
+    flex:1;padding:10px 12px;border-radius:999px;border:1px solid rgba(15,23,42,0.06);
+    outline:none;font-size:14px;background: #fbfdff;
+    transition:box-shadow .18s,transform .12s;
+  }
+  .search input:focus{box-shadow:0 6px 18px rgba(24,119,242,0.12);transform:translateY(-1px);}
+  .addById{
+    display:flex;gap:8px;margin-top:10px;
+  }
+  .addById input{
+    flex:1;padding:10px;border-radius:10px;border:1px solid rgba(15,23,42,0.06);
+  }
+  .btn{
+    background:var(--primary);color:white;border:none;padding:9px 12px;border-radius:10px;cursor:pointer;
+    box-shadow:0 6px 14px rgba(24,119,242,0.12);font-weight:600;
     transition: background-color 0.2s ease;
-    user-select: none;
+  }
+  .btn:hover {
+    background-color: #0f5cc1;
+  }
+  .btn:active{transform:translateY(1px);}
+
+  .list{
+    padding:10px;
+    overflow:auto;
+  }
+  .userItem{
+    display:flex;gap:12px;align-items:center;padding:10px;border-radius:12px;
+    transition:transform .18s, background .12s, box-shadow .12s;
+    cursor:pointer;margin-bottom:8px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.8), rgba(248,249,250,0.9));
+  }
+  .userItem:hover{
+    transform:translateY(-4px);
+    box-shadow:0 10px 30px rgba(12,18,33,0.06);
+  }
+  .avatar{
+    width:56px;height:56px;border-radius:50%;flex:0 0 56px;display:grid;place-items:center;font-weight:700;color:white;
+    background:linear-gradient(135deg,#6a9cff,#2b6ef6);
+    font-size:16px;
+  }
+  .userMeta{flex:1;display:flex;flex-direction:column;}
+  .userName{font-weight:600;color:#111;}
+  .userSub{font-size:13px;color:var(--muted);margin-top:4px;}
+
+  .chatArea{ flex:1;display:flex;flex-direction:column; }
+  .chatTop{
+    padding:12px 14px;background:linear-gradient(90deg,var(--primary),#2c8bf7);
+    color:white;display:flex;align-items:center;justify-content:space-between;
+  }
+  .chatTop .left{
+    display:flex;gap:12px;align-items:center;
+  }
+  .chatTop .title{
+    font-weight:700;font-size:16px;
+  }
+  .chatTop .sub{
+    font-size:13px;color:rgba(255,255,255,0.9);
+  }
+  .chatMain{
+    padding:18px;flex:1;overflow:auto;background:linear-gradient(180deg,#f7f9fb,#fbfdff);
+    display:flex;flex-direction:column;gap:10px;
   }
 
+  .msg{
+    max-width:72%;padding:12px 16px;border-radius:14px;line-height:1.35;font-size:15px;animation:msgIn .26s ease;
+    box-shadow:0 6px 18px rgba(12,18,33,0.04);
+    word-wrap: break-word;
+    white-space: pre-wrap;
+  }
+  .msg.me{
+    align-self:flex-end;
+    background:linear-gradient(180deg,#d8e9ff,#c6deff);
+    border-bottom-right-radius:6px;
+  }
+  .msg.them{
+    align-self:flex-start;
+    background:#fff;
+    border-bottom-left-radius:6px;
+  }
+  @keyframes msgIn{
+    from{opacity:0; transform:translateY(8px)}
+    to{opacity:1; transform:none}
+  }
+
+  .chatInput{
+    padding:12px 16px;background:var(--surface);display:flex;gap:10px;border-top:1px solid rgba(12,18,33,0.04);
+    align-items:center;
+  }
+  .chatInput textarea{
+    flex:1;border-radius:12px;padding:10px 12px;border:1px solid rgba(12,18,33,0.06);resize:none;font-size:15px;height:46px;
+  }
+  .sendBtn{
+    background:var(--primary);color:white;border:none;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:700;
+    transition: background-color 0.2s ease;
+  }
+  .sendBtn:hover {
+    background-color: #0f5cc1;
+  }
+  .sendBtn:active{transform:translateY(1px);}
+
+  .modal{
+    position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,0.48);z-index:1000;
+  }
+  .modalCard{
+    width:92%;max-width:360px;border-radius:12px;background:var(--surface);padding:18px;animation:pop .18s ease;
+  }
+  .modalHeader{
+    display:flex;gap:12px;align-items:center;
+  }
+  .modalAvatar{
+    width:72px;height:72px;border-radius:50%;display:grid;place-items:center;font-size:22px;color:white;background:linear-gradient(135deg,#6a9cff,#2b6ef6);
+  }
+  .modalName{
+    font-size:18px;font-weight:700;
+  }
+  .modalRow{
+    margin-top:12px;color:#333;
+  }
+  .closeBtn{
+    margin-top:14px;background:var(--primary);color:white;padding:8px 12px;border-radius:10px;border:none;cursor:pointer;
+    transition: background-color 0.2s ease;
+  }
   .closeBtn:hover {
-    background-color: var(--primary-hover);
+    background-color: #0f5cc1;
   }
 
-  @keyframes pop {
-    from {
-      transform: scale(0.96);
-      opacity: 0;
-    }
-    to {
-      transform: scale(1);
-      opacity: 1;
-    }
+  @keyframes pop{
+    from{transform:scale(.96);opacity:0}
+    to{transform:none;opacity:1}
   }
 
-  /* RESPONSIVE */
-  @media (max-width: 760px) {
-    .app {
-      margin: 0;
-      height: 100vh;
-      border-radius: 0;
-      flex-direction: column;
+  @media (max-width:760px){
+    .app{
+      margin:0;
+      height:100vh;
+      border-radius:0;
+      display:flex;
+      flex-direction:column;
     }
-
-    .sidebar {
-      position: fixed;
-      top: 0; bottom: 0; left: 0;
-      width: 86%;
-      max-width: 360px;
-      z-index: 1200;
-      box-shadow: 20px 0 50px rgba(2, 6, 23, 0.15);
+    .sidebar{
+      position:fixed;
+      left:0;
+      top:0;
+      bottom:0;
+      width:86%;
+      max-width:360px;
+      z-index:1200;
+      transform: translateX(-110%);
+      box-shadow: 20px 0 50px rgba(2,6,23,0.15);
       border-right: none;
       background: var(--surface);
-      transform: translateX(-110%);
       transition: transform 0.22s ease;
-      will-change: transform;
     }
-
-    .sidebar.open {
-      transform: translateX(0);
-    }
-
-    .list {
-      padding: 14px;
-      overflow-y: auto;
-    }
-
-    .userItem {
-      padding: 12px;
-      gap: 10px;
-    }
-
-    .app .chatArea {
-      margin-left: 0;
-      border-radius: 0;
-      height: 100%;
-    }
-
-    .chatTop {
-      padding: 12px 16px;
-    }
-
-    .logo {
-      width: 38px;
-      height: 38px;
-      font-size: 20px;
-    }
-
-    .avatar {
-      width: 44px;
-      height: 44px;
-      flex-shrink: 0;
-      font-size: 16px;
-    }
-
-    .chatMain {
-      padding: 14px 16px;
-    }
-
-    .chatInput {
-      padding: 12px 16px;
-    }
+    .sidebar.open{ transform: translateX(0); }
+    .list{ padding:14px; }
+    .userItem{ padding:12px; gap:10px; }
+    .app .chatArea{ margin-left:0; }
+    .chatTop{ padding:12px 12px; }
+    .logo{ width:38px;height:38px; }
+    .avatar{ width:44px;height:44px; flex:0 0 44px; }
+    .chatMain{ padding:14px; }
   }
 
-  /* HAMBURGER BUTTON */
-  .hamburger {
-    display: none;
-    background: transparent;
-    border: none;
-    color: white;
-    font-size: 24px;
-    padding: 6px 8px;
-    border-radius: 8px;
-    cursor: pointer;
-    user-select: none;
+  .hamburger{
+    display:none;
+    background:transparent;border:none;color:white;font-size:22px;padding:6px 8px;border-radius:8px;
   }
-
-  @media (max-width: 760px) {
-    .hamburger {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
+  @media (max-width:760px){
+    .hamburger{ display:inline-flex; align-items:center; justify-content:center; }
   }
-
 </style>
 
 <!-- Firebase compat libs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
 </head>
 <body>
 
-<div class="app" id="app" role="main" aria-label="Application de chat MiTalk">
-  <aside class="sidebar" id="sidebar" aria-label="Liste des utilisateurs">
+<div class="app" id="app">
+  <div class="sidebar" id="sidebar">
     <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;flex-direction: column;">
       <div style="display:flex;gap:12px;align-items:center;width:100%">
-        <div class="logo" aria-hidden="true">M</div>
+        <div class="logo">M</div>
         <div>
           <div style="font-size:14px;color:#0b1220;font-weight:700">MiTalk</div>
           <div style="font-size:12px;color:var(--muted)">Chat</div>
@@ -548,63 +284,63 @@
       </div>
 
       <div id="sidebarProfile" style="display:flex;align-items:center;gap:12px;width:100%;padding:8px;border-radius:12px;background:#f5f7fa;box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
-        <div id="sidebarAvatar" style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#6a9cff,#2b6ef6);background-size:cover;background-position:center;color:white;font-weight:700;display:grid;place-items:center;font-size:22px;" aria-label="Avatar utilisateur">U</div>
+        <div id="sidebarAvatar" style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#6a9cff,#2b6ef6);background-size:cover;background-position:center;color:white;font-weight:700;display:grid;place-items:center;font-size:22px;">U</div>
         <div style="flex:1;min-width:0;">
           <div id="sidebarName" style="font-weight:700; font-size:16px; color: var(--primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Utilisateur</div>
           <div id="sidebarEmail" style="font-size:13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">email@example.com</div>
         </div>
       </div>
 
-      <button id="closeSidebar" style="display:none;background:transparent;border:none;font-size:20px;cursor:pointer" aria-label="Fermer la barre latérale">✕</button>
+      <button id="closeSidebar" style="display:none;background:transparent;border:none;font-size:20px;cursor:pointer">✕</button>
     </div>
 
     <div class="searchWrap">
       <div class="search">
-        <input id="globalSearch" placeholder="Vous recherchez quelqu'un par son nom ou ID..." autocomplete="off" aria-label="Recherche utilisateur par nom ou ID"/>
+        <input id="globalSearch" placeholder="Vous recherchez quelqu'un par son nom ou ID..." autocomplete="off" />
       </div>
 
       <div class="addById">
-        <input id="inputAddId" placeholder="Entrez un ID (exemple: 101)" autocomplete="off" aria-label="Entrer un ID d'utilisateur"/>
-        <button class="btn" id="btnAdd" aria-label="Ajouter un utilisateur par ID">Entrer</button>
+        <input id="inputAddId" placeholder="Entrez un ID (exemple: 101)" autocomplete="off" />
+        <button class="btn" id="btnAdd">Entrer</button>
       </div>
     </div>
 
-    <div class="list" id="userList" tabindex="0" aria-live="polite" aria-relevant="additions">
+    <div class="list" id="userList">
       <!-- user items injected here -->
     </div>
-  </aside>
+  </div>
 
-  <section class="chatArea" aria-label="Zone de conversation">
-    <header class="chatTop">
+  <div class="chatArea">
+    <div class="chatTop">
       <div class="left">
-        <button class="hamburger" id="openSidebar" aria-label="Ouvrir la barre latérale">☰</button>
-        <div id="activeAvatar" class="modalAvatar" style="width:40px;height:40px" aria-label="Avatar de l'utilisateur actif"></div>
+        <button class="hamburger" id="openSidebar" aria-label="Open sidebar">☰</button>
+        <div id="activeAvatar" class="modalAvatar" style="width:40px;height:40px"></div>
         <div>
           <div class="title" id="activeName">Choisissez des personnes</div>
           <div class="sub" id="activeSub">Ne choisis pas encore</div>
         </div>
       </div>
       <div>
-        <button class="btn" id="openProfile" style="display:none" aria-label="Afficher les informations du profil">Info</button>
+        <button class="btn" id="openProfile" style="display:none">Info</button>
       </div>
-    </header>
+    </div>
 
-    <main class="chatMain" id="chatMain" tabindex="0" aria-live="polite" aria-label="Messages de la conversation">
-      <div class="typing" aria-live="off" aria-hidden="true"><span></span><span></span><span></span></div>
+    <div class="chatMain" id="chatMain">
+      <div class="typing"><span></span><span></span><span></span></div>
       <div style="opacity:0.6;color:var(--muted);margin:auto">n'a jamais discuté — sélectionnez une personne dans la liste ou saisissez votre ID</div>
-    </main>
+    </div>
 
-    <footer class="chatInput">
-      <textarea id="messageInput" placeholder="Écrivez le message..." rows="1" aria-label="Saisir un message"></textarea>
-      <button class="sendBtn" id="sendBtn" aria-label="Envoyer le message">Envoyez-le</button>
-    </footer>
-  </section>
+    <div class="chatInput">
+      <textarea id="messageInput" placeholder="Écrivez le message..." rows="1"></textarea>
+      <button class="sendBtn" id="sendBtn">Envoyez-le</button>
+    </div>
+  </div>
 </div>
 
-<div class="modal" id="profileModal" role="dialog" aria-modal="true" aria-labelledby="modalName" aria-describedby="modalEmail modalId modalRegistered">
-  <div class="modalCard" role="document">
+<div class="modal" id="profileModal" role="dialog" aria-modal="true" aria-labelledby="modalName">
+  <div class="modalCard">
     <div class="modalHeader">
-      <div id="modalAvatar" class="modalAvatar" aria-hidden="true"></div>
+      <div id="modalAvatar" class="modalAvatar"></div>
       <div>
         <div class="modalName" id="modalName">Nom</div>
         <div style="color:var(--muted);font-size:13px" id="modalEmail">email@example.com</div>
@@ -612,12 +348,11 @@
     </div>
     <div class="modalRow"><strong>ID:</strong> <span id="modalId">---</span></div>
     <div class="modalRow"><strong>Registered:</strong> <span id="modalRegistered">---</span></div>
-    <button class="closeBtn" id="closeModal" aria-label="Fermer le profil">Verrouillez-le</button>
+    <button class="closeBtn" id="closeModal">Verrouillez-le</button>
   </div>
 </div>
 
 <script>
-  // Firebase init et variables (tsy ovaina raha efa miasa tsara)
   const firebaseConfig = {
     apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
     authDomain: "mitalky.firebaseapp.com",
@@ -630,9 +365,23 @@
   const auth = firebase.auth();
   const db = firebase.firestore();
 
-  // Raha mila fanampiana amin'ny JS ianao na amin'ny Firebase, lazao ahy :)
+  let myUid = null;
+  let myProfile = null;
+  let selectedUid = null;
+  let selectedProfile = null;
+  let unsubscribeMessages = null;
 
-</script>
+  const sidebar = document.getElementById('sidebar');
+  const openSidebarBtn = document.getElementById('openSidebar');
+  const closeSidebarBtn = document.getElementById('closeSidebar');
+  const profileModal = document.getElementById('profileModal');
 
-</body>
-</html>
+  function openSidebar() {
+    sidebar.classList.add('open');
+    closeSidebarBtn.style.display = 'inline';
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    closeSidebarBtn.style.display = 'none';
+    document.body.style
