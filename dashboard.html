@@ -103,6 +103,11 @@
       0% {opacity: 0; transform: translateY(25px);}
       100% {opacity: 1; transform: translateY(0);}
     }
+    p.error {
+      color: red;
+      margin-top: 10px;
+      font-weight: 600;
+    }
   </style>
 
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -132,90 +137,130 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-auth.onAuthStateChanged(async user => {
-  if (!user) return window.location.href = "nextpage.html";
+    // Référence pour le code referral valide
+    const VALID_REFERRAL_CODE = "REF123";
 
-  const uid = user.uid;
-  const profileSection = document.getElementById("profile-section");
+    auth.onAuthStateChanged(async user => {
+      if (!user) return window.location.href = "login.html";
 
-  // Affiche loading kely aloha
-  profileSection.innerHTML = `<p style="color:#1877f2">Chargement du profil...</p>`;
+      const uid = user.uid;
+      const profileSection = document.getElementById("profile-section");
 
-  try {
-    const doc = await db.collection("users").doc(uid).get();
+      profileSection.innerHTML = `<p style="color:#1877f2">Chargement du profil...</p>`;
 
-    if (!doc.exists) {
-      // Affiche formulaire création profil
-      profileSection.innerHTML = `
-        <input id="name" type="text" placeholder="Nom" />
-        <select id="genre">
-          <option value="">Sélectionnez le genre</option>
-          <option value="garçon">Garçon</option>
-          <option value="fille">Fille</option>
-          <option value="autre">Autre</option>
-        </select>
-        <button id="saveBtn">Enregistrer Profil</button>
-      `;
+      try {
+        const doc = await db.collection("users").doc(uid).get();
 
-      document.getElementById("saveBtn").addEventListener('click', saveProfile);
-    } else {
-      const data = doc.data();
-      showProfile(data, user, uid);
-    }
-  } catch (error) {
-    profileSection.innerHTML = `<p style="color:red">Erreur de chargement: ${error.message}</p>`;
-  }
-});
+        if (!doc.exists) {
+          // Formulaire création profil complet
+          profileSection.innerHTML = `
+            <input id="name" type="text" placeholder="Nom complet" />
+            <select id="genre">
+              <option value="">Sélectionnez le genre</option>
+              <option value="garçon">Garçon</option>
+              <option value="fille">Fille</option>
+              <option value="autre">Autre</option>
+            </select>
+            <input id="dob" type="date" placeholder="Date de naissance" />
+            <input id="referral" type="text" placeholder="Code Referral" />
+            <p class="error" id="formError"></p>
+            <button id="saveBtn">Enregistrer Profil</button>
+          `;
 
-function showProfile(data, user, uid) {
-  const profileSection = document.getElementById("profile-section");
-  profileSection.innerHTML = `
-    <div class="profile-info">
-      <p><strong>Nom :</strong> ${data.name}</p>
-      <p><strong>Genre :</strong> ${data.genre || '-'}</p>
-      <p><strong>ID :</strong> ${data.id}</p>
-      <p><strong>Email :</strong> ${data.email || user.phoneNumber}</p>
-    </div>
-    <a class="chat-link" href="chat.html?uid=${uid}">Aller au chat</a>
-  `;
-}
-
-async function saveProfile() {
-  const uid = auth.currentUser.uid;
-  const name = document.getElementById("name").value.trim();
-  const genre = document.getElementById("genre").value;
-
-  if (!name || !genre) {
-    alert("Remplissez correctement le nom et le genre.");
-    return;
-  }
-
-  const id = Math.floor(100000 + Math.random() * 900000);
-  const email = auth.currentUser.email || auth.currentUser.phoneNumber;
-
-  try {
-    await db.collection("users").doc(uid).set({
-      name,
-      genre,
-      id,
-      email
+          document.getElementById("saveBtn").addEventListener('click', saveProfile);
+        } else {
+          const data = doc.data();
+          showProfile(data, user, uid);
+        }
+      } catch (error) {
+        profileSection.innerHTML = `<p style="color:red">Erreur de chargement: ${error.message}</p>`;
+      }
     });
-    alert("Profil voatahiry!");
-    // Affiche profil voatahiry avy hatrany nefa tsy reload
-    const doc = await db.collection("users").doc(uid).get();
-    showProfile(doc.data(), auth.currentUser, uid);
-  } catch (e) {
-    alert("Erreur: " + e.message);
-  }
-}
-document.getElementById("logoutBtn").addEventListener("click", () => {
-  auth.signOut().then(() => {
-    alert("Vous êtes déconnecté.");
-    window.location.href = "login.html"; // ovay io raha ilaina ny pejy aorian'ny logout
-  }).catch(err => {
-    alert("Erreur lors de la déconnexion: " + err.message);
-  });
-});
+
+    function showProfile(data, user, uid) {
+      const profileSection = document.getElementById("profile-section");
+      profileSection.innerHTML = `
+        <div class="profile-info">
+          <p><strong>Nom complet :</strong> ${data.name}</p>
+          <p><strong>Genre :</strong> ${data.genre || '-'}</p>
+          <p><strong>Date de naissance :</strong> ${data.dob || '-'}</p>
+          <p><strong>Code Referral :</strong> ${data.referral || '-'}</p>
+          <p><strong>ID :</strong> ${data.id}</p>
+          <p><strong>Email :</strong> ${data.email || user.phoneNumber}</p>
+        </div>
+        <a class="chat-link" href="chat.html?uid=${uid}">Aller au chat</a>
+      `;
+    }
+
+    async function saveProfile() {
+      const uid = auth.currentUser.uid;
+      const name = document.getElementById("name").value.trim();
+      const genre = document.getElementById("genre").value;
+      const dob = document.getElementById("dob").value;
+      const referral = document.getElementById("referral").value.trim();
+      const formError = document.getElementById("formError");
+
+      formError.textContent = "";
+
+      // Validation
+      if (!name || !genre || !dob || !referral) {
+        formError.textContent = "Veuillez remplir tous les champs.";
+        return;
+      }
+
+      // Validation âge minimum 16 ans
+      if (!isAtLeast16YearsOld(dob)) {
+        formError.textContent = "Vous devez avoir au moins 16 ans.";
+        return;
+      }
+
+      // Vérifier code referral
+      if (referral !== VALID_REFERRAL_CODE) {
+        formError.textContent = "Code Referral invalide.";
+        return;
+      }
+
+      const id = Math.floor(100000 + Math.random() * 900000);
+      const email = auth.currentUser.email || auth.currentUser.phoneNumber;
+
+      try {
+        await db.collection("users").doc(uid).set({
+          name,
+          genre,
+          dob,
+          referral,
+          id,
+          email
+        });
+        alert("Profil enregistré !");
+        const doc = await db.collection("users").doc(uid).get();
+        showProfile(doc.data(), auth.currentUser, uid);
+      } catch (e) {
+        alert("Erreur: " + e.message);
+      }
+    }
+
+    // Fonction pour vérifier si age >= 16 ans
+    function isAtLeast16YearsOld(dob) {
+      if (!dob) return false;
+      const today = new Date();
+      const birthDate = new Date(dob);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      return age >= 16;
+    }
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      auth.signOut().then(() => {
+        alert("Vous êtes déconnecté.");
+        window.location.href = "login.html";
+      }).catch(err => {
+        alert("Erreur lors de la déconnexion: " + err.message);
+      });
+    });
 
   </script>
 </body>
