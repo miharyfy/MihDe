@@ -3,156 +3,116 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Pub avec Firebase - MiTalk</title>
+<title>Créer une Pub avec Firebase</title>
 <style>
   body {
     font-family: Arial, sans-serif;
-    max-width: 700px;
-    margin: 20px auto;
-    background: #f0f2f5;
-    color: #222;
+    max-width: 480px;
+    margin: 30px auto;
+    background: #f9fafb;
+    padding: 20px;
+    border-radius: 14px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
   }
-  h1 { text-align: center; color: #1877f2; }
-  form {
-    margin-bottom: 20px;
-    background: white;
-    padding: 15px 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgb(24 119 242 / 0.3);
+  h2 {
+    text-align: center;
+    color: #1877f2;
+    margin-bottom: 24px;
   }
-  input, textarea {
+  label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #333;
+  }
+  input[type="text"], input[type="url"], textarea {
     width: 100%;
     padding: 10px 12px;
-    margin: 8px 0;
+    margin-bottom: 16px;
     border-radius: 8px;
-    border: 1px solid #ccc;
+    border: 1.8px solid #ccc;
     font-size: 14px;
     box-sizing: border-box;
+    transition: border-color 0.3s ease;
+  }
+  input[type="text"]:focus, input[type="url"]:focus, textarea:focus {
+    border-color: #1877f2;
+    outline: none;
+  }
+  textarea {
+    resize: vertical;
+    min-height: 90px;
+  }
+  .error {
+    color: #cc0000;
+    font-size: 13px;
+    margin-top: -12px;
+    margin-bottom: 12px;
   }
   button {
-    background: #1877f2;
+    background-color: #1877f2;
     color: white;
     border: none;
-    padding: 12px 16px;
-    border-radius: 10px;
-    cursor: pointer;
+    padding: 14px 20px;
+    font-size: 16px;
     font-weight: 700;
-    margin-top: 8px;
+    border-radius: 12px;
+    cursor: pointer;
+    width: 100%;
     transition: background-color 0.3s ease;
   }
-  button:hover { background: #145dbf; }
-
-  .pub {
-    background: white;
-    border-radius: 14px;
-    padding: 15px 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 3px 10px rgb(24 119 242 / 0.15);
-    transition: box-shadow 0.3s ease;
+  button:hover {
+    background-color: #145dbf;
   }
-  .pub:hover {
-    box-shadow: 0 8px 20px rgb(24 119 242 / 0.3);
+  .pubsList {
+    margin-top: 32px;
   }
-  .pub-header {
-    font-weight: 700;
-    margin-bottom: 6px;
-    color: #1877f2;
-    cursor: pointer;
+  .pubItem {
+    background: #e7f0fe;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    word-wrap: break-word;
   }
-  .pub-text {
-    margin-bottom: 10px;
+  .pubItem a {
+    color: #145dbf;
+    text-decoration: underline;
+  }
+  .pubText {
     white-space: pre-wrap;
   }
-  .pub-link {
-    color: #1877f2;
-    text-decoration: underline;
-    cursor: pointer;
-    display: inline-block;
-    margin-bottom: 8px;
-  }
-  .actions {
-    margin-top: 10px;
-  }
-  .actions button {
-    margin-right: 15px;
-    cursor: pointer;
-    background: #e7f3ff;
-    color: #145dbf;
-    font-weight: 600;
-    padding: 8px 12px;
-    border-radius: 8px;
-    border: none;
-    transition: background-color 0.2s ease;
-  }
-  .actions button:hover {
-    background: #c2dbff;
-  }
-  .messages {
-    margin-top: 12px;
-    border-top: 1px solid #eee;
-    padding-top: 10px;
-  }
-  .message {
-    background: #e7f0fe;
-    padding: 8px 12px;
-    border-radius: 10px;
-    margin-bottom: 8px;
-    font-size: 13px;
-    word-break: break-word;
-  }
-  .message strong {
-    color: #145dbf;
-  }
-  #userPubsBtn {
-    margin-bottom: 15px;
-    background: #3b5998;
-    border-radius: 12px;
-    padding: 10px 16px;
-    color: white;
-    font-weight: 700;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  #userPubsBtn:hover {
-    background: #2d4373;
-  }
-  #logoutBtn {
-    background: #dc3545;
-    border-radius: 12px;
-    float: right;
-    margin-top: -45px;
-    padding: 10px 16px;
-    color: white;
-    font-weight: 700;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  #logoutBtn:hover {
-    background: #b02a37;
+  .pubMeta {
+    font-size: 12px;
+    color: #666;
+    margin-top: 8px;
   }
 </style>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
 </head>
 <body>
 
-<h1>MiTalk - Publications</h1>
-<button id="logoutBtn" style="display:none">Déconnexion</button>
-<button id="userPubsBtn" style="display:none">Voir mes pubs</button>
+<h2>Créer une Pub</h2>
 
-<form id="pubForm" style="display:none">
-  <textarea id="pubText" placeholder="Écrivez votre pub..." required></textarea>
-  <input id="pubURL" type="url" placeholder="Lien URL (optionnel)" />
-  <button type="submit">Publier</button>
+<form id="pubForm" novalidate>
+  <label for="pubText">Texte de la pub <span style="color:#cc0000;">*</span></label>
+  <textarea id="pubText" placeholder="Écrivez votre publicité ici..." required></textarea>
+  <div id="textError" class="error" style="display:none;">Le texte est obligatoire.</div>
+  
+  <label for="pubURL">Lien URL (optionnel)</label>
+  <input type="url" id="pubURL" placeholder="https://exemple.com" />
+  <div id="urlError" class="error" style="display:none;">Veuillez entrer une URL valide.</div>
+  
+  <button type="submit">Valider la pub</button>
 </form>
 
-<div id="pubsContainer"></div>
+<div class="pubsList" id="pubsList"></div>
 
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  // Configuration Firebase
+  // Firebase config
   const firebaseConfig = {
     apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
     authDomain: "mitalky.firebaseapp.com",
@@ -162,173 +122,91 @@
     appId: "1:753557195623:web:abc3b37eca5d67c9157dc2"
   };
   firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
   const db = firebase.firestore();
 
-  let currentUser = null;
-  let viewingUserPubs = false;
+  const form = document.getElementById('pubForm');
+  const textInput = document.getElementById('pubText');
+  const urlInput = document.getElementById('pubURL');
+  const textError = document.getElementById('textError');
+  const urlError = document.getElementById('urlError');
+  const pubsList = document.getElementById('pubsList');
 
-  // Login anonyme auto
-  auth.signInAnonymously().catch(console.error);
+  // Escape HTML helper to prevent XSS
+  function escapeHtml(str) {
+    if(!str) return '';
+    return str.replace(/[&<>"']/g, m => ({
+      '&':'&amp;',
+      '<':'&lt;',
+      '>':'&gt;',
+      '"':'&quot;',
+      "'":'&#39;'
+    }[m]));
+  }
 
-  auth.onAuthStateChanged(user => {
-    if(user) {
-      currentUser = user;
-      document.getElementById('pubForm').style.display = 'block';
-      document.getElementById('logoutBtn').style.display = 'inline-block';
-      document.getElementById('userPubsBtn').style.display = 'inline-block';
-      loadPubs();
-    } else {
-      currentUser = null;
-      document.getElementById('pubForm').style.display = 'none';
-      document.getElementById('logoutBtn').style.display = 'none';
-      document.getElementById('userPubsBtn').style.display = 'none';
-      document.getElementById('pubsContainer').innerHTML = '<p>Connectez-vous pour voir et publier.</p>';
-    }
-  });
+  // Show all pubs from Firestore in real time
+  function showPubsRealtime() {
+    db.collection('pubs').orderBy('createdAt', 'desc')
+      .onSnapshot(snapshot => {
+        pubsList.innerHTML = '';
+        if(snapshot.empty){
+          pubsList.innerHTML = '<p style="color:#666;text-align:center;">Pas encore de pub.</p>';
+          return;
+        }
+        snapshot.forEach(doc => {
+          const p = doc.data();
+          const pubText = escapeHtml(p.text).replace(/\n/g, '<br>');
+          const pubURL = p.url ? `<br><a href="${escapeHtml(p.url)}" target="_blank" rel="noopener">${escapeHtml(p.url)}</a>` : '';
+          const date = p.createdAt ? new Date(p.createdAt.seconds * 1000).toLocaleString() : '';
+          const pubHTML = `
+            <div class="pubItem">
+              <div class="pubText">${pubText}${pubURL}</div>
+              <div class="pubMeta">Créé le ${date}</div>
+            </div>`;
+          pubsList.insertAdjacentHTML('beforeend', pubHTML);
+        });
+      });
+  }
 
-  document.getElementById('logoutBtn').addEventListener('click', () => {
-    auth.signOut();
-  });
+  showPubsRealtime();
 
-  // Ajouter pub
-  document.getElementById('pubForm').addEventListener('submit', async e => {
+  // Form submit
+  form.addEventListener('submit', (e) => {
     e.preventDefault();
-    if(!currentUser) return alert("Vous devez être connecté");
 
-    const text = document.getElementById('pubText').value.trim();
-    const url = document.getElementById('pubURL').value.trim();
+    // Reset errors
+    textError.style.display = 'none';
+    urlError.style.display = 'none';
 
-    if(!text) return alert("Le texte est obligatoire");
+    let valid = true;
 
-    await db.collection('pubs').add({
-      authorId: currentUser.uid,
-      authorName: currentUser.isAnonymous ? "Anonyme" : currentUser.email || "Utilisateur",
-      text: text,
-      url: url || null,
-      reactions: { like: 0 },
-      messages: [],
+    // Validate text
+    if(textInput.value.trim() === '') {
+      textError.style.display = 'block';
+      valid = false;
+    }
+
+    // Validate URL if not empty
+    if(urlInput.value.trim() !== '') {
+      try {
+        new URL(urlInput.value.trim());
+      } catch {
+        urlError.style.display = 'block';
+        valid = false;
+      }
+    }
+
+    if(!valid) return;
+
+    // Add pub to Firestore
+    db.collection('pubs').add({
+      text: textInput.value.trim(),
+      url: urlInput.value.trim() || null,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+      form.reset();
+    }).catch(err => {
+      alert('Erreur lors de la création de la pub: ' + err.message);
     });
-
-    document.getElementById('pubText').value = '';
-    document.getElementById('pubURL').value = '';
-    viewingUserPubs = false;
-    loadPubs();
-  });
-
-  // Charger pubs
-  function loadPubs() {
-    let query = db.collection('pubs').orderBy('createdAt', 'desc').limit(30);
-    if(viewingUserPubs && currentUser) {
-      query = query.where('authorId', '==', currentUser.uid);
-    }
-    query.onSnapshot(snapshot => {
-      const pubs = [];
-      snapshot.forEach(doc => {
-        pubs.push({ id: doc.id, ...doc.data() });
-      });
-      renderPubs(pubs);
-    });
-  }
-
-  // Afficher pubs
-  function renderPubs(pubs) {
-    const container = document.getElementById('pubsContainer');
-    container.innerHTML = '';
-    if(pubs.length === 0) {
-      container.innerHTML = '<p style="text-align:center;color:#777;">Aucune publication trouvée.</p>';
-      return;
-    }
-    pubs.forEach(pub => {
-      const pubDiv = document.createElement('div');
-      pubDiv.className = 'pub';
-
-      const author = escapeHtml(pub.authorName);
-      const textHTML = escapeHtml(pub.text).replace(/(https?:\/\/[^\s]+)/g, url =>
-        `<a href="${url}" target="_blank" rel="noopener" class="pub-link">${url}</a>`);
-
-      const likes = pub.reactions?.like || 0;
-
-      const messagesHTML = (pub.messages || []).map(m => `
-        <div class="message"><strong>${escapeHtml(m.from)}:</strong> ${escapeHtml(m.text)}</div>
-      `).join('');
-
-      pubDiv.innerHTML = `
-        <div class="pub-header" onclick="showUserPubs('${pub.authorId}')">${author}</div>
-        <div class="pub-text">${textHTML}</div>
-        ${pub.url ? `<a href="${pub.url}" target="_blank" rel="noopener" class="pub-link">${pub.url}</a>` : ''}
-        <div class="actions">
-          <button onclick="reactToPub('${pub.id}', 'like')">👍 Like (${likes})</button>
-          <button onclick="commentOnPub('${pub.id}')">💬 Message privé</button>
-        </div>
-        <div class="messages">${messagesHTML}</div>
-      `;
-      container.appendChild(pubDiv);
-    });
-  }
-
-  // Like
-  async function reactToPub(pubId, reaction) {
-    const pubRef = db.collection('pubs').doc(pubId);
-    await db.runTransaction(async tx => {
-      const doc = await tx.get(pubRef);
-      if(!doc.exists) throw "Pub non trouvée";
-
-      const data = doc.data();
-      const currentCount = data.reactions?.[reaction] || 0;
-      const newReactions = {...data.reactions, [reaction]: currentCount + 1};
-      tx.update(pubRef, { reactions: newReactions });
-    });
-  }
-
-  // Message privé
-  async function commentOnPub(pubId) {
-    const text = prompt("Envoyez un message privé à l'auteur de cette pub :");
-    if(!text) return;
-
-    const pubRef = db.collection('pubs').doc(pubId);
-    await db.runTransaction(async tx => {
-      const doc = await tx.get(pubRef);
-      if(!doc.exists) throw "Pub non trouvée";
-
-      const data = doc.data();
-      const messages = data.messages || [];
-      messages.push({
-        from: currentUser.uid === data.authorId ? "Vous" : "Anonyme",
-        text: text,
-        createdAt: new Date()
-      });
-      tx.update(pubRef, { messages });
-    });
-  }
-
-  // Voir pubs user
-  function showUserPubs(uid) {
-    if(!currentUser) return alert("Connectez-vous d'abord.");
-    if(uid === currentUser.uid) {
-      viewingUserPubs = true;
-      loadPubs();
-    } else {
-      alert("Voir pubs des autres utilisateurs pas encore implémenté.");
-    }
-  }
-
-  // Escape HTML
-  function escapeHtml(text) {
-    if(!text) return '';
-    return text.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  }
-
-  // Bouton voir mes pubs
-  document.getElementById('userPubsBtn').addEventListener('click', () => {
-    viewingUserPubs = !viewingUserPubs;
-    if(viewingUserPubs) {
-      document.getElementById('userPubsBtn').textContent = "Voir toutes les pubs";
-    } else {
-      document.getElementById('userPubsBtn').textContent = "Voir mes pubs";
-    }
-    loadPubs();
   });
 </script>
 
