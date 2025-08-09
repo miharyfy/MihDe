@@ -354,41 +354,6 @@
     .catch(error => showError(error.message));
 }
 
-  // Démarrer auth téléphone et envoyer code SMS
-  function startPhoneAuth(phone) {
-    auth.signInWithPhoneNumber(phone, window.recaptchaVerifier)
-      .then((result) => {
-        confirmationResult = result;
-        alert("Code SMS envoyé.");
-        verificationCodeInput.style.display = 'block';
-        verifyCodeBtn.style.display = 'block';
-      })
-      .catch(error => showError(error.message));
-  }
-
-  // Vérifier code SMS
-  function verifyCode() {
-    clearError();
-    const code = verificationCodeInput.value.trim();
-    if (!code) {
-      showError("Entrez le code SMS.");
-      return;
-    }
-    confirmationResult.confirm(code)
-      .then(({user}) => {
-        alert("Téléphone vérifié, connexion réussie !");
-        // Ajouter user dans Firestore si nouveau
-        db.collection("users").doc(user.uid).get().then(doc => {
-          if (!doc.exists) {
-            const idManokana = generateUniqueID();
-            db.collection("users").doc(user.uid).set({
-              phone: user.phoneNumber,
-              id: idManokana,
-              name: "",
-              photo: ""
-            });
-          }
-        });
         window.location.href = "dashboard.html";
       })
       .catch(() => showError("Code SMS incorrect ou expiré."));
