@@ -305,56 +305,54 @@
   }
 
   // Signup function with email + phone + SMS verification
-  function signup() {
-    clearError();
-    const email = document.getElementById('signup-email').value.trim();
-    const password = signupPwdInput.value;
-    const phone = document.getElementById('signup-phone').value.trim();
+ function signup() {
+  clearError();
+  const email = document.getElementById('signup-email').value.trim();
+  const password = signupPwdInput.value;
+  const phone = document.getElementById('signup-phone').value.trim();
 
-    if (!email || !password || !phone) {
-      showError("Veuillez remplir tous les champs.");
-      return;
-    }
-    if (!validateEmail(email)) {
-      showError("Email non valide.");
-      return;
-    }
-    if (!validatePhone(phone)) {
-      showError("Numéro de téléphone non valide.");
-      return;
-    }
-
-    // D'abord créer l'utilisateur email/password
-    auth.createUserWithEmailAndPassword(email, password)
-      .then(({user}) => {
-        user.sendEmailVerification();
-        alert("Inscription réussie ! Un mail de vérification a été envoyé.");
-
-        // On attend que l'utilisateur vérifie email avant la suite (optionnel ici)
-
-        // Stocker l'email dans Firestore
-        const idManokana = generateUniqueID();
-        db.collection("users").doc(user.uid).set({
-          email: email,
-          id: idManokana,
-          name: "",
-          photo: ""
-        });
-
-        // Commencer vérification téléphone (SMS)
-        startPhoneAuth(phone);
-
-      })
-      .catch(error => showError(error.message));
+  if (!email || !password || !phone) {
+    showError("Veuillez remplir tous les champs.");
+    return;
+  }
+  if (!validateEmail(email)) {
+    showError("Email non valide.");
+    return;
+  }
+  if (!validatePhone(phone)) {
+    showError("Numéro de téléphone non valide.");
+    return;
   }
 
-  // Setup recaptcha for phone auth
-  window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-    size: 'normal',
-    callback: (response) => {},
-    'expired-callback': () => {}
-  });
-  recaptchaVerifier.render();
+  // Tadiavo aloha raha efa misy ilay email
+  auth.fetchSignInMethodsForEmail(email)
+    .then(methods => {
+      if (methods.length > 0) {
+        showError("Cet email est déjà utilisé. Veuillez vous connecter.");
+        return;
+      }
+      // Raha tsy misy dia manao création
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(({user}) => {
+          user.sendEmailVerification();
+          alert("Inscription réussie ! Un mail de vérification a été envoyé.");
+
+          // Stockage Firestore
+          const idManokana = generateUniqueID();
+          db.collection("users").doc(user.uid).set({
+            email: email,
+            id: idManokana,
+            name: "",
+            photo: ""
+          });
+
+          // Démarrer vérification téléphone
+          startPhoneAuth(phone);
+        })
+        .catch(error => showError(error.message));
+    })
+    .catch(error => showError(error.message));
+}
 
   // Démarrer auth téléphone et envoyer code SMS
   function startPhoneAuth(phone) {
