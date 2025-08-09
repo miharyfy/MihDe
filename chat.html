@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Pub avec Like & Suppression</title>
+<title>Pub avec Like</title>
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -31,29 +31,21 @@
   .pub a:hover {
     text-decoration: underline;
   }
-  .like-btn, .delete-btn {
+  .like-btn {
     background: transparent;
     border: none;
-    cursor: pointer;
-    font-weight: bold;
-    margin-top: 10px;
-    font-size: 14px;
-  }
-  .like-btn {
     color: #1877f2;
-    margin-right: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
   }
   .liked {
     color: #e0245e; /* rose rouge like */
   }
-  .delete-btn {
-    color: #cc0000;
-    float: right;
-  }
   .likes-count {
     font-size: 0.9em;
     color: #555;
-    margin-left: 5px;
+    margin-left: 10px;
   }
 </style>
 
@@ -67,6 +59,7 @@
 <div id="pubList">Chargement...</div>
 
 <script>
+  // Config Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
     authDomain: "mitalky.firebaseapp.com",
@@ -76,9 +69,11 @@
     appId: "1:753557195623:web:abc3b37eca5d67c9157dc2"
   };
 
+  // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
+  // Générer un userId simulé unique stocké en localStorage
   function getUserId() {
     let userId = localStorage.getItem('userId');
     if(!userId) {
@@ -91,12 +86,50 @@
 
   const pubList = document.getElementById('pubList');
 
+  // Exemple de pub "sample" mivantana aseho raha mbola tsy misy ao amin'ny Firestore
+  const samplePubData = [{
+    id: 'sample1',
+    text: "Découvrez notre super offre ! 🎉",
+    url: "https://exemple.com",
+    createdAt: new Date(),
+    likesCount: 12,
+    likesBy: ["user_abc", "user_xyz"]
+  }];
+
+  // Fonction pour afficher pubs avec gestion du pub sample si vide
   function renderPubs(docs) {
+    pubList.innerHTML = '';
+
     if(docs.length === 0) {
-      pubList.innerHTML = '<p>Aucune pub pour le moment.</p>';
+      // Aucune pub dans Firestore, afficher sample
+      samplePubData.forEach(pub => {
+        const div = document.createElement('div');
+        div.className = 'pub';
+
+        let content = `<p>${pub.text}</p>`;
+        if(pub.url){
+          content += `<a href="${pub.url}" target="_blank" rel="noopener noreferrer">${pub.url}</a>`;
+        }
+        content += `<br/><small style="color:#999">Créée le: ${pub.createdAt.toLocaleString()}</small>`;
+
+        const likesCount = pub.likesCount || 0;
+        const likesBy = pub.likesBy || [];
+        const userLiked = likesBy.includes(userId);
+
+        content += `<br/><button class="like-btn ${userLiked ? 'liked' : ''}" data-id="${pub.id}">
+                      ${userLiked ? '❤️ Like' : '🤍 Like'}
+                    </button>
+                    <span class="likes-count">${likesCount} like${likesCount !== 1 ? 's' : ''}</span>`;
+
+        div.innerHTML = content;
+        pubList.appendChild(div);
+      });
+
+      // Pas de gestion des likes sample car pas en DB
       return;
     }
-    pubList.innerHTML = '';
+
+    // Sinon afficher pubs réelles Firestore
     docs.forEach(doc => {
       const data = doc.data();
       const id = doc.id;
@@ -112,42 +145,32 @@
 
       const likesCount = data.likesCount || 0;
       const likesBy = data.likesBy || [];
-
       const userLiked = likesBy.includes(userId);
 
-      content += `
-        <button class="like-btn ${userLiked ? 'liked' : ''}" data-id="${id}">
-          ${userLiked ? '❤️ Like' : '🤍 Like'}
-        </button>
-        <span class="likes-count">${likesCount} like${likesCount !== 1 ? 's' : ''}</span>
-        <button class="delete-btn" data-id="${id}" title="Supprimer cette pub">🗑 Supprimer</button>
-      `;
+      content += `<br/><button class="like-btn ${userLiked ? 'liked' : ''}" data-id="${id}">
+                    ${userLiked ? '❤️ Like' : '🤍 Like'}
+                  </button>
+                  <span class="likes-count">${likesCount} like${likesCount !== 1 ? 's' : ''}</span>`;
 
       div.innerHTML = content;
       pubList.appendChild(div);
     });
 
-    // Like btn listeners
+    // Ajouter écouteurs sur boutons like
     document.querySelectorAll('.like-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const pubId = btn.getAttribute('data-id');
         toggleLike(pubId, btn);
       });
     });
-
-    // Delete btn listeners
-    document.querySelectorAll('.delete-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const pubId = btn.getAttribute('data-id');
-        if(confirm("Voulez-vous vraiment supprimer cette pub ?")) {
-          db.collection('pubs').doc(pubId).delete()
-          .catch(err => alert("Erreur lors de la suppression : " + err.message));
-        }
-      });
-    });
   }
 
+  // Fonction toggle like/unlike
   function toggleLike(pubId, btn) {
+    if(pubId.startsWith('sample')) {
+      alert("Cette pub est un exemple, impossible de liker.");
+      return; // Pas possible liker sample
+    }
     const pubRef = db.collection('pubs').doc(pubId);
 
     db.runTransaction(async (transaction) => {
@@ -159,9 +182,11 @@
       let likesCount = data.likesCount || 0;
 
       if(likesBy.includes(userId)) {
+        // Unlike
         likesBy = likesBy.filter(uid => uid !== userId);
         likesCount = Math.max(0, likesCount - 1);
       } else {
+        // Like
         likesBy.push(userId);
         likesCount++;
       }
@@ -170,11 +195,29 @@
         likesBy: likesBy,
         likesCount: likesCount
       });
+    }).then(() => {
+      // Mise à jour précise à partir de Firestore
+      pubRef.get().then(doc => {
+        if(doc.exists){
+          const data = doc.data();
+          const userLikedNow = data.likesBy.includes(userId);
+          if(userLikedNow) {
+            btn.classList.add('liked');
+            btn.textContent = '❤️ Like';
+          } else {
+            btn.classList.remove('liked');
+            btn.textContent = '🤍 Like';
+          }
+          const countSpan = btn.nextElementSibling;
+          countSpan.textContent = `${data.likesCount} like${data.likesCount !== 1 ? 's' : ''}`;
+        }
+      });
     }).catch(error => {
       alert("Erreur lors du Like: " + error);
     });
   }
 
+  // Chargement en temps réel des pubs Firestore
   db.collection('pubs').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
     renderPubs(snapshot.docs);
   }, error => {
