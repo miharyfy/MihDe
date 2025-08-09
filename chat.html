@@ -1,3 +1,5 @@
+atao any ilay taloha iany fa lasa nikorotana ilay izy dia aona, fa mbola tsy mipoitra ilay sary ilay profile gmail nanaovana inscription 
+
 <!DOCTYPE html>
 <html lang="mg">
 <head>
@@ -240,6 +242,9 @@
     </div>
 
     <!-- Ity no profil mpampiasa -->
+    <div id="sidebarProfile" style="display:flex;align-items:center;gap:12px;width:100%;padding:8px;border-radius:12px;background:#f5f7fa;box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+  <!-- content -->
+</div>
       <div id="sidebarAvatar" style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#6a9cff,#2b6ef6);background-size:cover;background-position:center;color:white;font-weight:700;display:grid;place-items:center;font-size:22px;">U</div>
       <div style="flex:1;min-width:0;">
         <div id="sidebarName" style="font-weight:700; font-size:16px; color: var(--primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Utilisateur</div>
@@ -272,7 +277,6 @@
   <!-- Chat area -->
   <div class="chatArea">
     <div class="chatTop">
-    <div class="typing"><span></span><span></span><span></span></div>
       <div class="left">
         <button class="hamburger" id="openSidebar">☰</button>
         <div id="activeAvatar" class="modalAvatar" style="width:40px;height:40px"></div>
@@ -287,6 +291,7 @@
     </div>
 
     <div class="chatMain" id="chatMain">
+    <div class="typing"><span></span><span></span><span></span></div>
       <!-- messages injected here -->
       <div style="opacity:0.6;color:var(--muted);margin:auto">n'a jamais discuté — sélectionnez une personne dans la liste ou saisissez votre ID</div>
     </div>
@@ -607,7 +612,7 @@ db.collection('users').where('id','==', idNum).get().then(snapshot=>{
 .catch(err=>{
   console.error(err); alert('Erreur lors de la recherche d\'ID');
 });
-window.scrollTo(0, 0); // Miverina any ambony rehefa misokatra
+
 
 </script>
 </body>
