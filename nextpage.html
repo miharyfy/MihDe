@@ -1,105 +1,105 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="mg">
 <head>
   <meta charset="UTF-8" />
-  <title>Facebook-like Login / Inscription</title>
+  <title>Inscription / Connexion</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
     body {
-      font-family: Arial, sans-serif;
-      background:#f0f2f5;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      height:100vh;
-      margin:0;
+      font-family: 'Roboto', Arial, sans-serif;
+      background: linear-gradient(135deg, #4a90e2, #1877f2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
     }
     .container {
-      background:#fff;
-      padding:30px;
-      border-radius:10px;
-      box-shadow:0 2px 12px rgba(0,0,0,0.2);
-      width:360px;
-      text-align:center;
+      background: white;
+      padding: 35px 30px 40px 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      width: 340px;
+      text-align: center;
+      animation: fadeInUp 0.8s ease forwards;
+      position: relative;
     }
-    .tabs {
-      display: flex;
-      margin-bottom: 20px;
-      justify-content: center;
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
-    .tab {
-      flex: 1;
-      padding: 10px 0;
-      cursor: pointer;
-      border-bottom: 3px solid transparent;
-      font-weight: 600;
-      color: #555;
-      user-select: none;
-      transition: border-color 0.3s ease, color 0.3s ease;
-    }
-    .tab.active {
-      border-color: #1877f2;
+    h2 {
+      margin-bottom: 25px;
       color: #1877f2;
+      font-weight: 700;
+      letter-spacing: 1px;
     }
     input, button {
       width: 100%;
-      margin: 10px 0;
-      padding: 12px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
+      margin: 12px 0;
+      padding: 14px 15px;
+      border-radius: 8px;
+      border: 1.8px solid #ccc;
       font-size: 16px;
       box-sizing: border-box;
-      outline-offset: 2px;
+      outline-offset: 3px;
       transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
     input:focus {
       border-color: #1877f2;
-      box-shadow: 0 0 8px rgba(24,119,242,0.5);
+      box-shadow: 0 0 12px rgba(24,119,242,0.5);
     }
     button {
-      background:#1877f2;
-      color:#fff;
-      border:none;
-      cursor:pointer;
-      font-weight:600;
-      transition: background-color 0.3s ease;
+      background-color: #1877f2;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      transition: background-color 0.3s ease, transform 0.15s ease;
       user-select: none;
+      box-shadow: 0 5px 15px rgba(24,119,242,0.4);
     }
     button:hover {
-      background:#0f5dc8;
+      background-color: #0f5dc8;
+      transform: scale(1.06);
+    }
+    button:active {
+      transform: scale(0.97);
     }
     p.error {
-      color: red;
+      color: #e74c3c;
+      font-size: 14px;
       min-height: 20px;
-      font-size: 14px;
-      margin-top: 5px;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      margin: 8px 0 0 0;
     }
-    .link-btn {
-      background: none;
-      border: none;
-      color: #1877f2;
-      cursor: pointer;
-      padding: 0;
-      font-size: 14px;
-      text-decoration: underline;
-      margin-top: 5px;
-      user-select: none;
+    p.error.visible {
+      opacity: 1;
     }
-    /* Password + eye icon */
     .password-wrapper {
       position: relative;
       width: 100%;
     }
     .password-wrapper input {
-      padding-right: 40px;
+      padding-right: 44px;
     }
     .toggle-password {
       position: absolute;
       top: 50%;
-      right: 10px;
+      right: 12px;
       transform: translateY(-50%);
-      width: 24px;
-      height: 24px;
+      width: 26px;
+      height: 26px;
       cursor: pointer;
       fill: #888;
       transition: fill 0.3s ease, transform 0.3s ease;
@@ -113,78 +113,76 @@
       fill: #1877f2;
       transform: translateY(-50%) scale(1.2) rotate(20deg);
     }
-    /* Recaptcha container */
-    #recaptcha-container {
-      margin: 10px 0;
-      display: flex;
-      justify-content: center;
+    .forgot-password {
+      margin-top: 5px;
+      font-size: 14px;
+      color: #1877f2;
+      cursor: pointer;
+      text-decoration: underline;
+      user-select: none;
+      background: none;
+      border: none;
     }
-    /* Hide verification inputs by default */
-    #verificationCode, #verifyCodeBtn {
-      display: none;
+    .forgot-password:hover {
+      color: #0f5dc8;
     }
-    /* Reset password inputs hidden initially */
-    #resetEmail, #resetBtn {
+    /* Reset password form hidden by default */
+    #resetPasswordSection {
+      margin-top: 20px;
       display: none;
+      text-align: left;
+    }
+    #resetPasswordSection input {
+      margin-bottom: 10px;
+    }
+    #resetPasswordSection button {
+      width: auto;
+      padding: 10px 20px;
+      font-size: 15px;
+      border-radius: 6px;
+      box-shadow: none;
     }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <div class="tabs">
-    <div id="tab-login" class="tab active" onclick="showForm('login')">Connexion</div>
-    <div id="tab-signup" class="tab" onclick="showForm('signup')">Inscription</div>
+  <h2>Inscription / Connexion</h2>
+
+  <input id="email" type="email" placeholder="Email" autocomplete="email" required />
+
+  <div class="password-wrapper">
+    <input id="password" type="password" placeholder="Mot de passe" autocomplete="current-password" required />
+    <svg id="togglePassword" class="toggle-password" viewBox="0 0 24 24" >
+      <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
+      <circle cx="12" cy="12" r="2.5"/>
+    </svg>
   </div>
 
-  <!-- Formulaire Connexion -->
-  <div id="login-form">
-    <input id="login-identifier" type="text" placeholder="Email ou numéro téléphone (+261...)" autocomplete="username" />
-    <div class="password-wrapper">
-      <input id="login-password" type="password" placeholder="Mot de passe" autocomplete="current-password" />
-      <svg id="login-togglePassword" class="toggle-password" viewBox="0 0 24 24">
-        <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
-        <circle cx="12" cy="12" r="2.5"/>
-      </svg>
-    </div>
-    <button onclick="login()">Se connecter</button>
-    <button class="link-btn" onclick="showResetPassword()">Mot de passe oublié ?</button>
-    <input id="resetEmail" type="email" placeholder="Entrez votre email" />
-    <button id="resetBtn" class="link-btn" onclick="resetPassword()">Envoyer lien de réinitialisation</button>
-  </div>
+  <button onclick="signup()">S'inscrire</button>
+  <button onclick="login()">Se connecter</button>
 
-  <!-- Formulaire Inscription -->
-  <div id="signup-form" style="display:none;">
-    <input id="signup-email" type="email" placeholder="Email" autocomplete="email" />
-    <div class="password-wrapper">
-      <input id="signup-password" type="password" placeholder="Mot de passe" autocomplete="new-password" />
-      <svg id="signup-togglePassword" class="toggle-password" viewBox="0 0 24 24">
-        <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
-        <circle cx="12" cy="12" r="2.5"/>
-      </svg>
-    </div>
-    <input id="signup-phone" type="text" placeholder="Numéro téléphone (+261...)" autocomplete="tel" />
-    <div id="recaptcha-container"></div>
-    <input id="verificationCode" type="text" placeholder="Code de vérification SMS" />
-    <button id="verifyCodeBtn" onclick="verifyCode()">Vérifier Code</button>
-    <button onclick="signup()">S'inscrire</button>
+  <button class="forgot-password" onclick="toggleResetPassword()">Mot de passe oublié ?</button>
+
+  <div id="resetPasswordSection">
+    <input id="resetEmail" type="email" placeholder="Entrez votre email pour réinitialiser" />
+    <button onclick="resetPassword()">Envoyer lien</button>
   </div>
 
   <p class="error" id="error"></p>
 </div>
 
-<!-- Firebase SDKs -->
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-  // Config Firebase - soloinao amin'ny anao
   const firebaseConfig = {
     apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
     authDomain: "mitalky.firebaseapp.com",
     projectId: "mitalky",
-    storageBucket: "mitalky.appspot.com",
+    storageBucket: "mitalky.firebasestorage.app",
     messagingSenderId: "753557195623",
     appId: "1:753557195623:web:abc3b37eca5d67c9157dc2"
   };
@@ -192,187 +190,119 @@
   const auth = firebase.auth();
   const db = firebase.firestore();
 
-  // Elements
-  const tabLogin = document.getElementById('tab-login');
-  const tabSignup = document.getElementById('tab-signup');
-  const loginForm = document.getElementById('login-form');
-  const signupForm = document.getElementById('signup-form');
-  const errorElement = document.getElementById('error');
-  const resetEmailInput = document.getElementById('resetEmail');
-  const resetBtn = document.getElementById('resetBtn');
-  const verificationCodeInput = document.getElementById('verificationCode');
-  const verifyCodeBtn = document.getElementById('verifyCodeBtn');
+  const errorElement = document.getElementById("error");
+  const togglePassword = document.getElementById('togglePassword');
+  const passwordInput = document.getElementById('password');
 
-  // Password toggle buttons
-  const loginTogglePwd = document.getElementById('login-togglePassword');
-  const loginPwdInput = document.getElementById('login-password');
-  const signupTogglePwd = document.getElementById('signup-togglePassword');
-  const signupPwdInput = document.getElementById('signup-password');
-
-  // Variables for phone auth confirmation
-  let confirmationResult = null;
-
-  // Switch login/signup forms
-  function showForm(form) {
-    clearError();
-    if (form === 'login') {
-      tabLogin.classList.add('active');
-      tabSignup.classList.remove('active');
-      loginForm.style.display = 'block';
-      signupForm.style.display = 'none';
-      resetEmailInput.style.display = 'none';
-      resetBtn.style.display = 'none';
-      verificationCodeInput.style.display = 'none';
-      verifyCodeBtn.style.display = 'none';
-    } else {
-      tabLogin.classList.remove('active');
-      tabSignup.classList.add('active');
-      loginForm.style.display = 'none';
-      signupForm.style.display = 'block';
-      resetEmailInput.style.display = 'none';
-      resetBtn.style.display = 'none';
-      verificationCodeInput.style.display = 'none';
-      verifyCodeBtn.style.display = 'none';
-    }
-  }
-
-  // Toggle password visibility
-  loginTogglePwd.addEventListener('click', () => {
-    togglePassword(loginPwdInput, loginTogglePwd);
+  // Toggle password visibility with animation on icon
+  togglePassword.addEventListener('click', () => {
+    const type = passwordInput.type === 'password' ? 'text' : 'password';
+    passwordInput.type = type;
+    togglePassword.classList.toggle('active', type === 'text');
   });
-  signupTogglePwd.addEventListener('click', () => {
-    togglePassword(signupPwdInput, signupTogglePwd);
-  });
-  function togglePassword(pwdInput, toggleIcon) {
-    if (pwdInput.type === 'password') {
-      pwdInput.type = 'text';
-      toggleIcon.classList.add('active');
-    } else {
-      pwdInput.type = 'password';
-      toggleIcon.classList.remove('active');
-    }
+
+  function showError(message) {
+    errorElement.textContent = message;
+    errorElement.classList.add('visible');
+  }
+  function clearError() {
+    errorElement.textContent = "";
+    errorElement.classList.remove('visible');
   }
 
-  // Show password reset inputs
-  function showResetPassword() {
-    resetEmailInput.style.display = 'block';
-    resetBtn.style.display = 'block';
-  }
-
-  // Send password reset email
-  function resetPassword() {
+  function signup() {
     clearError();
-    const email = resetEmailInput.value.trim();
-    if (!email) {
-      showError('Entrez votre email.');
-      return;
-    }
-    auth.sendPasswordResetEmail(email)
-      .then(() => alert("Lien de réinitialisation envoyé à votre email."))
-      .catch(error => showError(error.message));
-  }
+    const email = document.getElementById("email").value.trim();
+    const password = passwordInput.value;
 
-  // Login function (email or phone)
-  function login() {
-    clearError();
-    const identifier = document.getElementById('login-identifier').value.trim();
-    const password = loginPwdInput.value;
-
-    if (!identifier || !password) {
+    if (!email || !password) {
       showError("Veuillez remplir tous les champs.");
       return;
     }
 
-    if (validateEmail(identifier)) {
-      // Email login
-      auth.signInWithEmailAndPassword(identifier, password)
-        .then(({user}) => {
-          if (!user.emailVerified) {
-            showError("Veuillez vérifier votre email avant de vous connecter.");
-            auth.signOut();
-            return;
-          }
-          alert("Connexion réussie !");
-          window.location.href = "dashboard.html";
-        })
-        .catch(error => showError(error.message));
-    } else if (validatePhone(identifier)) {
-      // Phone login - ici on demande le SMS code, mieux faire via inscription dédiée
-      startPhoneAuth(identifier);
+    auth.createUserWithEmailAndPassword(email, password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        const idManokana = generateUniqueID();
+
+        // Envoyer mail de vérification
+        user.sendEmailVerification();
+
+        return db.collection("users").doc(user.uid).set({
+          email: email,
+          id: idManokana,
+          name: "",
+          photo: ""
+        });
+      })
+      .then(() => {
+        alert("Inscription réussie ! Un mail de vérification a été envoyé.");
+        // Ici tu peux faire une redirection ou reset formulaire
+      })
+      .catch((error) => {
+        if (error.code === "auth/email-already-in-use") {
+          alert("Cet email est déjà utilisé. Veuillez vous connecter.");
+        } else {
+          showError(error.message);
+        }
+      });
+  }
+
+  function login() {
+    clearError();
+    const email = document.getElementById("email").value.trim();
+    const password = passwordInput.value;
+
+    if (!email || !password) {
+      showError("Veuillez remplir tous les champs.");
+      return;
+    }
+
+    auth.signInWithEmailAndPassword(email, password)
+      .then(({user}) => {
+        if (!user.emailVerified) {
+          showError("Veuillez vérifier votre email avant de vous connecter.");
+          auth.signOut();
+          return;
+        }
+        alert("Connexion réussie !");
+        window.location.href = "dashboard.html";
+      })
+      .catch((error) => {
+        showError(error.message);
+      });
+  }
+
+  // Reset password section toggle
+  function toggleResetPassword() {
+    const section = document.getElementById('resetPasswordSection');
+    if (section.style.display === 'block') {
+      section.style.display = 'none';
+      clearError();
     } else {
-      showError("Entrez un email ou un numéro téléphone valide.");
+      section.style.display = 'block';
+      clearError();
     }
   }
 
-  // Signup function with email + phone + SMS verification
- function signup() {
-  clearError();
-  const email = document.getElementById('signup-email').value.trim();
-  const password = signupPwdInput.value;
-  const phone = document.getElementById('signup-phone').value.trim();
-
-  if (!email || !password || !phone) {
-    showError("Veuillez remplir tous les champs.");
-    return;
-  }
-  if (!validateEmail(email)) {
-    showError("Email non valide.");
-    return;
-  }
-  if (!validatePhone(phone)) {
-    showError("Numéro de téléphone non valide.");
-    return;
-  }
-
-  // Tadiavo aloha raha efa misy ilay email
-  auth.fetchSignInMethodsForEmail(email)
-    .then(methods => {
-      if (methods.length > 0) {
-        showError("Cet email est déjà utilisé. Veuillez vous connecter.");
-        return;
-      }
-      // Raha tsy misy dia manao création
-      auth.createUserWithEmailAndPassword(email, password)
-        .then(({user}) => {
-          user.sendEmailVerification();
-          alert("Inscription réussie ! Un mail de vérification a été envoyé.");
-
-          // Stockage Firestore
-          const idManokana = generateUniqueID();
-          db.collection("users").doc(user.uid).set({
-            email: email,
-            id: idManokana,
-            name: "",
-            photo: ""
-          });
-
-          // Démarrer vérification téléphone
-          startPhoneAuth(phone);
-        })
-        .catch(error => showError(error.message));
-    })
-    .catch(error => showError(error.message));
-}
-
-        window.location.href = "dashboard.html";
+  // Reset password email send
+  function resetPassword() {
+    clearError();
+    const resetEmail = document.getElementById('resetEmail').value.trim();
+    if (!resetEmail) {
+      showError("Veuillez entrer votre email.");
+      return;
+    }
+    auth.sendPasswordResetEmail(resetEmail)
+      .then(() => {
+        alert("Un email pour réinitialiser votre mot de passe a été envoyé.");
+        toggleResetPassword();
       })
-      .catch(() => showError("Code SMS incorrect ou expiré."));
+      .catch((error) => {
+        showError(error.message);
+      });
   }
 
-  // Utils
-  function validateEmail(email) {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-  }
-  function validatePhone(phone) {
-    return /^\+261\d{8,9}$/.test(phone);
-  }
-  function showError(msg) {
-    errorElement.textContent = msg;
-  }
-  function clearError() {
-    errorElement.textContent = "";
-  }
   function generateUniqueID() {
     return 'id-' + Math.random().toString(36).substr(2, 9);
   }
