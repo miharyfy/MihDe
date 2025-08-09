@@ -533,6 +533,22 @@ document.getElementById('btnAdd').addEventListener('click', ()=>{
   }
   window.addEventListener('resize', updateSidebarButtons);
   updateSidebarButtons();
+db.collection('users').where('id','==', idNum).get().then(snapshot=>{
+  console.log("Recherche ID:", idNum, "Nombre trouvé:", snapshot.size);
+  if(snapshot.empty){
+    alert("L'ID n'est pas trouvé dans les utilisateurs.");
+  } else {
+    const doc = snapshot.docs[0];
+    console.log("Utilisateur trouvé:", doc.data());
+    selectUser(doc.id, doc.data());
+    if(window.innerWidth <= 760) closeSidebar();
+    document.querySelector('.chatMain').scrollIntoView({behavior:'smooth'});
+  }
+})
+.catch(err=>{
+  console.error(err); alert('Erreur lors de la recherche d\'ID');
+});
+
 
 </script>
 </body>
