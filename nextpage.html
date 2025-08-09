@@ -210,20 +210,41 @@
     errorElement.classList.remove('visible');
   }
 
-  function signup() {
-    clearError();
-    const email = document.getElementById("email").value.trim();
-    const password = passwordInput.value;
+async function signup() {
+  clearError();
+  const email = document.getElementById("email").value.trim();
+  const password = passwordInput.value;
 
-    if (!email || !password) {
-      showError("Veuillez remplir tous les champs.");
-      return;
+  if (!email || !password) {
+    showError("Veuillez remplir tous les champs.");
+    return;
+  }
+
+  try {
+    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+    const user = userCredential.user;
+
+    await user.sendEmailVerification();  // Miandrasa tsara handefa mail
+
+    const idManokana = generateUniqueID();
+    await db.collection("users").doc(user.uid).set({
+      email: email,
+      id: idManokana,
+      name: "",
+      photo: ""
+    });
+
+    alert("Inscription réussie ! Un mail de vérification a été envoyé. Veuillez vérifier votre boîte mail.");
+  } catch (error) {
+    if (error.code === "auth/email-already-in-use") {
+      alert("Cet email est déjà utilisé. Veuillez vous connecter.");
+    } else {
+      showError(error.message);
     }
+  }
+}
 
-    auth.createUserWithEmailAndPassword(email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        const idManokana = generateUniqueID();
+
 
         // Envoyer mail de vérification
         user.sendEmailVerification();
