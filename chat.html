@@ -379,23 +379,24 @@
   });
 
   // Add by ID button
-  document.getElementById('btnAdd').addEventListener('click', ()=>{
-    const idVal = document.getElementById('inputAddId').value.trim();
-    if(!idVal){ alert('Ampidiro ID.'); return; }
-    const idNum = isNaN(idVal) ? idVal : parseInt(idVal);
-    db.collection('users').where('id','==', idNum).get().then(snapshot=>{
-      if(snapshot.empty){
-        alert("L'ID n'est pas trouvé dans les utilisateurs.");
-      } else {
-        const doc = snapshot.docs[0];
-        selectUser(doc.id, doc.data());
-        if(window.innerWidth <= 760) closeSidebar();
-        document.querySelector('.chatMain').scrollIntoView({behavior:'smooth'});
-      }
-    }).catch(err=>{
-      console.error(err); alert('Erreur lors de la recherche d'ID');
-    });
+document.getElementById('btnAdd').addEventListener('click', ()=>{
+  const idVal = document.getElementById('inputAddId').value.trim();
+  if(!idVal){ alert('Ampidiro ID.'); return; }
+  const idNum = isNaN(idVal) ? idVal : parseInt(idVal);
+  db.collection('users').where('id','==', idNum).get().then(snapshot=>{
+    if(snapshot.empty){
+      alert("L'ID n'est pas trouvé dans les utilisateurs.");
+    } else {
+      const doc = snapshot.docs[0];
+      selectUser(doc.id, doc.data());
+      if(window.innerWidth <= 760) closeSidebar();
+      document.querySelector('.chatMain').scrollIntoView({behavior:'smooth'});
+    }
+  }).catch(err=>{
+    console.error(err); alert('Erreur lors de la recherche d\'ID');
   });
+});
+
 
   // Select user (when user clicked or add by ID found)
   function selectUser(uid, profileData) {
