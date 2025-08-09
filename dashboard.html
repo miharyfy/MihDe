@@ -142,9 +142,9 @@
         if (!doc.exists) {
           // Affiche formulaire création profil
           profileSection.innerHTML = `
-            <input id="name" type="text" placeholder="Anarana" />
+            <input id="name" type="text" placeholder="Nom" />
             <select id="genre">
-              <option value="">Safidio ny genre</option>
+              <option value="">Sélectionnez le genre</option>
               <option value="garçon">Garçon</option>
               <option value="fille">Fille</option>
               <option value="autre">Autre</option>
@@ -156,7 +156,7 @@
           const data = doc.data();
           profileSection.innerHTML = `
             <div class="profile-info">
-              <p><strong>Anarana :</strong> ${data.name}</p>
+              <p><strong>Nom :</strong> ${data.name}</p>
               <p><strong>Genre :</strong> ${data.genre || '-'}</p>
               <p><strong>ID :</strong> ${data.id}</p>
               <p><strong>Email :</strong> ${data.email || user.phoneNumber}</p>
