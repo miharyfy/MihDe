@@ -115,7 +115,7 @@
     <div id="profile-section">
       <!-- Form or profile info here -->
     </div>
-    <button id="logoutBtn">Hivoaka</button>
+    <button id="logoutBtn">Sortir</button>
   </div>
 
   <script>
@@ -161,7 +161,7 @@
               <p><strong>ID :</strong> ${data.id}</p>
               <p><strong>Email :</strong> ${data.email || user.phoneNumber}</p>
             </div>
-            <a class="chat-link" href="chat.html?uid=${uid}">Mankanesa amin'ny Chat</a>
+            <a class="chat-link" href="chat.html?uid=${uid}">Aller au chat</a>
           `;
         }
       });
@@ -173,7 +173,7 @@
       const genre = document.getElementById("genre").value;
 
       if (!name || !genre) {
-        alert("Fenoy tsara ny anarana sy ny genre.");
+        alert("Remplissez correctement le nom et le genre.");
         return;
       }
 
@@ -188,7 +188,7 @@
       }).then(() => {
         alert("Profil voatahiry!");
         location.reload();
-      }).catch(e => alert("Hadisoana: " + e.message));
+      }).catch(e => alert("Erreur: " + e.message));
     }
 
     document.getElementById("logoutBtn").onclick = () => {
