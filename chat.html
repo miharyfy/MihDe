@@ -381,7 +381,7 @@
   // Add by ID button
 document.getElementById('btnAdd').addEventListener('click', ()=>{
   const idVal = document.getElementById('inputAddId').value.trim();
-  if(!idVal){ alert('Ampidiro ID.'); return; }
+  if(!idVal){ alert('Entrez un identifiant.'); return; }
   const idNum = isNaN(idVal) ? idVal : parseInt(idVal);
   db.collection('users').where('id','==', idNum).get().then(snapshot=>{
     if(snapshot.empty){
