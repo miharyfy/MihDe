@@ -287,7 +287,7 @@
     document.getElementById("logoutBtn").addEventListener("click", () => {
       auth.signOut().then(() => {
         alert("Vous êtes déconnecté.");
-        window.location.href = "login.html";
+        window.location.href = "nextpage.html";
       }).catch(err => {
         alert("Erreur lors de la déconnexion: " + err.message);
       });
