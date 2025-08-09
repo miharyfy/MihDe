@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Test Pub Firebase</title>
+<title>Pub avec messages et reactions</title>
 <style>
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    max-width: 600px;
+    max-width: 650px;
     margin: 30px auto;
     background: #e8f0fe;
     padding: 25px 30px;
@@ -43,14 +43,14 @@
     background: #fff;
   }
   button {
-    margin-top: 22px;
+    margin-top: 12px;
     background: #ea4335;
     color: white;
     border: none;
-    padding: 14px 25px;
+    padding: 12px 22px;
     border-radius: 30px;
     cursor: pointer;
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 600;
     box-shadow: 0 4px 12px rgb(234 67 53 / 0.4);
     transition: background-color 0.3s ease;
@@ -85,6 +85,53 @@
     font-style: italic;
     font-size: 13px;
   }
+  .reaction-btn {
+    background: #4285f4;
+    color: white;
+    border-radius: 25px;
+    padding: 6px 16px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    margin-right: 10px;
+    transition: background-color 0.3s ease;
+  }
+  .reaction-btn.liked {
+    background: #0b59d5;
+  }
+  .message-section {
+    margin-top: 15px;
+  }
+  .message-list {
+    margin-top: 12px;
+    max-height: 120px;
+    overflow-y: auto;
+    border-top: 1px solid #ddd;
+    padding-top: 10px;
+  }
+  .message-item {
+    padding: 6px 10px;
+    background: #f1f3f4;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+  .message-input {
+    display: flex;
+    margin-top: 10px;
+  }
+  .message-input input {
+    flex-grow: 1;
+    padding: 10px 15px;
+    border-radius: 30px 0 0 30px;
+    border: 1.5px solid #dfe1e5;
+    font-size: 15px;
+    outline: none;
+  }
+  .message-input button {
+    border-radius: 0 30px 30px 0;
+    padding: 0 20px;
+  }
 </style>
 
 <!-- Firebase SDK -->
@@ -107,7 +154,6 @@
 <div id="pubList">Chargement...</div>
 
 <script>
-  // Votre config Firebase (changez par la vôtre)
   const firebaseConfig = {
     apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
     authDomain: "mitalky.firebaseapp.com",
@@ -117,7 +163,6 @@
     appId: "1:753557195623:web:abc3b37eca5d67c9157dc2"
   };
 
-  // Initialiser Firebase
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
@@ -126,44 +171,21 @@
   const btnCreatePub = document.getElementById('btnCreatePub');
   const pubList = document.getElementById('pubList');
 
-  // Fonction pour afficher pubs
-  function renderPubs(docs) {
-    if(docs.length === 0) {
-      pubList.innerHTML = '<p>Aucune pub pour le moment.</p>';
-      return;
-    }
-    pubList.innerHTML = '';
-    docs.forEach(doc => {
-      const data = doc.data();
-      const div = document.createElement('div');
-      div.className = 'pub';
-      let content = `<p>${data.text}</p>`;
-      if(data.url){
-        content += `<a href="${data.url}" target="_blank" rel="noopener noreferrer">${data.url}</a>`;
-      }
-      content += `<small>Créée le: ${data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleString() : 'Date inconnue'}</small>`;
-      div.innerHTML = content;
-      pubList.appendChild(div);
-    });
-  }
+  // Pour simplifier, identifiant utilisateur aléatoire (in real, il faut authentification)
+  const userId = localStorage.getItem('userId') || (() => {
+    const id = 'user_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('userId', id);
+    return id;
+  })();
 
-  // Charger pubs en temps réel
-  db.collection('pubs').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
-    renderPubs(snapshot.docs);
-  }, error => {
-    pubList.innerHTML = `<p style="color:red;">Erreur de chargement des pubs : ${error.message}</p>`;
-  });
-
-  // Créer une pub
+  // Créer pub
   btnCreatePub.addEventListener('click', () => {
     const text = pubText.value.trim();
     const url = pubUrl.value.trim();
-
     if(!text) {
       alert('Le texte de la pub est obligatoire.');
       return;
     }
-
     btnCreatePub.disabled = true;
     btnCreatePub.textContent = 'Envoi en cours...';
 
@@ -183,6 +205,146 @@
       btnCreatePub.textContent = 'Créer Pub';
     });
   });
+
+  // Afficher pubs + reactions + messages
+  function renderPubs(docs) {
+    if(docs.length === 0) {
+      pubList.innerHTML = '<p>Aucune pub pour le moment.</p>';
+      return;
+    }
+    pubList.innerHTML = '';
+
+    docs.forEach(doc => {
+      const data = doc.data();
+      const pubId = doc.id;
+
+      const div = document.createElement('div');
+      div.className = 'pub';
+
+      let content = `<p>${data.text}</p>`;
+      if(data.url){
+        content += `<a href="${data.url}" target="_blank" rel="noopener noreferrer">${data.url}</a>`;
+      }
+      content += `<small>Créée le: ${data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleString() : 'Date inconnue'}</small>`;
+
+      div.innerHTML = content;
+
+      // Reaction (like) button and count
+      const reactionBtn = document.createElement('button');
+      reactionBtn.className = 'reaction-btn';
+      reactionBtn.textContent = '❤️ 0';
+      reactionBtn.disabled = true; // temporaire tant que chargement
+
+      div.appendChild(reactionBtn);
+
+      // Message section
+      const msgSection = document.createElement('div');
+      msgSection.className = 'message-section';
+
+      const messageInputDiv = document.createElement('div');
+      messageInputDiv.className = 'message-input';
+
+      const msgInput = document.createElement('input');
+      msgInput.type = 'text';
+      msgInput.placeholder = 'Envoyer un message...';
+      messageInputDiv.appendChild(msgInput);
+
+      const sendBtn = document.createElement('button');
+      sendBtn.textContent = 'Envoyer';
+      sendBtn.disabled = true;
+      messageInputDiv.appendChild(sendBtn);
+
+      msgSection.appendChild(messageInputDiv);
+
+      // Liste messages
+      const msgList = document.createElement('div');
+      msgList.className = 'message-list';
+      msgSection.appendChild(msgList);
+
+      div.appendChild(msgSection);
+      pubList.appendChild(div);
+
+      // Charger nombre de likes et si user a liké
+      const reactionRef = db.collection('pubs').doc(pubId).collection('reactions');
+      reactionRef.get().then(snap => {
+        const likesCount = snap.size;
+        reactionBtn.textContent = `❤️ ${likesCount}`;
+
+        const userLiked = snap.docs.some(d => d.id === userId);
+        if(userLiked) {
+          reactionBtn.classList.add('liked');
+          reactionBtn.disabled = true; // deja liké, disable
+        } else {
+          reactionBtn.disabled = false;
+        }
+      });
+
+      // Gérer clic like
+      reactionBtn.addEventListener('click', () => {
+        reactionBtn.disabled = true;
+        reactionRef.doc(userId).set({ likedAt: firebase.firestore.FieldValue.serverTimestamp() })
+        .then(() => {
+          // Maj affichage
+          reactionRef.get().then(snap => {
+            reactionBtn.textContent = `❤️ ${snap.size}`;
+            reactionBtn.classList.add('liked');
+          });
+        }).catch(e => {
+          alert("Erreur reaction : " + e.message);
+          reactionBtn.disabled = false;
+        });
+      });
+
+      // Charger messages en temps réel
+      const msgRef = db.collection('pubs').doc(pubId).collection('messages').orderBy('createdAt', 'desc');
+      msgRef.onSnapshot(snapshot => {
+        msgList.innerHTML = '';
+        if(snapshot.empty) {
+          msgList.innerHTML = '<small>Aucun message</small>';
+          return;
+        }
+        snapshot.docs.forEach(docMsg => {
+          const msgData = docMsg.data();
+          const msgDiv = document.createElement('div');
+          msgDiv.className = 'message-item';
+          msgDiv.textContent = msgData.text + (msgData.userId === userId ? ' (Vous)' : '');
+          msgList.appendChild(msgDiv);
+        });
+      });
+
+      // Activer/désactiver bouton envoyer message selon input
+      msgInput.addEventListener('input', () => {
+        sendBtn.disabled = !msgInput.value.trim();
+      });
+
+      // Envoyer message
+      sendBtn.addEventListener('click', () => {
+        const message = msgInput.value.trim();
+        if(!message) return;
+        sendBtn.disabled = true;
+
+        db.collection('pubs').doc(pubId).collection('messages').add({
+          text: message,
+          userId: userId,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(() => {
+          msgInput.value = '';
+          sendBtn.disabled = false;
+        }).catch(e => {
+          alert("Erreur envoi message : " + e.message);
+          sendBtn.disabled = false;
+        });
+      });
+    });
+  }
+
+  // Écouter pubs en temps réel
+  db.collection('pubs').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
+    renderPubs(snapshot.docs);
+  }, error => {
+    pubList.innerHTML = `<p style="color:red;">Erreur de chargement des pubs : ${error.message}</p>`;
+  });
+
 </script>
 
 </body>
