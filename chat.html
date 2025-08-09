@@ -1,182 +1,484 @@
 <!DOCTYPE html>
 <html lang="mg">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chat Search</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Chat - Moderne (Android friendly)</title>
+<!-- Styles: moderne, responsive, animations -->
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        background: #f0f2f5;
-        margin: 0;
-        padding: 0;
-    }
-    header {
-        background: #1877f2;
-        color: white;
-        padding: 15px;
-        font-size: 20px;
-        text-align: center;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    .search-box {
-        display: flex;
-        padding: 10px;
-        background: white;
-    }
-    .search-box input {
-        flex: 1;
-        padding: 8px 12px;
-        border: 1px solid #ccc;
-        border-radius: 20px;
-        outline: none;
-    }
-    .user-list {
-        padding: 10px;
-    }
-    .user-card {
-        background: white;
-        display: flex;
-        align-items: center;
-        padding: 10px;
-        border-radius: 10px;
-        margin-bottom: 10px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        cursor: pointer;
-        transform: scale(0.95);
-        transition: all 0.3s ease;
-    }
-    .user-card:hover {
-        transform: scale(1);
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    .user-card img {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        margin-right: 15px;
-    }
-    .user-info {
-        flex: 1;
-    }
-    .user-info h3 {
-        margin: 0;
-        font-size: 16px;
-        color: #333;
-    }
-    .user-info p {
-        margin: 3px 0 0;
-        font-size: 14px;
-        color: gray;
-    }
-    /* Modal */
-    .modal {
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        background: rgba(0,0,0,0.5);
-        display: none;
-        justify-content: center;
-        align-items: center;
-        animation: fadeIn 0.3s ease;
-    }
-    .modal-content {
-        background: white;
-        padding: 20px;
-        border-radius: 15px;
-        width: 90%;
-        max-width: 350px;
-        text-align: center;
-        animation: slideUp 0.3s ease;
-    }
-    .modal-content img {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        margin-bottom: 10px;
-    }
-    @keyframes fadeIn {
-        from {opacity: 0;}
-        to {opacity: 1;}
-    }
-    @keyframes slideUp {
-        from {transform: translateY(50px); opacity: 0;}
-        to {transform: translateY(0); opacity: 1;}
-    }
+  :root{
+    --primary:#1877f2;
+    --surface:#ffffff;
+    --muted:#9aa4b2;
+    --bg:#f0f2f5;
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Inter, "Segoe UI", Roboto, Arial, sans-serif;
+    background:var(--bg);
+    height:100vh;
+    display:flex;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* Layout */
+  .app {
+    width:100%;
+    max-width:1100px;
+    margin:auto;
+    background:linear-gradient(180deg, rgba(255,255,255,0.9), rgba(250,250,250,0.95));
+    border-radius:18px;
+    box-shadow:0 8px 30px rgba(15,23,42,0.08);
+    overflow:hidden;
+    display:flex;
+    height:92vh;
+    margin-top:1.2rem;
+  }
+
+  /* Sidebar */
+  .sidebar{
+    width:320px;
+    min-width:250px;
+    background:var(--surface);
+    border-right:1px solid rgba(15,23,42,0.04);
+    display:flex;
+    flex-direction:column;
+  }
+  .brand{
+    padding:16px;
+    display:flex;
+    gap:12px;
+    align-items:center;
+  }
+  .logo{
+    width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--primary),#4aa3ff);display:grid;place-items:center;color:white;font-weight:700;
+    box-shadow:0 4px 12px rgba(24,119,242,0.18);
+  }
+  .brand h1{font-size:16px;margin:0;color:var(--primary)}
+  .searchWrap{
+    padding:12px;
+    border-bottom:1px solid rgba(15,23,42,0.03);
+  }
+  .search{
+    display:flex;gap:8px;align-items:center;
+  }
+  .search input{
+    flex:1;padding:10px 12px;border-radius:999px;border:1px solid rgba(15,23,42,0.06);
+    outline:none;font-size:14px;background: #fbfdff;
+    transition:box-shadow .18s,transform .12s;
+  }
+  .search input:focus{box-shadow:0 6px 18px rgba(24,119,242,0.12);transform:translateY(-1px)}
+  .addById{
+    display:flex;gap:8px;margin-top:10px;
+  }
+  .addById input{
+    flex:1;padding:10px;border-radius:10px;border:1px solid rgba(15,23,42,0.06)
+  }
+  .btn{
+    background:var(--primary);color:white;border:none;padding:9px 12px;border-radius:10px;cursor:pointer;
+    box-shadow:0 6px 14px rgba(24,119,242,0.12);font-weight:600;
+  }
+  .btn:active{transform:translateY(1px)}
+
+  /* User list */
+  .list{
+    padding:10px;
+    overflow:auto;
+  }
+  .userItem{
+    display:flex;gap:12px;align-items:center;padding:10px;border-radius:12px;
+    transition:transform .18s, background .12s, box-shadow .12s;
+    cursor:pointer;margin-bottom:8px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.8), rgba(248,249,250,0.9));
+  }
+  .userItem:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(12,18,33,0.06)}
+  .avatar{
+    width:56px;height:56px;border-radius:50%;flex:0 0 56px;display:grid;place-items:center;font-weight:700;color:white;
+    background:linear-gradient(135deg,#6a9cff,#2b6ef6);
+    font-size:16px;
+  }
+  .userMeta{flex:1;display:flex;flex-direction:column}
+  .userName{font-weight:600;color:#111}
+  .userSub{font-size:13px;color:var(--muted);margin-top:4px}
+
+  /* Main chat area */
+  .chatArea{
+    flex:1;display:flex;flex-direction:column;
+  }
+  .chatTop{
+    padding:14px 18px;background:linear-gradient(90deg,var(--primary),#2c8bf7);color:white;display:flex;align-items:center;justify-content:space-between;
+  }
+  .chatTop .left{display:flex;gap:12px;align-items:center}
+  .chatTop .title{font-weight:700;font-size:16px}
+  .chatTop .sub{font-size:13px;color:rgba(255,255,255,0.9)}
+  .chatMain{
+    padding:18px;flex:1;overflow:auto;background:linear-gradient(180deg,#f7f9fb,#fbfdff);
+    display:flex;flex-direction:column;gap:10px;
+  }
+
+  .msg{
+    max-width:72%;padding:12px 16px;border-radius:14px;line-height:1.35;font-size:15px;animation:msgIn .26s ease;
+    box-shadow:0 6px 18px rgba(12,18,33,0.04);
+  }
+  .msg.me{align-self:flex-end;background:linear-gradient(180deg,#d8e9ff,#c6deff);border-bottom-right-radius:6px}
+  .msg.them{align-self:flex-start;background:#fff;border-bottom-left-radius:6px}
+  @keyframes msgIn{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
+
+  /* Input area */
+  .chatInput{
+    padding:12px 16px;background:var(--surface);display:flex;gap:10px;border-top:1px solid rgba(12,18,33,0.04);
+    align-items:center;
+  }
+  .chatInput textarea{
+    flex:1;border-radius:12px;padding:10px 12px;border:1px solid rgba(12,18,33,0.06);resize:none;font-size:15px;height:46px;
+  }
+  .sendBtn{background:var(--primary);color:white;border:none;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:700}
+
+  /* Modal profile */
+  .modal{
+    position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,0.48);z-index:1000;
+  }
+  .modalCard{
+    width:92%;max-width:360px;border-radius:12px;background:var(--surface);padding:18px;animation:pop .18s ease;
+  }
+  .modalHeader{display:flex;gap:12px;align-items:center}
+  .modalAvatar{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;font-size:22px;color:white;background:linear-gradient(135deg,#6a9cff,#2b6ef6)}
+  .modalName{font-size:18px;font-weight:700}
+  .modalRow{margin-top:12px;color:#333}
+  .closeBtn{margin-top:14px;background:var(--primary);color:white;padding:8px 12px;border-radius:10px;border:none;cursor:pointer}
+
+  @keyframes pop{from{transform:scale(.96);opacity:0}to{transform:none;opacity:1}}
+
+  /* Responsive: smaller screens (android) */
+  @media (max-width:760px){
+    .sidebar{width:92px;min-width:92px}
+    .userItem .userMeta{display:none}
+    .brand h1{display:none}
+    .app{height:100vh;border-radius:0;margin-top:0}
+  }
 </style>
+
+<!-- Firebase compat libs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
-<header>Chat Search</header>
-
-<div class="search-box">
-    <input type="text" id="searchInput" placeholder="Karohy amin'ny anarana...">
-</div>
-
-<div class="user-list" id="userList">
-    <!-- Users will be loaded here -->
-</div>
-
-<!-- Modal -->
-<div class="modal" id="userModal">
-    <div class="modal-content" id="modalContent">
-        <img src="" id="modalImg" alt="Profile">
-        <h3 id="modalName"></h3>
-        <p id="modalEmail"></p>
-        <p>ID: <span id="modalId"></span></p>
-        <button onclick="closeModal()">Hidio</button>
+<div class="app" id="app">
+  <!-- Sidebar: search + users -->
+  <div class="sidebar">
+    <div class="brand">
+      <div class="logo">M</div>
+      <div>
+        <div style="font-size:14px;color:#0b1220;font-weight:700">MiTalk</div>
+        <div style="font-size:12px;color:var(--muted)">Chat moderne</div>
+      </div>
     </div>
+
+    <div class="searchWrap">
+      <div class="search">
+        <input id="globalSearch" placeholder="Mitady olona amin'ny anarana na ID..." />
+      </div>
+
+      <div style="margin-top:10px" class="addById">
+        <input id="inputAddId" placeholder="Ampidiro ID (oh: 101)" />
+        <button class="btn" id="btnAdd">Ampidiro</button>
+      </div>
+    </div>
+
+    <div class="list" id="userList">
+      <!-- user items injected here -->
+    </div>
+  </div>
+
+  <!-- Chat area -->
+  <div class="chatArea">
+    <div class="chatTop">
+      <div class="left">
+        <div id="activeAvatar" class="modalAvatar" style="width:40px;height:40px"></div>
+        <div>
+          <div class="title" id="activeName">Safidio ny olona</div>
+          <div class="sub" id="activeSub">Tsy mbola mifidy</div>
+        </div>
+      </div>
+      <div>
+        <button class="btn" id="openProfile" style="display:none">Info</button>
+      </div>
+    </div>
+
+    <div class="chatMain" id="chatMain">
+      <!-- messages injected here -->
+      <div style="opacity:0.6;color:var(--muted);margin:auto">Tsy mbola nifampiresaka — misafidiana olona avy amin'ny lisitra na ampidirina ID</div>
+    </div>
+
+    <div class="chatInput">
+      <textarea id="messageInput" placeholder="Soraty ny hafatra..."></textarea>
+      <button class="sendBtn" id="sendBtn">Alefa</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal profile -->
+<div class="modal" id="profileModal">
+  <div class="modalCard">
+    <div class="modalHeader">
+      <div id="modalAvatar" class="modalAvatar"></div>
+      <div>
+        <div class="modalName" id="modalName">Anarana</div>
+        <div style="color:var(--muted);font-size:13px" id="modalEmail">email@example.com</div>
+      </div>
+    </div>
+    <div class="modalRow"><strong>ID:</strong> <span id="modalId">---</span></div>
+    <div class="modalRow"><strong>Registered:</strong> <span id="modalRegistered">---</span></div>
+    <button class="closeBtn" id="closeModal">Hidio</button>
+  </div>
 </div>
 
 <script>
-    const users = [
-        {id: "101", name: "Andry Rakoto", email: "andry@example.com", img: "https://i.pravatar.cc/150?img=1"},
-        {id: "102", name: "Fara Andri", email: "fara@example.com", img: "https://i.pravatar.cc/150?img=2"},
-        {id: "103", name: "Tiana Raz", email: "tiana@example.com", img: "https://i.pravatar.cc/150?img=3"},
-        {id: "104", name: "Joel Rabe", email: "joel@example.com", img: "https://i.pravatar.cc/150?img=4"},
-    ];
+  // ---------------- Firebase config (change if ilaina) ----------------
+  const firebaseConfig = {
+    apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
+    authDomain: "mitalky.firebaseapp.com",
+    projectId: "mitalky",
+    storageBucket: "mitalky.appspot.com",
+    messagingSenderId: "753557195623",
+    appId: "1:753557195623:web:abc3b37eca5d67c9157dc2"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-    const userList = document.getElementById("userList");
-    const searchInput = document.getElementById("searchInput");
-    const modal = document.getElementById("userModal");
+  // ---------------- State ----------------
+  let myUid = null;
+  let myProfile = null;
+  let selectedUid = null;
+  let selectedProfile = null;
+  let unsubscribeMessages = null;
 
-    function displayUsers(list) {
-        userList.innerHTML = "";
-        list.forEach(user => {
-            const card = document.createElement("div");
-            card.className = "user-card";
-            card.innerHTML = `
-                <img src="${user.img}" alt="${user.name}">
-                <div class="user-info">
-                    <h3>${user.name}</h3>
-                    <p>${user.email}</p>
-                </div>
-            `;
-            card.onclick = () => showModal(user);
-            userList.appendChild(card);
-        });
-    }
+  // Utility: create initials SVG data URL for avatar
+  function initialsAvatar(name, bgA='#6a9cff', color='#fff') {
+    const initials = (name||'U').split(' ').map(s=>s[0]||'').slice(0,2).join('').toUpperCase();
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'>
+      <rect width='100%' height='100%' fill='${bgA}' rx='30'/>
+      <text x='50%' y='55%' font-size='90' fill='${color}' font-family='Arial, Helvetica, sans-serif' font-weight='700' text-anchor='middle' dominant-baseline='middle'>${initials}</text>
+    </svg>`;
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+  }
 
-    function showModal(user) {
-        document.getElementById("modalImg").src = user.img;
-        document.getElementById("modalName").innerText = user.name;
-        document.getElementById("modalEmail").innerText = user.email;
-        document.getElementById("modalId").innerText = user.id;
-        modal.style.display = "flex";
-    }
-
-    function closeModal() {
-        modal.style.display = "none";
-    }
-
-    searchInput.addEventListener("input", () => {
-        const value = searchInput.value.toLowerCase();
-        const filtered = users.filter(user => user.name.toLowerCase().includes(value));
-        displayUsers(filtered);
+  // Render functions
+  function renderUserList(users) {
+    const list = document.getElementById('userList');
+    list.innerHTML = '';
+    users.forEach(doc => {
+      const data = doc.data();
+      if(doc.id === myUid) return; // don't show yourself
+      const el = document.createElement('div');
+      el.className = 'userItem';
+      el.dataset.uid = doc.id;
+      // avatar: use saved photo if exists, else initials
+      const photo = data.photo || '';
+      const avatarHTML = photo
+        ? `<div class="avatar" style="background-image:url('${photo}');background-size:cover;background-position:center"></div>`
+        : `<div class="avatar" style="background-image:url('${initialsAvatar(data.name||('User '+data.id))}');background-size:cover;background-position:center"></div>`;
+      el.innerHTML = `${avatarHTML}
+        <div class="userMeta">
+          <div class="userName">${data.name || 'Anarana tsy voafaritra'}</div>
+          <div class="userSub">ID: ${data.id} • ${data.gmail || '—'}</div>
+        </div>`;
+      el.addEventListener('click', () => selectUser(doc.id, data));
+      list.appendChild(el);
     });
+  }
 
-    displayUsers(users);
+  // Load all users (initial)
+  function loadUsers() {
+    db.collection('users').orderBy('name').get().then(snapshot=>{
+      renderUserList(snapshot.docs);
+    }).catch(err=>{
+      console.error('Error loading users', err);
+    });
+  }
+
+  // Live search (filter DOM)
+  document.getElementById('globalSearch').addEventListener('input', function(){
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('.userItem').forEach(it=>{
+      const text = it.textContent.toLowerCase();
+      it.style.display = text.includes(q) ? 'flex' : 'none';
+      if(text.includes(q)) {
+        // small highlight animation when appears from search
+        it.animate([{transform:'scale(0.98)',opacity:0},{transform:'scale(1)',opacity:1}],{duration:240,easing:'ease-out'});
+      }
+    });
+  });
+
+  // Add by ID button
+  document.getElementById('btnAdd').addEventListener('click', ()=>{
+    const idVal = document.getElementById('inputAddId').value.trim();
+    if(!idVal){ alert('Ampidiro ID.'); return; }
+    const idNum = isNaN(idVal) ? idVal : parseInt(idVal);
+    // search users collection where id == idNum
+    db.collection('users').where('id','==', idNum).get().then(snapshot=>{
+      if(snapshot.empty){
+        alert('Tsy hita ilay ID ao amin\'ny users.');
+      } else {
+        const doc = snapshot.docs[0];
+        selectUser(doc.id, doc.data());
+        // scroll to chat area visually
+        document.querySelector('.chatMain').scrollIntoView({behavior:'smooth'});
+      }
+    }).catch(err=>{
+      console.error(err); alert('Error mitady ID');
+    });
+  });
+
+  // Select user (when user clicked or add by ID found)
+  function selectUser(uid, profileData) {
+    // clean previous message listener
+    if(unsubscribeMessages) unsubscribeMessages();
+    selectedUid = uid;
+    selectedProfile = profileData;
+    // update header
+    document.getElementById('activeName').textContent = profileData.name || ('User ' + profileData.id);
+    document.getElementById('activeSub').textContent = (profileData.gmail||'—') + ' • ID:' + (profileData.id||'—');
+    // avatar
+    const avatarEl = document.getElementById('activeAvatar');
+    if(profileData.photo){
+      avatarEl.style.backgroundImage = `url('${profileData.photo}')`;
+      avatarEl.style.backgroundSize = 'cover';
+      avatarEl.textContent = '';
+    } else {
+      avatarEl.style.backgroundImage = `url('${initialsAvatar(profileData.name||('User'+profileData.id))}')`;
+      avatarEl.style.backgroundSize = 'cover';
+      avatarEl.textContent = '';
+    }
+    // show profile button
+    document.getElementById('openProfile').style.display = 'inline-block';
+    // load messages
+    listenMessagesForChat(myUid, selectedUid);
+  }
+
+  // Listen messages (real time)
+  function listenMessagesForChat(uidA, uidB){
+    const chatId = [uidA, uidB].sort().join('_');
+    const container = document.getElementById('chatMain');
+    container.innerHTML = ''; // clear
+    // add a subtle loader
+    const loader = document.createElement('div');
+    loader.style.opacity = .6; loader.style.color = 'var(--muted)'; loader.innerText = 'Manafatra hafatra...';
+    container.appendChild(loader);
+
+    unsubscribeMessages = db.collection('chats').doc(chatId).collection('messages')
+      .orderBy('time')
+      .onSnapshot(snapshot=>{
+        container.innerHTML = '';
+        if(snapshot.empty){
+          const emptyNote = document.createElement('div');
+          emptyNote.style.color = 'var(--muted)'; emptyNote.style.margin = 'auto';
+          emptyNote.innerText = 'Tsy mbola misy hafatra — manorata aloha!';
+          container.appendChild(emptyNote);
+        } else {
+          snapshot.forEach(doc=>{
+            const m = doc.data();
+            const el = document.createElement('div');
+            el.className = 'msg ' + (m.from === myUid ? 'me' : 'them');
+            // subtle sender label for others
+            if(m.from === myUid){
+              el.innerHTML = `<div style="font-weight:600;margin-bottom:6px;font-size:13px;color:#0b1220">Izaho</div>
+                              <div>${escapeHtml(m.text)}</div>`;
+            } else {
+              el.innerHTML = `<div style="font-weight:600;margin-bottom:6px;font-size:13px;color:#0b1220">${selectedProfile.name||'Izy'}</div>
+                              <div>${escapeHtml(m.text)}</div>`;
+            }
+            container.appendChild(el);
+          });
+          // scroll to bottom
+          container.scrollTop = container.scrollHeight;
+          // little pop for the last message
+          const last = container.lastElementChild;
+          if(last) last.animate([{transform:'translateY(6px)',opacity:0},{transform:'translateY(0)',opacity:1}],{duration:260,easing:'ease-out'});
+        }
+      }, err => {
+        console.error('listen messages error', err);
+      });
+  }
+
+  // Send message
+  document.getElementById('sendBtn').addEventListener('click', ()=> {
+    const text = document.getElementById('messageInput').value.trim();
+    if(!selectedUid){ alert('Safidio aloha ny olona hifampiresahana.'); return; }
+    if(!text) return;
+    const chatId = [myUid, selectedUid].sort().join('_');
+    db.collection('chats').doc(chatId).collection('messages').add({
+      from: myUid,
+      text: text,
+      time: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(()=>{
+      document.getElementById('messageInput').value = '';
+    }).catch(err=>{
+      console.error(err); alert('Tsy afaka mandefa hafatra ankehitriny.');
+    });
+  });
+
+  // Profile modal open
+  document.getElementById('openProfile').addEventListener('click', ()=>{
+    if(!selectedProfile) return;
+    const m = selectedProfile;
+    document.getElementById('modalName').textContent = m.name || '—';
+    document.getElementById('modalEmail').textContent = m.gmail || '—';
+    document.getElementById('modalId').textContent = m.id || '—';
+    document.getElementById('modalRegistered').textContent = m.registeredAt ? new Date(m.registeredAt.seconds*1000).toLocaleString() : '—';
+    const avatar = document.getElementById('modalAvatar');
+    if(m.photo) avatar.style.backgroundImage = `url('${m.photo}')`;
+    else avatar.style.backgroundImage = `url('${initialsAvatar(m.name||('User'+m.id))}')`;
+    document.getElementById('profileModal').style.display = 'flex';
+  });
+
+  document.getElementById('closeModal').addEventListener('click', ()=>{
+    document.getElementById('profileModal').style.display = 'none';
+  });
+
+  // Escape HTML helper
+  function escapeHtml(str){
+    if(!str) return '';
+    return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  // Auth state: get current user profile from users collection
+  auth.onAuthStateChanged(async user=>{
+    if(!user){
+      // redirect to login page if not logged in
+      // window.location.href = 'nextpage.html';
+      // For demo, stop
+      alert('Tsy mbola logged in — midira aloha (login).');
+      return;
+    }
+    myUid = user.uid;
+    // read profile doc (must exist)
+    const doc = await db.collection('users').doc(myUid).get();
+    if(!doc.exists){
+      alert('Tsy nahita profil anao ao amin\'ny users collection — mandehana mamorona profil aloha.');
+      // window.location.href = 'dashboard.html';
+      return;
+    }
+    myProfile = doc.data();
+    // set header avatar for own profile small (optional)
+    // load users list after we have myUid
+    loadUsers();
+
+    // optionally, you may want to subscribe to users collection changes to keep list live:
+    db.collection('users').onSnapshot(snap => {
+      // re-render users quickly
+      renderUserList(snap.docs);
+    });
+  });
+
+  // initial load (if already logged in)
+  // loadUsers(); // will run after auth as well
+
 </script>
-
 </body>
 </html>
