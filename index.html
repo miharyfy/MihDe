@@ -30,7 +30,6 @@
       transition: all 0.3s ease-in-out;
       position: relative;
       overflow: hidden;
-      /* Tsy novaina ny haavony */
     }
 
     .container:hover {
@@ -65,7 +64,7 @@
 
     .dot-text-container {
       position: relative;
-      height: 50px; /* Raha mila kely kokoa, azonao soloina */
+      height: 50px;
       margin: 30px 0;
     }
 
@@ -81,7 +80,6 @@
       color: #444;
       transition: opacity 0.4s ease, transform 0.4s ease;
       max-width: 350px;
-      /* Tsy novaina hafa */
     }
 
     .dot-text.active {
@@ -113,20 +111,33 @@
       transition: background 0.3s;
     }
 
+    /* Sauter button default */
     button:nth-child(1) {
       background-color: #bbb;
+      color: #000;
     }
 
+    /* Sauter hover: manga */
     button:nth-child(1):hover {
-      background-color: #999;
+      background-color: #1877f2;
+      color: #fff;
     }
 
+    /* Suivant default: manga */
     button:nth-child(2) {
       background-color: #1877f2;
     }
 
+    /* Suivant hover: manga mazava kokoa */
     button:nth-child(2):hover {
       background-color: #0f5dc8;
+    }
+
+    /* Suivant disabled (matroka) */
+    button.disabled {
+      background-color: #660000 !important; /* matroka */
+      cursor: default;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -156,8 +167,8 @@
     </div>
 
     <div class="buttons">
-      <button onclick="skip()">Sauter</button>
-      <button onclick="next()">Suivant</button>
+      <button id="skipBtn" onclick="skip()">Sauter</button>
+      <button id="nextBtn" onclick="next()">Suivant</button>
     </div>
 
   </div>
@@ -165,20 +176,24 @@
   <script>
     let currentStep = 0;
     const steps = document.querySelectorAll(".dot-text");
+    const nextBtn = document.getElementById("nextBtn");
 
     function updateSteps() {
       steps.forEach((step, i) => {
-        if (i === currentStep) {
-          step.classList.add("active");
-        } else {
-          step.classList.remove("active");
-        }
+        step.classList.toggle("active", i === currentStep);
       });
 
+      // Raha tonga amin'ny farany
       if (currentStep === steps.length - 1) {
+        // Atao matroka ny bouton Suivant, tsy azo tsindrina intsony
+        nextBtn.classList.add("disabled");
+        // Mety ovaina ny cursor sy loko amin'ny CSS
         setTimeout(() => {
           window.location.href = "nextpage.html";
         }, 1000);
+      } else {
+        // Averina ho mavitrika ny bouton raha tsy eo amin'ny farany
+        nextBtn.classList.remove("disabled");
       }
     }
 
