@@ -244,6 +244,94 @@
 <div class="app" id="app">
   <!-- Sidebar: search + users -->
   <div class="sidebar" id="sidebar">
+  <!-- Ao anaty sidebar na any amin'ny toerana mety -->
+<div class="pub-section" style="padding:12px; border-top:1px solid #ccc; margin-top:20px;">
+  <input type="text" id="searchPub" placeholder="Rechercher une pub..." style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccc;" />
+  <div id="pubList" style="margin-top:12px; max-height:150px; overflow-y:auto;">
+    <!-- Pub items haseho eto -->
+  </div>
+</div>
+
+<script>
+  // Sample pubs
+  const pubs = [
+    {
+      id: 1,
+      text: "Découvrez le nouveau smartphone XPhone - rapide et puissant !",
+      url: "https://xphone.example.com",
+      likes: 12,
+      comments: [],
+      shares: 3
+    },
+    {
+      id: 2,
+      text: "Cours de programmation gratuits en ligne. Apprenez dès aujourd'hui !",
+      url: "https://codingfree.example.com",
+      likes: 8,
+      comments: [],
+      shares: 1
+    }
+  ];
+
+  function renderPubs(filter = '') {
+    const list = document.getElementById('pubList');
+    list.innerHTML = '';
+    const filtered = pubs.filter(p => p.text.toLowerCase().includes(filter.toLowerCase()));
+    if(filtered.length === 0) {
+      list.innerHTML = '<p style="color:#888; font-style:italic;">Aucune publicité trouvée.</p>';
+      return;
+    }
+    filtered.forEach(pub => {
+      const div = document.createElement('div');
+      div.style.padding = "8px";
+      div.style.borderBottom = "1px solid #eee";
+      div.innerHTML = `
+        <p>${pub.text} <a href="${pub.url}" target="_blank" rel="noopener" style="color:var(--primary)">Voir</a></p>
+        <div style="display:flex; gap:10px; font-size:13px;">
+          <button onclick="likePub(${pub.id})">👍 ${pub.likes}</button>
+          <button onclick="commentPub(${pub.id})">💬 ${pub.comments.length}</button>
+          <button onclick="sharePub(${pub.id})">🔗 ${pub.shares}</button>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+  }
+
+  function likePub(id) {
+    const pub = pubs.find(p => p.id === id);
+    if(pub) {
+      pub.likes++;
+      renderPubs(document.getElementById('searchPub').value);
+    }
+  }
+  function commentPub(id) {
+    const text = prompt("Écrivez un commentaire:");
+    if(text) {
+      const pub = pubs.find(p => p.id === id);
+      if(pub) {
+        pub.comments.push(text);
+        alert("Commentaire ajouté !");
+        renderPubs(document.getElementById('searchPub').value);
+      }
+    }
+  }
+  function sharePub(id) {
+    const pub = pubs.find(p => p.id === id);
+    if(pub) {
+      pub.shares++;
+      alert(`Lien partagé: ${pub.url}`);
+      renderPubs(document.getElementById('searchPub').value);
+    }
+  }
+
+  document.getElementById('searchPub').addEventListener('input', e => {
+    renderPubs(e.target.value);
+  });
+
+  // Initial render
+  renderPubs();
+</script>
+
     <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;">
       <div style="display:flex;gap:12px;align-items:center">
         <div class="logo">M</div>
