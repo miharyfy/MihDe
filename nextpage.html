@@ -2,10 +2,9 @@
 <html lang="mg">
 <head>
   <meta charset="UTF-8" />
-  <title>Inscription/Login</title>
+  <title>Inscription / Connexion</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    /* Style de base */
     body {
       font-family: Arial, sans-serif;
       background: #f0f2f5;
@@ -34,8 +33,7 @@
         transform: translateY(0);
       }
     }
-
-    input, button, select {
+    input, button {
       width: 100%;
       margin: 8px 0;
       padding: 12px;
@@ -46,7 +44,7 @@
       outline-offset: 2px;
       transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
-    input:focus, select:focus {
+    input:focus {
       border-color: #1877f2;
       box-shadow: 0 0 8px rgba(24,119,242,0.5);
     }
@@ -82,7 +80,7 @@
       width: 100%;
     }
     .password-wrapper input {
-      padding-right: 40px; /* espace ho an'ny icon */
+      padding-right: 40px;
     }
     .toggle-password {
       position: absolute;
@@ -104,8 +102,6 @@
       fill: #1877f2;
       transform: translateY(-50%) scale(1.2) rotate(20deg);
     }
-
-    /* Reset password form style */
     #resetPasswordSection {
       display: none;
       margin-top: 10px;
@@ -113,12 +109,9 @@
     #resetPasswordSection input, #resetPasswordSection button {
       margin-top: 8px;
     }
-
-    /* Titles */
     h2 {
       margin-bottom: 15px;
     }
-
   </style>
 </head>
 <body>
@@ -126,18 +119,14 @@
 <div class="container">
   <h2>Inscription / Connexion</h2>
 
-  <!-- Form inscription -->
-  <input id="fullName" type="text" placeholder="Nom complet" autocomplete="name" />
-  <input id="birthDate" type="date" placeholder="Date de naissance" />
   <input id="email" type="email" placeholder="Email" autocomplete="email" />
   <div class="password-wrapper">
-    <input id="password" type="password" placeholder="Mot de passe" autocomplete="new-password" />
+    <input id="password" type="password" placeholder="Mot de passe" autocomplete="current-password" />
     <svg id="togglePassword" class="toggle-password" viewBox="0 0 24 24" >
       <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
       <circle cx="12" cy="12" r="2.5"/>
     </svg>
   </div>
-  <input id="referralCode" type="text" placeholder="Code de parrainage (Referral)" autocomplete="off" />
 
   <button id="signupBtn" onclick="signup()">S'inscrire</button>
   <button id="loginBtn" onclick="login()">Se connecter</button>
@@ -152,13 +141,11 @@
   <p class="error" id="error"></p>
 </div>
 
-<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-  // Config Firebase - soloinao amin'ny anao
   const firebaseConfig = {
     apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
     authDomain: "mitalky.firebaseapp.com",
@@ -169,23 +156,18 @@
   };
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
-  const db = firebase.firestore();
-
-  // Elements
   const errorElement = document.getElementById("error");
   const togglePassword = document.getElementById('togglePassword');
   const passwordInput = document.getElementById('password');
   const showResetBtn = document.getElementById('showResetBtn');
   const resetPasswordSection = document.getElementById('resetPasswordSection');
 
-  // Toggle password visibility
   togglePassword.addEventListener('click', () => {
     const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
     passwordInput.setAttribute('type', type);
     togglePassword.classList.toggle('active');
   });
 
-  // Affiche / masque la section reset password
   showResetBtn.addEventListener('click', () => {
     if(resetPasswordSection.style.display === 'block') {
       resetPasswordSection.style.display = 'none';
@@ -194,78 +176,29 @@
     }
   });
 
-  // Affiche message erreur
   function showError(message) {
     errorElement.textContent = message;
     errorElement.classList.add('visible');
   }
-  // Efface erreur
   function clearError() {
     errorElement.textContent = "";
     errorElement.classList.remove('visible');
   }
 
-  // Valide l'age minimum 16 ans
-  function isAtLeast16YearsOld(dateString) {
-    const today = new Date();
-    const birthDate = new Date(dateString);
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    return age >= 16;
-  }
-
-  // Liste des codes referral valides (exemple)
-  const validReferralCodes = ["ABC123", "XYZ789", "REF2025"];
-
-  // Génère un ID unique simple
-  function generateUniqueID() {
-    return 'id-' + Math.random().toString(36).substr(2, 9);
-  }
-
-  // Inscription
   async function signup() {
     clearError();
-
-    const fullName = document.getElementById("fullName").value.trim();
-    const birthDate = document.getElementById("birthDate").value;
     const email = document.getElementById("email").value.trim();
     const password = passwordInput.value;
-    const referralCode = document.getElementById("referralCode").value.trim().toUpperCase();
 
-    if (!fullName || !birthDate || !email || !password || !referralCode) {
+    if (!email || !password) {
       showError("Veuillez remplir tous les champs.");
-      return;
-    }
-    if (!isAtLeast16YearsOld(birthDate)) {
-      showError("Vous devez avoir au moins 16 ans pour vous inscrire.");
-      return;
-    }
-    if (!validReferralCodes.includes(referralCode)) {
-      showError("Code de parrainage invalide.");
       return;
     }
 
     try {
-      const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-      const user = userCredential.user;
-
-      // Enregistre données complémentaires dans Firestore
-      await db.collection("users").doc(user.uid).set({
-        fullName,
-        birthDate,
-        email,
-        referralCode,
-        id: generateUniqueID(),
-        photo: "",
-        createdAt: new Date()
-      });
-
+      await auth.createUserWithEmailAndPassword(email, password);
       alert("Inscription réussie !");
       window.location.href = "dashboard.html";
-
     } catch (error) {
       if (error.code === "auth/email-already-in-use") {
         alert("Cet email est déjà utilisé. Veuillez vous connecter.");
@@ -275,10 +208,8 @@
     }
   }
 
-  // Connexion
   async function login() {
     clearError();
-
     const email = document.getElementById("email").value.trim();
     const password = passwordInput.value;
 
@@ -296,7 +227,6 @@
     }
   }
 
-  // Reset password
   async function resetPassword() {
     clearError();
     const resetEmail = document.getElementById("resetEmail").value.trim();
