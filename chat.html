@@ -3,134 +3,49 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Pub avec messages et reactions</title>
+<title>Pub avec Like</title>
 <style>
   body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    max-width: 650px;
+    font-family: Arial, sans-serif;
+    max-width: 600px;
     margin: 30px auto;
-    background: #e8f0fe;
-    padding: 25px 30px;
-    border-radius: 10px;
-    box-shadow: 0 8px 20px rgb(24 119 242 / 0.3);
-    color: #202124;
+    background: #f0f4ff;
+    padding: 20px;
+    border-radius: 8px;
   }
   h2 {
-    color: #1a73e8;
-    border-bottom: 2px solid #1a73e8;
-    padding-bottom: 6px;
-    margin-bottom: 15px;
-  }
-  label {
-    display: block;
-    margin-top: 20px;
-    font-weight: 600;
-    color: #3c4043;
-  }
-  input[type="text"], textarea {
-    width: 100%;
-    padding: 12px 15px;
-    margin-top: 6px;
-    border-radius: 8px;
-    border: 1.5px solid #dfe1e5;
-    box-sizing: border-box;
-    font-size: 15px;
-    transition: border-color 0.3s ease;
-  }
-  input[type="text"]:focus, textarea:focus {
-    border-color: #4285f4;
-    outline: none;
-    background: #fff;
-  }
-  button {
-    margin-top: 12px;
-    background: #ea4335;
-    color: white;
-    border: none;
-    padding: 12px 22px;
-    border-radius: 30px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: 600;
-    box-shadow: 0 4px 12px rgb(234 67 53 / 0.4);
-    transition: background-color 0.3s ease;
-  }
-  button:hover:not(:disabled) {
-    background: #c23321;
-  }
-  button:disabled {
-    background: #f4a8a5;
-    cursor: not-allowed;
+    color: #1877f2;
   }
   .pub {
     background: white;
-    border-radius: 12px;
-    padding: 18px 22px;
-    margin-top: 22px;
-    box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
-    color: #202124;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    position: relative;
   }
   .pub a {
-    color: #1a73e8;
+    color: #1877f2;
     text-decoration: none;
-    font-weight: 600;
   }
   .pub a:hover {
     text-decoration: underline;
   }
-  small {
-    display: block;
-    margin-top: 10px;
-    color: #5f6368;
-    font-style: italic;
-    font-size: 13px;
-  }
-  .reaction-btn {
-    background: #4285f4;
-    color: white;
-    border-radius: 25px;
-    padding: 6px 16px;
-    font-weight: 600;
-    cursor: pointer;
+  .like-btn {
+    background: transparent;
     border: none;
-    margin-right: 10px;
-    transition: background-color 0.3s ease;
-  }
-  .reaction-btn.liked {
-    background: #0b59d5;
-  }
-  .message-section {
-    margin-top: 15px;
-  }
-  .message-list {
-    margin-top: 12px;
-    max-height: 120px;
-    overflow-y: auto;
-    border-top: 1px solid #ddd;
-    padding-top: 10px;
-  }
-  .message-item {
-    padding: 6px 10px;
-    background: #f1f3f4;
-    border-radius: 10px;
-    margin-bottom: 8px;
-    font-size: 14px;
-  }
-  .message-input {
-    display: flex;
+    color: #1877f2;
+    font-weight: bold;
+    cursor: pointer;
     margin-top: 10px;
   }
-  .message-input input {
-    flex-grow: 1;
-    padding: 10px 15px;
-    border-radius: 30px 0 0 30px;
-    border: 1.5px solid #dfe1e5;
-    font-size: 15px;
-    outline: none;
+  .liked {
+    color: #e0245e; /* rose rouge like */
   }
-  .message-input button {
-    border-radius: 0 30px 30px 0;
-    padding: 0 20px;
+  .likes-count {
+    font-size: 0.9em;
+    color: #555;
+    margin-left: 10px;
   }
 </style>
 
@@ -140,20 +55,11 @@
 </head>
 <body>
 
-<h2>Créer une Pub</h2>
-
-<label for="pubText">Texte de la Pub :</label>
-<textarea id="pubText" rows="3" placeholder="Écrivez votre message publicitaire ici..."></textarea>
-
-<label for="pubUrl">Lien du site (optionnel) :</label>
-<input type="text" id="pubUrl" placeholder="https://exemple.com" />
-
-<button id="btnCreatePub">Créer Pub</button>
-
 <h2>Liste des Pubs</h2>
 <div id="pubList">Chargement...</div>
 
 <script>
+  // Config Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
     authDomain: "mitalky.firebaseapp.com",
@@ -163,60 +69,33 @@
     appId: "1:753557195623:web:abc3b37eca5d67c9157dc2"
   };
 
+  // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  const pubText = document.getElementById('pubText');
-  const pubUrl = document.getElementById('pubUrl');
-  const btnCreatePub = document.getElementById('btnCreatePub');
+  // Générer un userId simulé unique stocké en localStorage
+  function getUserId() {
+    let userId = localStorage.getItem('userId');
+    if(!userId) {
+      userId = 'user_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('userId', userId);
+    }
+    return userId;
+  }
+  const userId = getUserId();
+
   const pubList = document.getElementById('pubList');
 
-  // Pour simplifier, identifiant utilisateur aléatoire (in real, il faut authentification)
-  const userId = localStorage.getItem('userId') || (() => {
-    const id = 'user_' + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem('userId', id);
-    return id;
-  })();
-
-  // Créer pub
-  btnCreatePub.addEventListener('click', () => {
-    const text = pubText.value.trim();
-    const url = pubUrl.value.trim();
-    if(!text) {
-      alert('Le texte de la pub est obligatoire.');
-      return;
-    }
-    btnCreatePub.disabled = true;
-    btnCreatePub.textContent = 'Envoi en cours...';
-
-    db.collection('pubs').add({
-      text: text,
-      url: url || '',
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => {
-      pubText.value = '';
-      pubUrl.value = '';
-      btnCreatePub.disabled = false;
-      btnCreatePub.textContent = 'Créer Pub';
-      alert('Pub créée avec succès !');
-    }).catch(error => {
-      alert('Erreur lors de la création de la pub : ' + error.message);
-      btnCreatePub.disabled = false;
-      btnCreatePub.textContent = 'Créer Pub';
-    });
-  });
-
-  // Afficher pubs + reactions + messages
+  // Fonction pour afficher les pubs avec Like button
   function renderPubs(docs) {
     if(docs.length === 0) {
       pubList.innerHTML = '<p>Aucune pub pour le moment.</p>';
       return;
     }
     pubList.innerHTML = '';
-
     docs.forEach(doc => {
       const data = doc.data();
-      const pubId = doc.id;
+      const id = doc.id;
 
       const div = document.createElement('div');
       div.className = 'pub';
@@ -225,126 +104,84 @@
       if(data.url){
         content += `<a href="${data.url}" target="_blank" rel="noopener noreferrer">${data.url}</a>`;
       }
-      content += `<small>Créée le: ${data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleString() : 'Date inconnue'}</small>`;
+      content += `<br/><small style="color:#999">Créée le: ${data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleString() : 'Date inconnue'}</small>`;
+
+      // Likes info
+      const likesCount = data.likesCount || 0;
+      const likesBy = data.likesBy || [];
+
+      // Vérifier si user a liké
+      const userLiked = likesBy.includes(userId);
+
+      content += `<br/><button class="like-btn ${userLiked ? 'liked' : ''}" data-id="${id}">
+                    ${userLiked ? '❤️ Like' : '🤍 Like'}
+                  </button>
+                  <span class="likes-count">${likesCount} like${likesCount !== 1 ? 's' : ''}</span>`;
 
       div.innerHTML = content;
-
-      // Reaction (like) button and count
-      const reactionBtn = document.createElement('button');
-      reactionBtn.className = 'reaction-btn';
-      reactionBtn.textContent = '❤️ 0';
-      reactionBtn.disabled = true; // temporaire tant que chargement
-
-      div.appendChild(reactionBtn);
-
-      // Message section
-      const msgSection = document.createElement('div');
-      msgSection.className = 'message-section';
-
-      const messageInputDiv = document.createElement('div');
-      messageInputDiv.className = 'message-input';
-
-      const msgInput = document.createElement('input');
-      msgInput.type = 'text';
-      msgInput.placeholder = 'Envoyer un message...';
-      messageInputDiv.appendChild(msgInput);
-
-      const sendBtn = document.createElement('button');
-      sendBtn.textContent = 'Envoyer';
-      sendBtn.disabled = true;
-      messageInputDiv.appendChild(sendBtn);
-
-      msgSection.appendChild(messageInputDiv);
-
-      // Liste messages
-      const msgList = document.createElement('div');
-      msgList.className = 'message-list';
-      msgSection.appendChild(msgList);
-
-      div.appendChild(msgSection);
       pubList.appendChild(div);
+    });
 
-      // Charger nombre de likes et si user a liké
-      const reactionRef = db.collection('pubs').doc(pubId).collection('reactions');
-      reactionRef.get().then(snap => {
-        const likesCount = snap.size;
-        reactionBtn.textContent = `❤️ ${likesCount}`;
-
-        const userLiked = snap.docs.some(d => d.id === userId);
-        if(userLiked) {
-          reactionBtn.classList.add('liked');
-          reactionBtn.disabled = true; // deja liké, disable
-        } else {
-          reactionBtn.disabled = false;
-        }
-      });
-
-      // Gérer clic like
-      reactionBtn.addEventListener('click', () => {
-        reactionBtn.disabled = true;
-        reactionRef.doc(userId).set({ likedAt: firebase.firestore.FieldValue.serverTimestamp() })
-        .then(() => {
-          // Maj affichage
-          reactionRef.get().then(snap => {
-            reactionBtn.textContent = `❤️ ${snap.size}`;
-            reactionBtn.classList.add('liked');
-          });
-        }).catch(e => {
-          alert("Erreur reaction : " + e.message);
-          reactionBtn.disabled = false;
-        });
-      });
-
-      // Charger messages en temps réel
-      const msgRef = db.collection('pubs').doc(pubId).collection('messages').orderBy('createdAt', 'desc');
-      msgRef.onSnapshot(snapshot => {
-        msgList.innerHTML = '';
-        if(snapshot.empty) {
-          msgList.innerHTML = '<small>Aucun message</small>';
-          return;
-        }
-        snapshot.docs.forEach(docMsg => {
-          const msgData = docMsg.data();
-          const msgDiv = document.createElement('div');
-          msgDiv.className = 'message-item';
-          msgDiv.textContent = msgData.text + (msgData.userId === userId ? ' (Vous)' : '');
-          msgList.appendChild(msgDiv);
-        });
-      });
-
-      // Activer/désactiver bouton envoyer message selon input
-      msgInput.addEventListener('input', () => {
-        sendBtn.disabled = !msgInput.value.trim();
-      });
-
-      // Envoyer message
-      sendBtn.addEventListener('click', () => {
-        const message = msgInput.value.trim();
-        if(!message) return;
-        sendBtn.disabled = true;
-
-        db.collection('pubs').doc(pubId).collection('messages').add({
-          text: message,
-          userId: userId,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        }).then(() => {
-          msgInput.value = '';
-          sendBtn.disabled = false;
-        }).catch(e => {
-          alert("Erreur envoi message : " + e.message);
-          sendBtn.disabled = false;
-        });
+    // Ajouter écouteurs sur boutons like
+    document.querySelectorAll('.like-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const pubId = btn.getAttribute('data-id');
+        toggleLike(pubId, btn);
       });
     });
   }
 
-  // Écouter pubs en temps réel
+  // Fonction toggle like/unlike
+  function toggleLike(pubId, btn) {
+    const pubRef = db.collection('pubs').doc(pubId);
+
+    db.runTransaction(async (transaction) => {
+      const doc = await transaction.get(pubRef);
+      if(!doc.exists) throw "Pub introuvable";
+
+      const data = doc.data();
+      let likesBy = data.likesBy || [];
+      let likesCount = data.likesCount || 0;
+
+      if(likesBy.includes(userId)) {
+        // Unlike
+        likesBy = likesBy.filter(uid => uid !== userId);
+        likesCount = Math.max(0, likesCount - 1);
+      } else {
+        // Like
+        likesBy.push(userId);
+        likesCount++;
+      }
+
+      transaction.update(pubRef, {
+        likesBy: likesBy,
+        likesCount: likesCount
+      });
+    }).then(() => {
+      // Màj bouton like immédiatement
+      const userLikedNow = btn.classList.contains('liked');
+      if(userLikedNow) {
+        btn.classList.remove('liked');
+        btn.textContent = '🤍 Like';
+        const countSpan = btn.nextElementSibling;
+        countSpan.textContent = (parseInt(countSpan.textContent) - 1) + ' like' + ((parseInt(countSpan.textContent) - 1) !== 1 ? 's' : '');
+      } else {
+        btn.classList.add('liked');
+        btn.textContent = '❤️ Like';
+        const countSpan = btn.nextElementSibling;
+        countSpan.textContent = (parseInt(countSpan.textContent) + 1) + ' likes';
+      }
+    }).catch(error => {
+      alert("Erreur lors du Like: " + error);
+    });
+  }
+
+  // Chargement en temps réel des pubs
   db.collection('pubs').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
     renderPubs(snapshot.docs);
   }, error => {
     pubList.innerHTML = `<p style="color:red;">Erreur de chargement des pubs : ${error.message}</p>`;
   });
-
 </script>
 
 </body>
