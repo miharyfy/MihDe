@@ -324,6 +324,7 @@
   }
 
   // Chargement en temps réel des pubs
+  content += `<br/><button class="delete-pub-btn" data-id="${id}" style="background:#e0245e;">Supprimer Pub</button>`;
   db.collection('pubs').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
     renderPubs(snapshot.docs);
   }, error => {
@@ -362,6 +363,73 @@
       btn.textContent = 'Créer Pub';
     });
   });
+// Supprimer un message donné
+function deleteMessage(pubId, messageId) {
+  if (!confirm("Voulez-vous vraiment supprimer ce message ?")) return;
+
+  db.collection('pubs').doc(pubId).collection('messages').doc(messageId)
+    .delete()
+    .then(() => {
+      loadMessages(pubId); // rafraîchir
+  snapshot.forEach(doc => {
+  const msg = doc.data();
+  const dateStr = msg.createdAt ? new Date(msg.createdAt.seconds * 1000).toLocaleString() : 'Date inconnue';
+  const div = document.createElement('div');
+  div.className = 'message';
+
+  div.innerHTML = `
+    <span class="message-user">${msg.userId}</span>
+    <span class="message-time">${dateStr}</span>
+    <p>${msg.text}</p>
+    <button class="delete-message-btn" data-pub-id="${pubId}" data-msg-id="${doc.id}" style="background:#e0245e; font-size:0.8em; margin-top:5px;">Supprimer</button>
+  `;
+
+  messagesList.appendChild(div);
+});
+
+// Après la boucle forEach, ajouter écouteurs suppression message :
+messagesList.querySelectorAll('.delete-message-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const pubId = btn.getAttribute('data-pub-id');
+    const msgId = btn.getAttribute('data-msg-id');
+    deleteMessage(pubId, msgId);
+  });
+});
+
+    })
+    .catch(error => {
+      alert("Erreur suppression message : " + error.message);
+    });
+}
+
+// Supprimer une pub et ses messages (messages supprimés en batch)
+async function deletePub(pubId) {
+  if (!confirm("Voulez-vous vraiment supprimer cette pub et tous ses messages ?")) return;
+
+  const pubRef = db.collection('pubs').doc(pubId);
+  try {
+    // Supprimer les messages de la subcollection "messages"
+    const messagesSnapshot = await pubRef.collection('messages').get();
+    const batch = db.batch();
+    messagesSnapshot.forEach(doc => {
+      batch.delete(doc.ref);
+    });
+    batch.delete(pubRef); // supprimer la pub elle-même
+    await batch.commit();
+    // Pub supprimée, Firestore onSnapshot va rafraîchir la liste
+  } catch (error) {
+    alert("Erreur suppression pub : " + error.message);
+  }
+}
+// Bouton suppression pub
+document.querySelectorAll('.delete-pub-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const pubId = btn.getAttribute('data-id');
+    deletePub(pubId);
+  });
+});
+
+
 </script>
 
 </body>
