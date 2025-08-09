@@ -1,5 +1,4 @@
-ataovy tsaratsara koko ito azafady raha mety 
-
+fa tiko ho renovelena fotsiny io raha mety azafady
 <!DOCTYPE html>
 <html lang="mg">
 <head>
@@ -9,39 +8,43 @@ ataovy tsaratsara koko ito azafady raha mety
 <!-- Styles: moderne, responsive, animations -->
 <style>
   .typing {
-    font-style: italic;
-    color: var(--muted);
-    padding: 10px;
-    display: inline-block;
-    position: relative;
-    width: 50px;
-  }
-  .typing span {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    margin: 0 2px;
-    background: var(--primary);
-    border-radius: 50%;
-    opacity: 0.4;
-    animation: blink 1.4s infinite;
-  }
-  .typing span:nth-child(1) { animation-delay: 0s; }
-  .typing span:nth-child(2) { animation-delay: 0.2s; }
-  .typing span:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes blink {
-    0%, 80%, 100% { opacity: 0.4; }
-    40% { opacity: 1; }
-  }
+  font-style: italic;
+  color: var(--muted);
+  padding: 10px;
+  display: inline-block;
+  position: relative;
+  width: 50px;
+}
 
-  :root{
+.typing span {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin: 0 2px;
+  background: var(--primary);
+  border-radius: 50%;
+  opacity: 0.4;
+  animation: blink 1.4s infinite;
+}
+
+.typing span:nth-child(1) { animation-delay: 0s; }
+.typing span:nth-child(2) { animation-delay: 0.2s; }
+.typing span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes blink {
+  0%, 80%, 100% { opacity: 0.4; }
+  40% { opacity: 1; }
+}
+
+
+:root{
     --primary:#1877f2;
     --surface:#ffffff;
     --muted:#9aa4b2;
     --bg:#f0f2f5;
     --radius:14px;
   }
-  *{box-sizing:border-box;}
+  *{box-sizing:border-box}
   body{
     margin:0;
     font-family:Inter, "Segoe UI", Roboto, Arial, sans-serif;
@@ -51,6 +54,7 @@ ataovy tsaratsara koko ito azafady raha mety
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* Desktop / Tablet layout container */
   .app {
     width:100%;
     max-width:1100px;
@@ -62,6 +66,8 @@ ataovy tsaratsara koko ito azafady raha mety
     display:flex;
     height:82vh;
   }
+
+  /* Sidebar */
   .sidebar{
     width:320px;
     min-width:250px;
@@ -78,11 +84,10 @@ ataovy tsaratsara koko ito azafady raha mety
     align-items:center;
   }
   .logo{
-    width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--primary),#4aa3ff);
-    display:grid;place-items:center;color:white;font-weight:700;
+    width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--primary),#4aa3ff);display:grid;place-items:center;color:white;font-weight:700;
     box-shadow:0 4px 12px rgba(24,119,242,0.18);
   }
-  .brand h1{font-size:16px;margin:0;color:var(--primary);}
+  .brand h1{font-size:16px;margin:0;color:var(--primary)}
   .searchWrap{
     padding:12px;
     border-bottom:1px solid rgba(15,23,42,0.03);
@@ -95,23 +100,20 @@ ataovy tsaratsara koko ito azafady raha mety
     outline:none;font-size:14px;background: #fbfdff;
     transition:box-shadow .18s,transform .12s;
   }
-  .search input:focus{box-shadow:0 6px 18px rgba(24,119,242,0.12);transform:translateY(-1px);}
+  .search input:focus{box-shadow:0 6px 18px rgba(24,119,242,0.12);transform:translateY(-1px)}
   .addById{
     display:flex;gap:8px;margin-top:10px;
   }
   .addById input{
-    flex:1;padding:10px;border-radius:10px;border:1px solid rgba(15,23,42,0.06);
+    flex:1;padding:10px;border-radius:10px;border:1px solid rgba(15,23,42,0.06)
   }
   .btn{
     background:var(--primary);color:white;border:none;padding:9px 12px;border-radius:10px;cursor:pointer;
     box-shadow:0 6px 14px rgba(24,119,242,0.12);font-weight:600;
-    transition: background-color 0.2s ease;
   }
-  .btn:hover {
-    background-color: #0f5cc1;
-  }
-  .btn:active{transform:translateY(1px);}
+  .btn:active{transform:translateY(1px)}
 
+  /* User list */
   .list{
     padding:10px;
     overflow:auto;
@@ -122,33 +124,24 @@ ataovy tsaratsara koko ito azafady raha mety
     cursor:pointer;margin-bottom:8px;
     background:linear-gradient(180deg, rgba(255,255,255,0.8), rgba(248,249,250,0.9));
   }
-  .userItem:hover{
-    transform:translateY(-4px);
-    box-shadow:0 10px 30px rgba(12,18,33,0.06);
-  }
+  .userItem:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(12,18,33,0.06)}
   .avatar{
     width:56px;height:56px;border-radius:50%;flex:0 0 56px;display:grid;place-items:center;font-weight:700;color:white;
     background:linear-gradient(135deg,#6a9cff,#2b6ef6);
     font-size:16px;
   }
-  .userMeta{flex:1;display:flex;flex-direction:column;}
-  .userName{font-weight:600;color:#111;}
-  .userSub{font-size:13px;color:var(--muted);margin-top:4px;}
+  .userMeta{flex:1;display:flex;flex-direction:column}
+  .userName{font-weight:600;color:#111}
+  .userSub{font-size:13px;color:var(--muted);margin-top:4px}
 
+  /* Main chat area */
   .chatArea{ flex:1;display:flex;flex-direction:column; }
   .chatTop{
-    padding:12px 14px;background:linear-gradient(90deg,var(--primary),#2c8bf7);
-    color:white;display:flex;align-items:center;justify-content:space-between;
+    padding:12px 14px;background:linear-gradient(90deg,var(--primary),#2c8bf7);color:white;display:flex;align-items:center;justify-content:space-between;
   }
-  .chatTop .left{
-    display:flex;gap:12px;align-items:center;
-  }
-  .chatTop .title{
-    font-weight:700;font-size:16px;
-  }
-  .chatTop .sub{
-    font-size:13px;color:rgba(255,255,255,0.9);
-  }
+  .chatTop .left{display:flex;gap:12px;align-items:center}
+  .chatTop .title{font-weight:700;font-size:16px}
+  .chatTop .sub{font-size:13px;color:rgba(255,255,255,0.9)}
   .chatMain{
     padding:18px;flex:1;overflow:auto;background:linear-gradient(180deg,#f7f9fb,#fbfdff);
     display:flex;flex-direction:column;gap:10px;
@@ -157,24 +150,12 @@ ataovy tsaratsara koko ito azafady raha mety
   .msg{
     max-width:72%;padding:12px 16px;border-radius:14px;line-height:1.35;font-size:15px;animation:msgIn .26s ease;
     box-shadow:0 6px 18px rgba(12,18,33,0.04);
-    word-wrap: break-word;
-    white-space: pre-wrap;
   }
-  .msg.me{
-    align-self:flex-end;
-    background:linear-gradient(180deg,#d8e9ff,#c6deff);
-    border-bottom-right-radius:6px;
-  }
-  .msg.them{
-    align-self:flex-start;
-    background:#fff;
-    border-bottom-left-radius:6px;
-  }
-  @keyframes msgIn{
-    from{opacity:0; transform:translateY(8px)}
-    to{opacity:1; transform:none}
-  }
+  .msg.me{align-self:flex-end;background:linear-gradient(180deg,#d8e9ff,#c6deff);border-bottom-right-radius:6px}
+  .msg.them{align-self:flex-start;background:#fff;border-bottom-left-radius:6px}
+  @keyframes msgIn{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
 
+  /* Input area */
   .chatInput{
     padding:12px 16px;background:var(--surface);display:flex;gap:10px;border-top:1px solid rgba(12,18,33,0.04);
     align-items:center;
@@ -182,46 +163,22 @@ ataovy tsaratsara koko ito azafady raha mety
   .chatInput textarea{
     flex:1;border-radius:12px;padding:10px 12px;border:1px solid rgba(12,18,33,0.06);resize:none;font-size:15px;height:46px;
   }
-  .sendBtn{
-    background:var(--primary);color:white;border:none;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:700;
-    transition: background-color 0.2s ease;
-  }
-  .sendBtn:hover {
-    background-color: #0f5cc1;
-  }
-  .sendBtn:active{transform:translateY(1px);}
+  .sendBtn{background:var(--primary);color:white;border:none;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:700}
 
-  .modal{
-    position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,0.48);z-index:1000;
-  }
+  /* Modal profile */
+  .modal{ position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,0.48);z-index:1000; }
   .modalCard{
     width:92%;max-width:360px;border-radius:12px;background:var(--surface);padding:18px;animation:pop .18s ease;
   }
-  .modalHeader{
-    display:flex;gap:12px;align-items:center;
-  }
-  .modalAvatar{
-    width:72px;height:72px;border-radius:50%;display:grid;place-items:center;font-size:22px;color:white;background:linear-gradient(135deg,#6a9cff,#2b6ef6);
-  }
-  .modalName{
-    font-size:18px;font-weight:700;
-  }
-  .modalRow{
-    margin-top:12px;color:#333;
-  }
-  .closeBtn{
-    margin-top:14px;background:var(--primary);color:white;padding:8px 12px;border-radius:10px;border:none;cursor:pointer;
-    transition: background-color 0.2s ease;
-  }
-  .closeBtn:hover {
-    background-color: #0f5cc1;
-  }
+  .modalHeader{display:flex;gap:12px;align-items:center}
+  .modalAvatar{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;font-size:22px;color:white;background:linear-gradient(135deg,#6a9cff,#2b6ef6)}
+  .modalName{font-size:18px;font-weight:700}
+  .modalRow{margin-top:12px;color:#333}
+  .closeBtn{margin-top:14px;background:var(--primary);color:white;padding:8px 12px;border-radius:10px;border:none;cursor:pointer}
 
-  @keyframes pop{
-    from{transform:scale(.96);opacity:0}
-    to{transform:none;opacity:1}
-  }
+  @keyframes pop{from{transform:scale(.96);opacity:0}to{transform:none;opacity:1}}
 
+  /* MOBILE adjustments (android friendly) */
   @media (max-width:760px){
     .app{
       margin:0;
@@ -230,6 +187,7 @@ ataovy tsaratsara koko ito azafady raha mety
       display:flex;
       flex-direction:column;
     }
+    /* Hide sidebar by default on mobile; we'll toggle it */
     .sidebar{
       position:fixed;
       left:0;
@@ -241,19 +199,20 @@ ataovy tsaratsara koko ito azafady raha mety
       transform: translateX(-110%);
       box-shadow: 20px 0 50px rgba(2,6,23,0.15);
       border-right: none;
-      background: var(--surface);
-      transition: transform 0.22s ease;
     }
     .sidebar.open{ transform: translateX(0); }
     .list{ padding:14px; }
-    .userItem{ padding:12px; gap:10px; }
+    /* make user item more compact on small screen */
+    .userItem{ padding:12px; gap:10px }
     .app .chatArea{ margin-left:0; }
+    /* top bar: add hamburger */
     .chatTop{ padding:12px 12px; }
-    .logo{ width:38px;height:38px; }
-    .avatar{ width:44px;height:44px; flex:0 0 44px; }
-    .chatMain{ padding:14px; }
+    .logo{ width:38px;height:38px }
+    .avatar{ width:44px;height:44px; flex:0 0 44px }
+    .chatMain{ padding:14px }
   }
 
+  /* small helper for hamburger button */
   .hamburger{
     display:none;
     background:transparent;border:none;color:white;font-size:22px;padding:6px 8px;border-radius:8px;
@@ -271,34 +230,40 @@ ataovy tsaratsara koko ito azafady raha mety
 <body>
 
 <div class="app" id="app">
-  <div class="sidebar" id="sidebar">
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;flex-direction: column;">
-      <div style="display:flex;gap:12px;align-items:center;width:100%">
-        <div class="logo">M</div>
-        <div>
-          <div style="font-size:14px;color:#0b1220;font-weight:700">MiTalk</div>
-          <div style="font-size:12px;color:var(--muted)">Chat</div>
-        </div>
+<div class="sidebar" id="sidebar">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;flex-direction: column;">
+    <div style="display:flex;gap:12px;align-items:center;width:100%">
+      <div class="logo">M</div>
+      <div>
+        <div style="font-size:14px;color:#0b1220;font-weight:700">MiTalk</div>
+        <div style="font-size:12px;color:var(--muted)">Chat</div>
       </div>
-
-      <div id="sidebarProfile" style="display:flex;align-items:center;gap:12px;width:100%;padding:8px;border-radius:12px;background:#f5f7fa;box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
-        <div id="sidebarAvatar" style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#6a9cff,#2b6ef6);background-size:cover;background-position:center;color:white;font-weight:700;display:grid;place-items:center;font-size:22px;">U</div>
-        <div style="flex:1;min-width:0;">
-          <div id="sidebarName" style="font-weight:700; font-size:16px; color: var(--primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Utilisateur</div>
-          <div id="sidebarEmail" style="font-size:13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">email@example.com</div>
-        </div>
-      </div>
-
-      <button id="closeSidebar" style="display:none;background:transparent;border:none;font-size:20px;cursor:pointer">✕</button>
     </div>
 
-    <div class="searchWrap">
+    <!-- Ity no profil mpampiasa -->
+    <div id="sidebarProfile" style="display:flex;align-items:center;gap:12px;width:100%;padding:8px;border-radius:12px;background:#f5f7fa;box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+  <!-- content -->
+</div>
+      <div id="sidebarAvatar" style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#6a9cff,#2b6ef6);background-size:cover;background-position:center;color:white;font-weight:700;display:grid;place-items:center;font-size:22px;">U</div>
+      <div style="flex:1;min-width:0;">
+        <div id="sidebarName" style="font-weight:700; font-size:16px; color: var(--primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Utilisateur</div>
+        <div id="sidebarEmail" style="font-size:13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">email@example.com</div>
+      </div>
+    </div>
+
+    <!-- Bouton close pour mobile -->
+    <button id="closeSidebar" style="display:none;background:transparent;border:none;font-size:20px;cursor:pointer">✕</button>
+  </div>
+
+  <!-- Ensuite ny sisa amin'ny sidebar -->
+  <div class="searchWrap">
+  ...
       <div class="search">
-        <input id="globalSearch" placeholder="Vous recherchez quelqu'un par son nom ou ID..." autocomplete="off" />
+        <input id="globalSearch" placeholder="Vous recherchez quelqu'un par son nom ou ID..." />
       </div>
 
-      <div class="addById">
-        <input id="inputAddId" placeholder="Entrez un ID (exemple: 101)" autocomplete="off" />
+      <div style="margin-top:10px" class="addById">
+        <input id="inputAddId" placeholder="Entrez un ID (exemple: 101)" />
         <button class="btn" id="btnAdd">Entrer</button>
       </div>
     </div>
@@ -308,10 +273,11 @@ ataovy tsaratsara koko ito azafady raha mety
     </div>
   </div>
 
+  <!-- Chat area -->
   <div class="chatArea">
     <div class="chatTop">
       <div class="left">
-        <button class="hamburger" id="openSidebar" aria-label="Open sidebar">☰</button>
+        <button class="hamburger" id="openSidebar">☰</button>
         <div id="activeAvatar" class="modalAvatar" style="width:40px;height:40px"></div>
         <div>
           <div class="title" id="activeName">Choisissez des personnes</div>
@@ -324,18 +290,20 @@ ataovy tsaratsara koko ito azafady raha mety
     </div>
 
     <div class="chatMain" id="chatMain">
-      <div class="typing"><span></span><span></span><span></span></div>
+    <div class="typing"><span></span><span></span><span></span></div>
+      <!-- messages injected here -->
       <div style="opacity:0.6;color:var(--muted);margin:auto">n'a jamais discuté — sélectionnez une personne dans la liste ou saisissez votre ID</div>
     </div>
 
     <div class="chatInput">
-      <textarea id="messageInput" placeholder="Écrivez le message..." rows="1"></textarea>
+      <textarea id="messageInput" placeholder="Écrivez le message..."></textarea>
       <button class="sendBtn" id="sendBtn">Envoyez-le</button>
     </div>
   </div>
 </div>
 
-<div class="modal" id="profileModal" role="dialog" aria-modal="true" aria-labelledby="modalName">
+<!-- Modal profile -->
+<div class="modal" id="profileModal">
   <div class="modalCard">
     <div class="modalHeader">
       <div id="modalAvatar" class="modalAvatar"></div>
@@ -351,6 +319,7 @@ ataovy tsaratsara koko ito azafady raha mety
 </div>
 
 <script>
+  // ---------------- Firebase config (change if ilaina) ----------------
   const firebaseConfig = {
     apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
     authDomain: "mitalky.firebaseapp.com",
@@ -363,23 +332,287 @@ ataovy tsaratsara koko ito azafady raha mety
   const auth = firebase.auth();
   const db = firebase.firestore();
 
+  // ---------------- State ----------------
   let myUid = null;
   let myProfile = null;
   let selectedUid = null;
   let selectedProfile = null;
   let unsubscribeMessages = null;
 
+  // Mobile sidebar toggle buttons
   const sidebar = document.getElementById('sidebar');
   const openSidebarBtn = document.getElementById('openSidebar');
   const closeSidebarBtn = document.getElementById('closeSidebar');
-  const profileModal = document.getElementById('profileModal');
 
   function openSidebar() {
     sidebar.classList.add('open');
     closeSidebarBtn.style.display = 'inline';
+    // disable body scroll
     document.body.style.overflow = 'hidden';
   }
   function closeSidebar() {
     sidebar.classList.remove('open');
     closeSidebarBtn.style.display = 'none';
-    document.body.style
+    document.body.style.overflow = '';
+  }
+  openSidebarBtn && openSidebarBtn.addEventListener('click', openSidebar);
+  closeSidebarBtn && closeSidebarBtn.addEventListener('click', closeSidebar);
+  // close sidebar when clicking outside (mobile)
+  document.addEventListener('click', (e) => {
+    if(window.innerWidth <= 760 && sidebar.classList.contains('open')) {
+      const isClickInside = sidebar.contains(e.target) || openSidebarBtn.contains(e.target);
+      if(!isClickInside) closeSidebar();
+    }
+  });
+
+  // Utility: create initials SVG data URL for avatar
+  function initialsAvatar(name, bgA='#6a9cff', color='#fff') {
+    const initials = (name||'U').split(' ').map(s=>s[0]||'').slice(0,2).join('').toUpperCase();
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'>
+      <rect width='100%' height='100%' fill='${bgA}' rx='30'/>
+      <text x='50%' y='55%' font-size='90' fill='${color}' font-family='Arial, Helvetica, sans-serif' font-weight='700' text-anchor='middle' dominant-baseline='middle'>${initials}</text>
+    </svg>`;
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+  }
+
+  // Render functions
+  function renderUserList(users) {
+    const list = document.getElementById('userList');
+    list.innerHTML = '';
+    users.forEach(doc => {
+      const data = doc.data();
+      if(doc.id === myUid) return; // don't show yourself
+      const el = document.createElement('div');
+      el.className = 'userItem';
+      el.dataset.uid = doc.id;
+      const photo = data.photo || '';
+      const avatarHTML = photo
+        ? `<div class="avatar" style="background-image:url('${photo}');background-size:cover;background-position:center"></div>`
+        : `<div class="avatar" style="background-image:url('${initialsAvatar(data.name||('User '+data.id))}');background-size:cover;background-position:center"></div>`;
+      el.innerHTML = `${avatarHTML}
+        <div class="userMeta">
+          <div class="userName">${data.name || 'Nom non défini'}</div>
+          <div class="userSub">ID: ${data.id} • ${data.gmail || '—'}</div>
+        </div>`;
+      el.addEventListener('click', () => {
+        selectUser(doc.id, data);
+        if(window.innerWidth <= 760) closeSidebar(); // auto-close on mobile
+      });
+      list.appendChild(el);
+    });
+  }
+
+  // Load all users (initial)
+  function loadUsers() {
+    db.collection('users').orderBy('name').get().then(snapshot=>{
+      renderUserList(snapshot.docs);
+    }).catch(err=>{
+      console.error('Error loading users', err);
+    });
+  }
+
+  // Live search (filter DOM)
+  document.getElementById('globalSearch').addEventListener('input', function(){
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('.userItem').forEach(it=>{
+      const text = it.textContent.toLowerCase();
+      it.style.display = text.includes(q) ? 'flex' : 'none';
+      if(text.includes(q)) {
+        it.animate([{transform:'scale(0.98)',opacity:0},{transform:'scale(1)',opacity:1}],{duration:240,easing:'ease-out'});
+      }
+    });
+  });
+
+  // Add by ID button
+document.getElementById('btnAdd').addEventListener('click', ()=>{
+  const idVal = document.getElementById('inputAddId').value.trim();
+  if(!idVal){ alert('Entrez un identifiant.'); return; }
+  const idNum = isNaN(idVal) ? idVal : parseInt(idVal);
+  db.collection('users').where('id','==', idNum).get().then(snapshot=>{
+    if(snapshot.empty){
+      alert("L'ID n'est pas trouvé dans les utilisateurs.");
+    } else {
+      const doc = snapshot.docs[0];
+      selectUser(doc.id, doc.data());
+      if(window.innerWidth <= 760) closeSidebar();
+      document.querySelector('.chatMain').scrollIntoView({behavior:'smooth'});
+    }
+  }).catch(err=>{
+    console.error(err); alert("Erreur lors de la recherche d\'ID'");
+  });
+});
+
+
+  // Select user (when user clicked or add by ID found)
+  function selectUser(uid, profileData) {
+    if(unsubscribeMessages) unsubscribeMessages();
+    selectedUid = uid;
+    selectedProfile = profileData;
+    document.getElementById('activeName').textContent = profileData.name || ('User ' + profileData.id);
+    document.getElementById('activeSub').textContent = (profileData.gmail||'—') + ' • ID:' + (profileData.id||'—');
+    const avatarEl = document.getElementById('activeAvatar');
+    if(profileData.photo){
+      avatarEl.style.backgroundImage = `url('${profileData.photo}')`;
+      avatarEl.style.backgroundSize = 'cover';
+      avatarEl.textContent = '';
+    } else {
+      avatarEl.style.backgroundImage = `url('${initialsAvatar(profileData.name||('User'+profileData.id))}')`;
+      avatarEl.style.backgroundSize = 'cover';
+      avatarEl.textContent = '';
+    }
+    document.getElementById('openProfile').style.display = 'inline-block';
+    listenMessagesForChat(myUid, selectedUid);
+  }
+
+  // Listen messages (real time)
+  function listenMessagesForChat(uidA, uidB){
+    const chatId = [uidA, uidB].sort().join('_');
+    const container = document.getElementById('chatMain');
+    container.innerHTML = '';
+    const loader = document.createElement('div');
+    loader.style.opacity = .6; loader.style.color = 'var(--muted)'; loader.innerText = 'Message de commande....';
+    container.appendChild(loader);
+
+    unsubscribeMessages = db.collection('chats').doc(chatId).collection('messages')
+      .orderBy('time')
+      .onSnapshot(snapshot=>{
+        container.innerHTML = '';
+        if(snapshot.empty){
+          const emptyNote = document.createElement('div');
+          emptyNote.style.color = 'var(--muted)'; emptyNote.style.margin = 'auto';
+          emptyNote.innerText = 'Aucun message pour le moment — écrivez d’abord !';
+          container.appendChild(emptyNote);
+        } else {
+          snapshot.forEach(doc=>{
+            const m = doc.data();
+            const el = document.createElement('div');
+            el.className = 'msg ' + (m.from === myUid ? 'me' : 'them');
+            if(m.from === myUid){
+              el.innerHTML = `<div style="font-weight:600;margin-bottom:6px;font-size:13px;color:#0b1220">Moi</div>
+                              <div>${escapeHtml(m.text)}</div>`;
+            } else {
+              el.innerHTML = `<div style="font-weight:600;margin-bottom:6px;font-size:13px;color:#0b1220">${selectedProfile.name||'Il est'}</div>
+                              <div>${escapeHtml(m.text)}</div>`;
+            }
+            container.appendChild(el);
+          });
+          container.scrollTop = container.scrollHeight;
+          const last = container.lastElementChild;
+          if(last) last.animate([{transform:'translateY(6px)',opacity:0},{transform:'translateY(0)',opacity:1}],{duration:260,easing:'ease-out'});
+        }
+      }, err => {
+        console.error('listen messages error', err);
+      });
+  }
+
+  // Send message
+  document.getElementById('sendBtn').addEventListener('click', ()=> {
+    const text = document.getElementById('messageInput').value.trim();
+    if(!selectedUid){ alert('Tout d’abord, choisissez les personnes à qui vous souhaitez parler.'); return; }
+    if(!text) return;
+    const chatId = [myUid, selectedUid].sort().join('_');
+    db.collection('chats').doc(chatId).collection('messages').add({
+      from: myUid,
+      text: text,
+      time: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(()=>{
+      document.getElementById('messageInput').value = '';
+    }).catch(err=>{
+      console.error(err); alert("Impossible d'envoyer des messages pour le moment.");
+    });
+  });
+
+  // Profile modal open
+  document.getElementById('openProfile').addEventListener('click', ()=>{
+    if(!selectedProfile) return;
+    const m = selectedProfile;
+    document.getElementById('modalName').textContent = m.name || '—';
+    document.getElementById('modalEmail').textContent = m.gmail || '—';
+    document.getElementById('modalId').textContent = m.id || '—';
+    document.getElementById('modalRegistered').textContent = m.registeredAt ? new Date(m.registeredAt.seconds*1000).toLocaleString() : '—';
+    const avatar = document.getElementById('modalAvatar');
+    if(m.photo) avatar.style.backgroundImage = `url('${m.photo}')`;
+    else avatar.style.backgroundImage = `url('${initialsAvatar(m.name||('User'+m.id))}')`;
+    document.getElementById('profileModal').style.display = 'flex';
+  });
+
+  document.getElementById('closeModal').addEventListener('click', ()=>{
+    document.getElementById('profileModal').style.display = 'none';
+  });
+
+  // Escape HTML helper
+  function escapeHtml(str){
+    if(!str) return '';
+    return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+auth.onAuthStateChanged(async user=>{
+  console.log('User auth state changed:', user);
+  if(!user){
+    alert("Pas encore connecté — veuillez d'abord vous connecter.");
+    return;
+  }
+  myUid = user.uid;
+  const doc = await db.collection('users').doc(myUid).get();
+  if(!doc.exists){
+    alert("Nous n'avons pas pu trouver votre profil dans la collection d'utilisateurs. Créez d'abord un profil.");
+    return;
+  }
+  myProfile = doc.data();
+  console.log('My profile data:', myProfile);
+  // Mampiseho azy ao amin'ny sidebar
+  const sidebarAvatar = document.getElementById('sidebarAvatar');
+  const sidebarName = document.getElementById('sidebarName');
+  const sidebarEmail = document.getElementById('sidebarEmail');
+
+  if(myProfile.photo){
+    sidebarAvatar.style.backgroundImage = `url('${myProfile.photo}')`;
+    sidebarAvatar.textContent = '';
+  } else {
+    const initials = (myProfile.name||'U').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+    sidebarAvatar.textContent = initials;
+    sidebarAvatar.style.backgroundImage = '';
+  }
+  sidebarName.textContent = myProfile.name || 'Utilisateur';
+  sidebarEmail.textContent = myProfile.gmail || '—';
+
+  loadUsers();
+  db.collection('users').onSnapshot(snap => {
+    renderUserList(snap.docs);
+  });
+});
+
+
+
+  // ensure sidebar close button visibility on load/resizes
+  function updateSidebarButtons(){
+    if(window.innerWidth <= 760){
+      document.getElementById('closeSidebar').style.display = sidebar.classList.contains('open') ? 'inline' : 'none';
+    } else {
+      document.getElementById('closeSidebar').style.display = 'none';
+      sidebar.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  }
+  window.addEventListener('resize', updateSidebarButtons);
+  updateSidebarButtons();
+db.collection('users').where('id','==', idNum).get().then(snapshot=>{
+  console.log("Recherche ID:", idNum, "Nombre trouvé:", snapshot.size);
+  if(snapshot.empty){
+    alert("L'ID n'est pas trouvé dans les utilisateurs.");
+  } else {
+    const doc = snapshot.docs[0];
+    console.log("Utilisateur trouvé:", doc.data());
+    selectUser(doc.id, doc.data());
+    if(window.innerWidth <= 760) closeSidebar();
+    document.querySelector('.chatMain').scrollIntoView({behavior:'smooth'});
+  }
+})
+.catch(err=>{
+  console.error(err); alert('Erreur lors de la recherche d\'ID');
+});
+
+
+</script>
+</body>
+</html>
