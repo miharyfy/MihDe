@@ -443,7 +443,7 @@ document.getElementById('btnAdd').addEventListener('click', ()=>{
             const el = document.createElement('div');
             el.className = 'msg ' + (m.from === myUid ? 'me' : 'them');
             if(m.from === myUid){
-              el.innerHTML = `<div style="font-weight:600;margin-bottom:6px;font-size:13px;color:#0b1220">Izaho</div>
+              el.innerHTML = `<div style="font-weight:600;margin-bottom:6px;font-size:13px;color:#0b1220">Moi</div>
                               <div>${escapeHtml(m.text)}</div>`;
             } else {
               el.innerHTML = `<div style="font-weight:600;margin-bottom:6px;font-size:13px;color:#0b1220">${selectedProfile.name||'Il est'}</div>
