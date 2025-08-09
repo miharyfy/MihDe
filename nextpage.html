@@ -2,14 +2,13 @@
 <html lang="mg">
 <head>
   <meta charset="UTF-8" />
-  <title>Inscription / Connexion</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Inscription/Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
-
+    /* Style de base */
     body {
-      font-family: 'Roboto', Arial, sans-serif;
-      background: linear-gradient(135deg, #4a90e2, #1877f2);
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -18,70 +17,62 @@
     }
     .container {
       background: white;
-      padding: 35px 30px 40px 30px;
-      border-radius: 15px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-      width: 340px;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+      width: 350px;
       text-align: center;
-      animation: fadeInUp 0.8s ease forwards;
-      position: relative;
+      animation: fadeInUp 0.7s ease forwards;
     }
     @keyframes fadeInUp {
-      from {
+      0% {
         opacity: 0;
-        transform: translateY(30px);
+        transform: translateY(20px);
       }
-      to {
+      100% {
         opacity: 1;
         transform: translateY(0);
       }
     }
-    h2 {
-      margin-bottom: 25px;
-      color: #1877f2;
-      font-weight: 700;
-      letter-spacing: 1px;
-    }
-    input, button {
+
+    input, button, select {
       width: 100%;
-      margin: 12px 0;
-      padding: 14px 15px;
-      border-radius: 8px;
-      border: 1.8px solid #ccc;
+      margin: 8px 0;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
       font-size: 16px;
       box-sizing: border-box;
-      outline-offset: 3px;
+      outline-offset: 2px;
       transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
-    input:focus {
+    input:focus, select:focus {
       border-color: #1877f2;
-      box-shadow: 0 0 12px rgba(24,119,242,0.5);
+      box-shadow: 0 0 8px rgba(24,119,242,0.5);
     }
     button {
       background-color: #1877f2;
       color: white;
       border: none;
       cursor: pointer;
-      font-weight: 700;
-      letter-spacing: 0.8px;
+      font-weight: 600;
       transition: background-color 0.3s ease, transform 0.15s ease;
       user-select: none;
-      box-shadow: 0 5px 15px rgba(24,119,242,0.4);
     }
     button:hover {
       background-color: #0f5dc8;
-      transform: scale(1.06);
+      transform: scale(1.05);
     }
     button:active {
-      transform: scale(0.97);
+      transform: scale(0.98);
     }
     p.error {
-      color: #e74c3c;
+      color: red;
       font-size: 14px;
       min-height: 20px;
       opacity: 0;
       transition: opacity 0.4s ease;
-      margin: 8px 0 0 0;
+      margin: 5px 0 0 0;
     }
     p.error.visible {
       opacity: 1;
@@ -91,15 +82,15 @@
       width: 100%;
     }
     .password-wrapper input {
-      padding-right: 44px;
+      padding-right: 40px; /* espace ho an'ny icon */
     }
     .toggle-password {
       position: absolute;
       top: 50%;
-      right: 12px;
+      right: 10px;
       transform: translateY(-50%);
-      width: 26px;
-      height: 26px;
+      width: 24px;
+      height: 24px;
       cursor: pointer;
       fill: #888;
       transition: fill 0.3s ease, transform 0.3s ease;
@@ -113,35 +104,21 @@
       fill: #1877f2;
       transform: translateY(-50%) scale(1.2) rotate(20deg);
     }
-    .forgot-password {
-      margin-top: 5px;
-      font-size: 14px;
-      color: #1877f2;
-      cursor: pointer;
-      text-decoration: underline;
-      user-select: none;
-      background: none;
-      border: none;
-    }
-    .forgot-password:hover {
-      color: #0f5dc8;
-    }
-    /* Reset password form hidden by default */
+
+    /* Reset password form style */
     #resetPasswordSection {
-      margin-top: 20px;
       display: none;
-      text-align: left;
+      margin-top: 10px;
     }
-    #resetPasswordSection input {
-      margin-bottom: 10px;
+    #resetPasswordSection input, #resetPasswordSection button {
+      margin-top: 8px;
     }
-    #resetPasswordSection button {
-      width: auto;
-      padding: 10px 20px;
-      font-size: 15px;
-      border-radius: 6px;
-      box-shadow: none;
+
+    /* Titles */
+    h2 {
+      margin-bottom: 15px;
     }
+
   </style>
 </head>
 <body>
@@ -149,24 +126,27 @@
 <div class="container">
   <h2>Inscription / Connexion</h2>
 
-  <input id="email" type="email" placeholder="Email" autocomplete="email" required />
-
+  <!-- Form inscription -->
+  <input id="fullName" type="text" placeholder="Nom complet" autocomplete="name" />
+  <input id="birthDate" type="date" placeholder="Date de naissance" />
+  <input id="email" type="email" placeholder="Email" autocomplete="email" />
   <div class="password-wrapper">
-    <input id="password" type="password" placeholder="Mot de passe" autocomplete="current-password" required />
+    <input id="password" type="password" placeholder="Mot de passe" autocomplete="new-password" />
     <svg id="togglePassword" class="toggle-password" viewBox="0 0 24 24" >
       <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
       <circle cx="12" cy="12" r="2.5"/>
     </svg>
   </div>
+  <input id="referralCode" type="text" placeholder="Code de parrainage (Referral)" autocomplete="off" />
 
-  <button onclick="signup()">S'inscrire</button>
-  <button onclick="login()">Se connecter</button>
+  <button id="signupBtn" onclick="signup()">S'inscrire</button>
+  <button id="loginBtn" onclick="login()">Se connecter</button>
 
-  <button class="forgot-password" onclick="toggleResetPassword()">Mot de passe oublié ?</button>
+  <button id="showResetBtn" style="margin-top: 10px; background: none; color: #1877f2; border:none; cursor:pointer; text-decoration: underline;">Mot de passe oublié ?</button>
 
   <div id="resetPasswordSection">
-    <input id="resetEmail" type="email" placeholder="Entrez votre email pour réinitialiser" />
-    <button onclick="resetPassword()">Envoyer lien</button>
+    <input id="resetEmail" type="email" placeholder="Entrez votre email pour réinitialiser" autocomplete="email" />
+    <button onclick="resetPassword()">Envoyer lien de réinitialisation</button>
   </div>
 
   <p class="error" id="error"></p>
@@ -178,6 +158,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
+  // Config Firebase - soloinao amin'ny anao
   const firebaseConfig = {
     apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
     authDomain: "mitalky.firebaseapp.com",
@@ -190,87 +171,114 @@
   const auth = firebase.auth();
   const db = firebase.firestore();
 
+  // Elements
   const errorElement = document.getElementById("error");
   const togglePassword = document.getElementById('togglePassword');
   const passwordInput = document.getElementById('password');
+  const showResetBtn = document.getElementById('showResetBtn');
+  const resetPasswordSection = document.getElementById('resetPasswordSection');
 
-  // Toggle password visibility with animation on icon
+  // Toggle password visibility
   togglePassword.addEventListener('click', () => {
-    const type = passwordInput.type === 'password' ? 'text' : 'password';
-    passwordInput.type = type;
-    togglePassword.classList.toggle('active', type === 'text');
+    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordInput.setAttribute('type', type);
+    togglePassword.classList.toggle('active');
   });
 
+  // Affiche / masque la section reset password
+  showResetBtn.addEventListener('click', () => {
+    if(resetPasswordSection.style.display === 'block') {
+      resetPasswordSection.style.display = 'none';
+    } else {
+      resetPasswordSection.style.display = 'block';
+    }
+  });
+
+  // Affiche message erreur
   function showError(message) {
     errorElement.textContent = message;
     errorElement.classList.add('visible');
   }
+  // Efface erreur
   function clearError() {
     errorElement.textContent = "";
     errorElement.classList.remove('visible');
   }
 
-async function signup() {
-  clearError();
-  const email = document.getElementById("email").value.trim();
-  const password = passwordInput.value;
-
-  if (!email || !password) {
-    showError("Veuillez remplir tous les champs.");
-    return;
+  // Valide l'age minimum 16 ans
+  function isAtLeast16YearsOld(dateString) {
+    const today = new Date();
+    const birthDate = new Date(dateString);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age >= 16;
   }
 
-  try {
-    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-    const user = userCredential.user;
+  // Liste des codes referral valides (exemple)
+  const validReferralCodes = ["ABC123", "XYZ789", "REF2025"];
 
-    await user.sendEmailVerification();  // Miandrasa tsara handefa mail
+  // Génère un ID unique simple
+  function generateUniqueID() {
+    return 'id-' + Math.random().toString(36).substr(2, 9);
+  }
 
-    const idManokana = generateUniqueID();
-    await db.collection("users").doc(user.uid).set({
-      email: email,
-      id: idManokana,
-      name: "",
-      photo: ""
-    });
+  // Inscription
+  async function signup() {
+    clearError();
 
-    alert("Inscription réussie ! Un mail de vérification a été envoyé. Veuillez vérifier votre boîte mail.");
-  } catch (error) {
-    if (error.code === "auth/email-already-in-use") {
-      alert("Cet email est déjà utilisé. Veuillez vous connecter.");
-    } else {
-      showError(error.message);
+    const fullName = document.getElementById("fullName").value.trim();
+    const birthDate = document.getElementById("birthDate").value;
+    const email = document.getElementById("email").value.trim();
+    const password = passwordInput.value;
+    const referralCode = document.getElementById("referralCode").value.trim().toUpperCase();
+
+    if (!fullName || !birthDate || !email || !password || !referralCode) {
+      showError("Veuillez remplir tous les champs.");
+      return;
+    }
+    if (!isAtLeast16YearsOld(birthDate)) {
+      showError("Vous devez avoir au moins 16 ans pour vous inscrire.");
+      return;
+    }
+    if (!validReferralCodes.includes(referralCode)) {
+      showError("Code de parrainage invalide.");
+      return;
+    }
+
+    try {
+      const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+      const user = userCredential.user;
+
+      // Enregistre données complémentaires dans Firestore
+      await db.collection("users").doc(user.uid).set({
+        fullName,
+        birthDate,
+        email,
+        referralCode,
+        id: generateUniqueID(),
+        photo: "",
+        createdAt: new Date()
+      });
+
+      alert("Inscription réussie !");
+      window.location.href = "dashboard.html";
+
+    } catch (error) {
+      if (error.code === "auth/email-already-in-use") {
+        alert("Cet email est déjà utilisé. Veuillez vous connecter.");
+      } else {
+        showError(error.message);
+      }
     }
   }
-}
 
-
-
-        // Envoyer mail de vérification
-        user.sendEmailVerification();
-
-        return db.collection("users").doc(user.uid).set({
-          email: email,
-          id: idManokana,
-          name: "",
-          photo: ""
-        });
-      })
-      .then(() => {
-        alert("Inscription réussie ! Un mail de vérification a été envoyé.");
-        // Ici tu peux faire une redirection ou reset formulaire
-      })
-      .catch((error) => {
-        if (error.code === "auth/email-already-in-use") {
-          alert("Cet email est déjà utilisé. Veuillez vous connecter.");
-        } else {
-          showError(error.message);
-        }
-      });
-  }
-
-  function login() {
+  // Connexion
+  async function login() {
     clearError();
+
     const email = document.getElementById("email").value.trim();
     const password = passwordInput.value;
 
@@ -279,53 +287,30 @@ async function signup() {
       return;
     }
 
-    auth.signInWithEmailAndPassword(email, password)
-      .then(({user}) => {
-        if (!user.emailVerified) {
-          showError("Veuillez vérifier votre email avant de vous connecter.");
-          auth.signOut();
-          return;
-        }
-        alert("Connexion réussie !");
-        window.location.href = "dashboard.html";
-      })
-      .catch((error) => {
-        showError(error.message);
-      });
-  }
-
-  // Reset password section toggle
-  function toggleResetPassword() {
-    const section = document.getElementById('resetPasswordSection');
-    if (section.style.display === 'block') {
-      section.style.display = 'none';
-      clearError();
-    } else {
-      section.style.display = 'block';
-      clearError();
+    try {
+      await auth.signInWithEmailAndPassword(email, password);
+      alert("Connexion réussie !");
+      window.location.href = "dashboard.html";
+    } catch (error) {
+      showError(error.message);
     }
   }
 
-  // Reset password email send
-  function resetPassword() {
+  // Reset password
+  async function resetPassword() {
     clearError();
-    const resetEmail = document.getElementById('resetEmail').value.trim();
+    const resetEmail = document.getElementById("resetEmail").value.trim();
     if (!resetEmail) {
-      showError("Veuillez entrer votre email.");
+      showError("Veuillez entrer votre email pour réinitialiser le mot de passe.");
       return;
     }
-    auth.sendPasswordResetEmail(resetEmail)
-      .then(() => {
-        alert("Un email pour réinitialiser votre mot de passe a été envoyé.");
-        toggleResetPassword();
-      })
-      .catch((error) => {
-        showError(error.message);
-      });
-  }
-
-  function generateUniqueID() {
-    return 'id-' + Math.random().toString(36).substr(2, 9);
+    try {
+      await auth.sendPasswordResetEmail(resetEmail);
+      alert("Lien de réinitialisation envoyé à votre email.");
+      resetPasswordSection.style.display = 'none';
+    } catch (error) {
+      showError(error.message);
+    }
   }
 </script>
 
