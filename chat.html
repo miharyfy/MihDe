@@ -1,322 +1,182 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="mg">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chat Moderne</title>
+<title>Chat Search</title>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    display: flex;
-    height: 100vh;
-    background: #e9ebee;
-  }
-  /* Sidebar */
-  #sidebar {
-    width: 280px;
-    background: #fff;
-    border-right: 1px solid #ddd;
-    display: flex;
-    flex-direction: column;
-  }
-  #searchUser {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  #searchUser input {
-    flex: 1;
-    padding: 8px 12px;
-    border-radius: 20px;
-    border: 1px solid #ccc;
-    outline: none;
-  }
-  #userList {
-    flex: 1;
-    overflow-y: auto;
-    padding: 5px;
-  }
-  .user-item {
-    display: flex;
-    align-items: center;
-    padding: 8px;
-    cursor: pointer;
-    border-radius: 10px;
-    transition: background 0.2s, transform 0.2s;
-    animation: fadeIn 0.3s ease;
-  }
-  .user-item:hover {
-    background: #f0f2f5;
-    transform: scale(1.02);
-  }
-  .user-item img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    margin-right: 10px;
-  }
-  .user-name {
-    font-weight: bold;
-  }
-  /* Chat area */
-  #container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-  #chatHeader {
-    padding: 10px;
-    background: #1877f2;
-    color: white;
-    font-weight: bold;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  #chatHeader button {
-    background: rgba(255,255,255,0.2);
-    border: none;
-    padding: 5px 10px;
-    border-radius: 6px;
-    color: white;
-    cursor: pointer;
-  }
-  #chatBox {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding: 10px;
-    background-color: #f9f9f9;
-    display: flex;
-    flex-direction: column;
-  }
-  .message {
-    max-width: 70%;
-    padding: 10px 15px;
-    margin-bottom: 10px;
-    border-radius: 15px;
-    line-height: 1.4;
-    font-size: 15px;
-    animation: fadeIn 0.4s ease;
-  }
-  .sent {
-    background-color: #d2e3fc;
-    align-self: flex-end;
-    border-bottom-right-radius: 0;
-  }
-  .received {
-    background-color: #f1f0f0;
-    align-self: flex-start;
-    border-bottom-left-radius: 0;
-  }
-  #sendMsgDiv {
-    display: flex;
-    padding: 10px;
-    background: #fff;
-    border-top: 1px solid #ccc;
-  }
-  #msg {
-    flex-grow: 1;
-    padding: 10px;
-    border-radius: 20px;
-    border: 1px solid #ccc;
-    outline: none;
-  }
-  #sendBtn {
-    background: #1877f2;
-    border: none;
-    color: white;
-    padding: 0 20px;
-    margin-left: 8px;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: background 0.3s;
-  }
-  #sendBtn:hover {
-    background: #145dbf;
-  }
-  /* Modal */
-  #infoModal {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.6);
-    display: none;
-    justify-content: center;
-    align-items: center;
-  }
-  #infoModalContent {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    width: 300px;
-    text-align: center;
-    animation: scaleIn 0.3s ease;
-  }
-  #infoModalContent img {
-    width: 80px; height: 80px;
-    border-radius: 50%;
-    margin-bottom: 10px;
-  }
-  #closeModal {
-    background: #1877f2;
-    border: none;
-    padding: 8px 15px;
-    color: white;
-    border-radius: 8px;
-    margin-top: 10px;
-    cursor: pointer;
-  }
-  @keyframes fadeIn {
-    from {opacity: 0; transform: translateY(5px);}
-    to {opacity: 1; transform: translateY(0);}
-  }
-  @keyframes scaleIn {
-    from {transform: scale(0.8); opacity: 0;}
-    to {transform: scale(1); opacity: 1;}
-  }
+    body {
+        font-family: Arial, sans-serif;
+        background: #f0f2f5;
+        margin: 0;
+        padding: 0;
+    }
+    header {
+        background: #1877f2;
+        color: white;
+        padding: 15px;
+        font-size: 20px;
+        text-align: center;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .search-box {
+        display: flex;
+        padding: 10px;
+        background: white;
+    }
+    .search-box input {
+        flex: 1;
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+        border-radius: 20px;
+        outline: none;
+    }
+    .user-list {
+        padding: 10px;
+    }
+    .user-card {
+        background: white;
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        cursor: pointer;
+        transform: scale(0.95);
+        transition: all 0.3s ease;
+    }
+    .user-card:hover {
+        transform: scale(1);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .user-card img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-right: 15px;
+    }
+    .user-info {
+        flex: 1;
+    }
+    .user-info h3 {
+        margin: 0;
+        font-size: 16px;
+        color: #333;
+    }
+    .user-info p {
+        margin: 3px 0 0;
+        font-size: 14px;
+        color: gray;
+    }
+    /* Modal */
+    .modal {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        animation: fadeIn 0.3s ease;
+    }
+    .modal-content {
+        background: white;
+        padding: 20px;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 350px;
+        text-align: center;
+        animation: slideUp 0.3s ease;
+    }
+    .modal-content img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        margin-bottom: 10px;
+    }
+    @keyframes fadeIn {
+        from {opacity: 0;}
+        to {opacity: 1;}
+    }
+    @keyframes slideUp {
+        from {transform: translateY(50px); opacity: 0;}
+        to {transform: translateY(0); opacity: 1;}
+    }
 </style>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
-<!-- Sidebar -->
-<div id="sidebar">
-  <div id="searchUser">
-    <input type="text" id="searchInput" placeholder="Mitady olona...">
-  </div>
-  <div id="userList"></div>
+<header>Chat Search</header>
+
+<div class="search-box">
+    <input type="text" id="searchInput" placeholder="Karohy amin'ny anarana...">
 </div>
 
-<!-- Chat -->
-<div id="container">
-  <div id="chatHeader">
-    <span>Safidio ny olona</span>
-    <button id="viewInfoBtn" style="display:none;">Info</button>
-  </div>
-  <div id="chatBox"></div>
-  <div id="sendMsgDiv">
-    <input id="msg" placeholder="Lazao hafatra" />
-    <button id="sendBtn" onclick="sendMsg()">Alefa</button>
-  </div>
+<div class="user-list" id="userList">
+    <!-- Users will be loaded here -->
 </div>
 
-<!-- Modal Info -->
-<div id="infoModal">
-  <div id="infoModalContent">
-    <img id="infoPic" src="" alt="">
-    <h3 id="infoName"></h3>
-    <p><strong>ID:</strong> <span id="infoId"></span></p>
-    <p><strong>Gmail:</strong> <span id="infoGmail"></span></p>
-    <button id="closeModal">Hidio</button>
-  </div>
+<!-- Modal -->
+<div class="modal" id="userModal">
+    <div class="modal-content" id="modalContent">
+        <img src="" id="modalImg" alt="Profile">
+        <h3 id="modalName"></h3>
+        <p id="modalEmail"></p>
+        <p>ID: <span id="modalId"></span></p>
+        <button onclick="closeModal()">Hidio</button>
+    </div>
 </div>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
-  authDomain: "mitalky.firebaseapp.com",
-  projectId: "mitalky",
-  storageBucket: "mitalky.appspot.com",
-  messagingSenderId: "753557195623",
-  appId: "1:753557195623:web:abc3b37eca5d67c9157dc2"
-};
+    const users = [
+        {id: "101", name: "Andry Rakoto", email: "andry@example.com", img: "https://i.pravatar.cc/150?img=1"},
+        {id: "102", name: "Fara Andri", email: "fara@example.com", img: "https://i.pravatar.cc/150?img=2"},
+        {id: "103", name: "Tiana Raz", email: "tiana@example.com", img: "https://i.pravatar.cc/150?img=3"},
+        {id: "104", name: "Joel Rabe", email: "joel@example.com", img: "https://i.pravatar.cc/150?img=4"},
+    ];
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+    const userList = document.getElementById("userList");
+    const searchInput = document.getElementById("searchInput");
+    const modal = document.getElementById("userModal");
 
-let myUid, myId, otherUid, otherUserData;
+    function displayUsers(list) {
+        userList.innerHTML = "";
+        list.forEach(user => {
+            const card = document.createElement("div");
+            card.className = "user-card";
+            card.innerHTML = `
+                <img src="${user.img}" alt="${user.name}">
+                <div class="user-info">
+                    <h3>${user.name}</h3>
+                    <p>${user.email}</p>
+                </div>
+            `;
+            card.onclick = () => showModal(user);
+            userList.appendChild(card);
+        });
+    }
 
-auth.onAuthStateChanged(user => {
-  if (!user) return window.location.href = "nextpage.html";
-  myUid = user.uid;
-  db.collection("users").doc(myUid).get().then(doc => {
-    if (!doc.exists) return window.location.href = "dashboard.html";
-    myId = doc.data().id;
-    loadUserList();
-  });
-});
+    function showModal(user) {
+        document.getElementById("modalImg").src = user.img;
+        document.getElementById("modalName").innerText = user.name;
+        document.getElementById("modalEmail").innerText = user.email;
+        document.getElementById("modalId").innerText = user.id;
+        modal.style.display = "flex";
+    }
 
-function loadUserList() {
-  db.collection("users").get().then(snapshot => {
-    const listDiv = document.getElementById("userList");
-    listDiv.innerHTML = "";
-    snapshot.forEach(doc => {
-      if (doc.id !== myUid) {
-        const data = doc.data();
-        const item = document.createElement("div");
-        item.classList.add("user-item");
-        item.innerHTML = `<img src="${data.photo || 'https://i.pravatar.cc/150'}">
-                          <div>
-                            <div class="user-name">${data.name || "Anarana tsy voafaritra"}</div>
-                            <div style="font-size:12px;color:gray;">ID: ${data.id}</div>
-                          </div>`;
-        item.onclick = () => {
-          otherUid = doc.id;
-          otherUserData = data;
-          document.getElementById("chatHeader").children[0].textContent = data.name || data.id;
-          document.getElementById("viewInfoBtn").style.display = "inline-block";
-          listenToMessages();
-        };
-        listDiv.appendChild(item);
-      }
+    function closeModal() {
+        modal.style.display = "none";
+    }
+
+    searchInput.addEventListener("input", () => {
+        const value = searchInput.value.toLowerCase();
+        const filtered = users.filter(user => user.name.toLowerCase().includes(value));
+        displayUsers(filtered);
     });
-  });
-}
 
-document.getElementById("searchInput").addEventListener("input", function() {
-  const term = this.value.toLowerCase();
-  document.querySelectorAll(".user-item").forEach(item => {
-    item.style.display = item.textContent.toLowerCase().includes(term) ? "flex" : "none";
-  });
-});
-
-function listenToMessages() {
-  const chatId = [myUid, otherUid].sort().join("_");
-  db.collection("chats").doc(chatId).collection("messages")
-    .orderBy("time")
-    .onSnapshot(snapshot => {
-      const box = document.getElementById("chatBox");
-      box.innerHTML = "";
-      snapshot.forEach(doc => {
-        const msg = doc.data();
-        const div = document.createElement("div");
-        div.classList.add("message", msg.from === myUid ? "sent" : "received");
-        div.textContent = msg.text;
-        box.appendChild(div);
-      });
-      box.scrollTop = box.scrollHeight;
-    });
-}
-
-function sendMsg() {
-  const text = document.getElementById("msg").value.trim();
-  if (!text || !otherUid) return;
-  const chatId = [myUid, otherUid].sort().join("_");
-  db.collection("chats").doc(chatId).collection("messages").add({
-    from: myUid,
-    text,
-    time: firebase.firestore.FieldValue.serverTimestamp()
-  });
-  document.getElementById("msg").value = "";
-}
-
-// Modal info
-document.getElementById("viewInfoBtn").onclick = () => {
-  if (!otherUserData) return;
-  document.getElementById("infoPic").src = otherUserData.photo || 'https://i.pravatar.cc/150';
-  document.getElementById("infoName").textContent = otherUserData.name || "Anarana tsy voafaritra";
-  document.getElementById("infoId").textContent = otherUserData.id || "";
-  document.getElementById("infoGmail").textContent = otherUserData.gmail || "Tsy voafaritra";
-  document.getElementById("infoModal").style.display = "flex";
-};
-document.getElementById("closeModal").onclick = () => {
-  document.getElementById("infoModal").style.display = "none";
-};
+    displayUsers(users);
 </script>
+
 </body>
 </html>
