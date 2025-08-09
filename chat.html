@@ -219,6 +219,19 @@
   @media (max-width:760px){
     .hamburger{ display:inline-flex; align-items:center; justify-content:center; }
   }
+.hand-emoji {
+  display: inline-block;
+  animation: spin 2s linear infinite;
+  font-size: 18px;
+  margin: 0 4px;
+  transform-origin: 50% 50%;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}
+
 </style>
 
 <!-- Firebase compat libs -->
@@ -250,7 +263,10 @@
 
       <div style="margin-top:10px" class="addById">
         <input id="inputAddId" placeholder="Entrez un ID (exemple: 101)" />
-        <button class="btn" id="btnAdd">Entrer</button>
+        <button class="btn" id="btnAdd">
+  <span class="hand-emoji">✋</span> Entrer <span class="hand-emoji">✋</span>
+</button>
+
       </div>
     </div>
 
