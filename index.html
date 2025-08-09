@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="mg">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Mi-talky</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
       margin: 0;
@@ -28,6 +28,9 @@
       outline-offset: -10px;
       text-align: center;
       transition: all 0.3s ease-in-out;
+      position: relative;
+      overflow: hidden;
+      height: 140px; /* hanamafy ny haavon'ny div dot+text */
     }
 
     .container:hover {
@@ -60,22 +63,37 @@
       font-weight: bold;
     }
 
-    .dots {
+    .dot-text-container {
+      position: relative;
+      height: 50px;
       margin: 30px 0;
     }
 
-    .dot {
-      display: inline-block;
-      width: 14px;
-      height: 14px;
-      background: lightgray;
-      border-radius: 50%;
-      margin: 0 6px;
-      transition: background 0.3s;
+    .dot-text {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      opacity: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      color: #444;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      max-width: 350px;
     }
 
-    .dot.active {
+    .dot-text.active {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .dot-circle {
+      width: 16px;
+      height: 16px;
       background: #1877f2;
+      border-radius: 50%;
+      flex-shrink: 0;
     }
 
     .buttons {
@@ -121,10 +139,19 @@
 
     <h2 class="title">Bienvenue sur mi-talky</h2>
 
-    <div class="dots">
-      <span class="dot active">Cette application est conçue pour se connecter avec d'autres personnes et envoyer des messages simples.</span>
-      <span class="dot">Il y a toujours une mise à jour, mais n'arrêtez pas d'utiliser l'application.</span>
-      <span class="dot">Allez, c'est parti !</span>
+    <div class="dot-text-container">
+      <div class="dot-text active">
+        <div class="dot-circle"></div>
+        <span>Cette application est conçue pour se connecter avec d'autres personnes et envoyer des messages simples.</span>
+      </div>
+      <div class="dot-text">
+        <div class="dot-circle"></div>
+        <span>Il y a toujours une mise à jour, mais n'arrêtez pas d'utiliser l'application.</span>
+      </div>
+      <div class="dot-text">
+        <div class="dot-circle"></div>
+        <span>Allez, c'est parti !</span>
+      </div>
     </div>
 
     <div class="buttons">
@@ -136,31 +163,36 @@
 
   <script>
     let currentStep = 0;
+    const steps = document.querySelectorAll(".dot-text");
 
-    function updateDots() {
-      const dots = document.querySelectorAll(".dot");
-      dots.forEach((dot, index) => {
-        dot.classList.toggle("active", index === currentStep);
+    function updateSteps() {
+      steps.forEach((step, i) => {
+        if (i === currentStep) {
+          step.classList.add("active");
+        } else {
+          step.classList.remove("active");
+        }
       });
 
-      if (currentStep === 2) {
+      if (currentStep === steps.length - 1) {
         setTimeout(() => {
-          window.location.href = "nextpage.html"; // soloina amin'ny pejy tianao
+          window.location.href = "nextpage.html"; // ovaina araka izay tadiavina
         }, 1000);
       }
     }
 
     function next() {
-      if (currentStep < 2) {
+      if (currentStep < steps.length - 1) {
         currentStep++;
-        updateDots();
+        updateSteps();
       }
     }
 
     function skip() {
-      currentStep = 2;
-      updateDots();
+      currentStep = steps.length - 1;
+      updateSteps();
     }
   </script>
+
 </body>
 </html>
