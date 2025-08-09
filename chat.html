@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Pub Firebase avec Like & Messages</title>
+<title>Pub Firebase avec Like & Messages par Pub</title>
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -42,7 +42,7 @@
   button:hover {
     background: #145dbf;
   }
-  .pub, .message {
+  .pub {
     background: white;
     border-radius: 8px;
     padding: 15px;
@@ -78,7 +78,15 @@
     margin-top: 8px;
   }
   .messages-section {
-    margin-top: 50px;
+    margin-top: 15px;
+    border-top: 1px solid #ddd;
+    padding-top: 15px;
+  }
+  .message {
+    background: #e8f0fe;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-bottom: 8px;
   }
   .message-user {
     font-weight: bold;
@@ -86,7 +94,7 @@
   }
   .message-time {
     font-size: 0.8em;
-    color: #888;
+    color: #555;
     margin-left: 10px;
   }
 </style>
@@ -109,18 +117,6 @@
 <h2>Liste des Pubs</h2>
 <div id="pubList">Chargement...</div>
 
-<!-- Section Messages -->
-<div class="messages-section">
-  <h2>Envoyer un Message</h2>
-  <label for="messageText">Votre Message :</label>
-  <textarea id="messageText" rows="3" placeholder="Écrivez votre message ici..."></textarea>
-  <button id="btnSendMessage">Envoyer Message</button>
-  <div id="msgError" class="error"></div>
-
-  <h2>Messages reçus</h2>
-  <div id="messageList">Chargement des messages...</div>
-</div>
-
 <script>
   // Config Firebase
   const firebaseConfig = {
@@ -132,11 +128,10 @@
     appId: "1:753557195623:web:abc3b37eca5d67c9157dc2"
   };
 
-  // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  // Générer un userId unique stocké en localStorage
+  // userId unique localStorage
   function getUserId() {
     let userId = localStorage.getItem('userId');
     if(!userId) {
@@ -149,16 +144,15 @@
 
   const pubList = document.getElementById('pubList');
   const errorMsg = document.getElementById('errorMsg');
-  const messageList = document.getElementById('messageList');
-  const msgError = document.getElementById('msgError');
 
-  // AFFICHER LES PUBS (fonction identique)
+  // Fonction afficher pubs + boutons like + commentaires
   function renderPubs(docs) {
     if(docs.length === 0) {
       pubList.innerHTML = '<p>Aucune pub pour le moment.</p>';
       return;
     }
     pubList.innerHTML = '';
+
     docs.forEach(doc => {
       const data = doc.data();
       const id = doc.id;
@@ -174,28 +168,64 @@
 
       const likesCount = data.likesCount || 0;
       const likesBy = data.likesBy || [];
-
       const userLiked = likesBy.includes(userId);
 
       content += `<br/><button class="like-btn ${userLiked ? 'liked' : ''}" data-id="${id}">${userLiked ? '❤️ Like' : '🤍 Like'}</button>
                   <span class="likes-count">${likesCount} like${likesCount !== 1 ? 's' : ''}</span>`;
 
+      // Bouton pour afficher/cacher la section messages
+      content += `<br/><button class="toggle-comments-btn" data-id="${id}">Afficher les messages</button>`;
+
+      // Section commentaires cachée (sera affichée au clic)
+      content += `
+        <div class="messages-section" id="messages-section-${id}" style="display:none;">
+          <div class="messages-list" id="messages-list-${id}">Chargement des messages...</div>
+          <textarea id="input-message-${id}" rows="2" placeholder="Écrire un message..."></textarea>
+          <button class="send-message-btn" data-id="${id}">Envoyer</button>
+          <div class="error" id="error-msg-${id}"></div>
+        </div>
+      `;
+
       div.innerHTML = content;
       pubList.appendChild(div);
     });
 
+    // Like boutons
     document.querySelectorAll('.like-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const pubId = btn.getAttribute('data-id');
         toggleLike(pubId, btn);
       });
     });
+
+    // Toggle commentaires
+    document.querySelectorAll('.toggle-comments-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const pubId = btn.getAttribute('data-id');
+        const section = document.getElementById(`messages-section-${pubId}`);
+        if(section.style.display === 'none'){
+          section.style.display = 'block';
+          btn.textContent = "Cacher les messages";
+          loadMessages(pubId);
+        } else {
+          section.style.display = 'none';
+          btn.textContent = "Afficher les messages";
+        }
+      });
+    });
+
+    // Envoi message
+    document.querySelectorAll('.send-message-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const pubId = btn.getAttribute('data-id');
+        sendMessage(pubId);
+      });
+    });
   }
 
-  // Toggle like (identique)
+  // Toggle like/unlike
   function toggleLike(pubId, btn) {
     const pubRef = db.collection('pubs').doc(pubId);
-
     db.runTransaction(async (transaction) => {
       const doc = await transaction.get(pubRef);
       if(!doc.exists) throw "Pub introuvable";
@@ -212,10 +242,7 @@
         likesCount++;
       }
 
-      transaction.update(pubRef, {
-        likesBy: likesBy,
-        likesCount: likesCount
-      });
+      transaction.update(pubRef, { likesBy, likesCount });
     }).then(() => {
       pubRef.get().then(doc => {
         if(doc.exists){
@@ -232,19 +259,78 @@
           countSpan.textContent = `${data.likesCount} like${data.likesCount !== 1 ? 's' : ''}`;
         }
       });
+    }).catch(error => alert("Erreur lors du Like: " + error));
+  }
+
+  // Charger les messages pour un pub donné (subcollection "messages")
+  function loadMessages(pubId) {
+    const messagesList = document.getElementById(`messages-list-${pubId}`);
+    messagesList.innerHTML = 'Chargement des messages...';
+
+    db.collection('pubs').doc(pubId).collection('messages')
+      .orderBy('createdAt', 'asc')
+      .get()
+      .then(snapshot => {
+        if(snapshot.empty){
+          messagesList.innerHTML = '<p>Aucun message pour cette pub.</p>';
+          return;
+        }
+        messagesList.innerHTML = '';
+        snapshot.forEach(doc => {
+          const msg = doc.data();
+          const dateStr = msg.createdAt ? new Date(msg.createdAt.seconds * 1000).toLocaleString() : 'Date inconnue';
+          const div = document.createElement('div');
+          div.className = 'message';
+          div.innerHTML = `<span class="message-user">${msg.userId}</span>
+                           <span class="message-time">${dateStr}</span>
+                           <p>${msg.text}</p>`;
+          messagesList.appendChild(div);
+        });
+      }).catch(error => {
+        messagesList.innerHTML = `<p style="color:red;">Erreur chargement messages: ${error.message}</p>`;
+      });
+  }
+
+  // Envoyer un message dans la subcollection "messages" du pub
+  function sendMessage(pubId) {
+    const input = document.getElementById(`input-message-${pubId}`);
+    const errorDiv = document.getElementById(`error-msg-${pubId}`);
+    const text = input.value.trim();
+    errorDiv.textContent = '';
+
+    if(!text) {
+      errorDiv.textContent = "Le message est obligatoire.";
+      return;
+    }
+
+    const btn = input.nextElementSibling; // bouton Envoyer
+    btn.disabled = true;
+    btn.textContent = "Envoi...";
+
+    db.collection('pubs').doc(pubId).collection('messages').add({
+      userId: userId,
+      text: text,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+      input.value = '';
+      btn.disabled = false;
+      btn.textContent = "Envoyer";
+      loadMessages(pubId); // rafraîchir messages
     }).catch(error => {
-      alert("Erreur lors du Like: " + error);
+      errorDiv.textContent = "Erreur envoi message : " + error.message;
+      btn.disabled = false;
+      btn.textContent = "Envoyer";
     });
   }
 
-  // Chargement temps réel pubs
+  // Chargement en temps réel des pubs
   db.collection('pubs').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
     renderPubs(snapshot.docs);
   }, error => {
     pubList.innerHTML = `<p style="color:red;">Erreur de chargement des pubs : ${error.message}</p>`;
   });
 
-  // Création pub
+  // Création pub via formulaire
   document.getElementById('btnCreatePub').addEventListener('click', () => {
     const text = document.getElementById('pubText').value.trim();
     const url = document.getElementById('pubUrl').value.trim();
@@ -274,64 +360,6 @@
       errorMsg.textContent = "Erreur lors de la création de la pub : " + error.message;
       btn.disabled = false;
       btn.textContent = 'Créer Pub';
-    });
-  });
-
-  // --- Partie Messages ---
-
-  // Fonction afficher messages
-  function renderMessages(docs) {
-    if(docs.length === 0) {
-      messageList.innerHTML = '<p>Aucun message pour le moment.</p>';
-      return;
-    }
-    messageList.innerHTML = '';
-    docs.forEach(doc => {
-      const data = doc.data();
-      const div = document.createElement('div');
-      div.className = 'message';
-
-      const dateStr = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleString() : 'Date inconnue';
-      div.innerHTML = `<span class="message-user">${data.userId}</span>
-                       <span class="message-time">${dateStr}</span>
-                       <p>${data.text}</p>`;
-      messageList.appendChild(div);
-    });
-  }
-
-  // Chargement temps réel messages
-  db.collection('messages').orderBy('createdAt', 'desc').limit(30).onSnapshot(snapshot => {
-    renderMessages(snapshot.docs);
-  }, error => {
-    messageList.innerHTML = `<p style="color:red;">Erreur de chargement des messages : ${error.message}</p>`;
-  });
-
-  // Envoyer un message
-  document.getElementById('btnSendMessage').addEventListener('click', () => {
-    const messageText = document.getElementById('messageText').value.trim();
-    msgError.textContent = '';
-
-    if(!messageText) {
-      msgError.textContent = "Le message est obligatoire.";
-      return;
-    }
-
-    const btn = document.getElementById('btnSendMessage');
-    btn.disabled = true;
-    btn.textContent = "Envoi en cours...";
-
-    db.collection('messages').add({
-      userId: userId,
-      text: messageText,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => {
-      document.getElementById('messageText').value = '';
-      btn.disabled = false;
-      btn.textContent = "Envoyer Message";
-    }).catch(error => {
-      msgError.textContent = "Erreur lors de l'envoi du message : " + error.message;
-      btn.disabled = false;
-      btn.textContent = "Envoyer Message";
     });
   });
 </script>
