@@ -132,68 +132,83 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    auth.onAuthStateChanged(user => {
-      if (!user) return window.location.href = "nextpage.html";
+auth.onAuthStateChanged(async user => {
+  if (!user) return window.location.href = "nextpage.html";
 
-      const uid = user.uid;
-      const profileSection = document.getElementById("profile-section");
+  const uid = user.uid;
+  const profileSection = document.getElementById("profile-section");
 
-      db.collection("users").doc(uid).get().then(doc => {
-        if (!doc.exists) {
-          // Affiche formulaire création profil
-          profileSection.innerHTML = `
-            <input id="name" type="text" placeholder="Nom" />
-            <select id="genre">
-              <option value="">Sélectionnez le genre</option>
-              <option value="garçon">Garçon</option>
-              <option value="fille">Fille</option>
-              <option value="autre">Autre</option>
-            </select>
-            <button onclick="saveProfile()">Enregistrer Profil</button>
-          `;
-        } else {
-          // Affiche profil existant
-          const data = doc.data();
-          profileSection.innerHTML = `
-            <div class="profile-info">
-              <p><strong>Nom :</strong> ${data.name}</p>
-              <p><strong>Genre :</strong> ${data.genre || '-'}</p>
-              <p><strong>ID :</strong> ${data.id}</p>
-              <p><strong>Email :</strong> ${data.email || user.phoneNumber}</p>
-            </div>
-            <a class="chat-link" href="chat.html?uid=${uid}">Aller au chat</a>
-          `;
-        }
-      });
-    });
+  // Affiche loading kely aloha
+  profileSection.innerHTML = `<p style="color:#1877f2">Chargement du profil...</p>`;
 
-    function saveProfile() {
-      const uid = auth.currentUser.uid;
-      const name = document.getElementById("name").value.trim();
-      const genre = document.getElementById("genre").value;
+  try {
+    const doc = await db.collection("users").doc(uid).get();
 
-      if (!name || !genre) {
-        alert("Remplissez correctement le nom et le genre.");
-        return;
-      }
+    if (!doc.exists) {
+      // Affiche formulaire création profil
+      profileSection.innerHTML = `
+        <input id="name" type="text" placeholder="Nom" />
+        <select id="genre">
+          <option value="">Sélectionnez le genre</option>
+          <option value="garçon">Garçon</option>
+          <option value="fille">Fille</option>
+          <option value="autre">Autre</option>
+        </select>
+        <button id="saveBtn">Enregistrer Profil</button>
+      `;
 
-      const id = Math.floor(100000 + Math.random() * 900000);
-      const email = auth.currentUser.email || auth.currentUser.phoneNumber;
-
-      db.collection("users").doc(uid).set({
-        name,
-        genre,
-        id,
-        email
-      }).then(() => {
-        alert("Profil voatahiry!");
-        location.reload();
-      }).catch(e => alert("Erreur: " + e.message));
+      document.getElementById("saveBtn").addEventListener('click', saveProfile);
+    } else {
+      const data = doc.data();
+      showProfile(data, user, uid);
     }
+  } catch (error) {
+    profileSection.innerHTML = `<p style="color:red">Erreur de chargement: ${error.message}</p>`;
+  }
+});
 
-    document.getElementById("logoutBtn").onclick = () => {
-      auth.signOut().then(() => window.location.href = "nextpage.html");
-    };
+function showProfile(data, user, uid) {
+  const profileSection = document.getElementById("profile-section");
+  profileSection.innerHTML = `
+    <div class="profile-info">
+      <p><strong>Nom :</strong> ${data.name}</p>
+      <p><strong>Genre :</strong> ${data.genre || '-'}</p>
+      <p><strong>ID :</strong> ${data.id}</p>
+      <p><strong>Email :</strong> ${data.email || user.phoneNumber}</p>
+    </div>
+    <a class="chat-link" href="chat.html?uid=${uid}">Aller au chat</a>
+  `;
+}
+
+async function saveProfile() {
+  const uid = auth.currentUser.uid;
+  const name = document.getElementById("name").value.trim();
+  const genre = document.getElementById("genre").value;
+
+  if (!name || !genre) {
+    alert("Remplissez correctement le nom et le genre.");
+    return;
+  }
+
+  const id = Math.floor(100000 + Math.random() * 900000);
+  const email = auth.currentUser.email || auth.currentUser.phoneNumber;
+
+  try {
+    await db.collection("users").doc(uid).set({
+      name,
+      genre,
+      id,
+      email
+    });
+    alert("Profil voatahiry!");
+    // Affiche profil voatahiry avy hatrany nefa tsy reload
+    const doc = await db.collection("users").doc(uid).get();
+    showProfile(doc.data(), auth.currentUser, uid);
+  } catch (e) {
+    alert("Erreur: " + e.message);
+  }
+}
+
   </script>
 </body>
 </html>
