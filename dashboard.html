@@ -155,7 +155,7 @@
     const VALID_REFERRAL_CODE = "REF123";
 
     auth.onAuthStateChanged(async user => {
-      if (!user) return window.location.href = "login.html";
+      if (!user) return window.location.href = "nextpage.html";
 
       const uid = user.uid;
       const profileSection = document.getElementById("profile-section");
@@ -200,7 +200,7 @@
           <p><strong>ID :</strong> ${data.id}</p>
           <p><strong>Email :</strong> ${data.email || user.phoneNumber}</p>
         </div>
-        <a class="chat-link" href="chat.html?uid=${uid}">Aller au chat</a>
+        <a class="chat-link" href="chat.html?uid=${uid}">Allons au pub.</a>
         <button id="savePngBtn">Enregistrer profil en PNG</button>
       `;
 
