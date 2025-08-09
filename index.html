@@ -178,10 +178,20 @@
     const steps = document.querySelectorAll(".dot-text");
     const nextBtn = document.getElementById("nextBtn");
 
-    function updateSteps() {
-      steps.forEach((step, i) => {
-        step.classList.toggle("active", i === currentStep);
-      });
+   function updateSteps() {
+  steps.forEach((step, i) => {
+    step.classList.toggle("active", i === currentStep);
+  });
+
+  if (currentStep === steps.length - 1) {
+    nextBtn.classList.add("disabled");
+    // Tsy apetraka intsony ilay setTimeout raha tianao mbola azo tsindrina fa 
+    // raha tsy tianao aza dia esory ilay setTimeout mankany amin'ny pejy hafa
+  } else {
+    nextBtn.classList.remove("disabled");
+  }
+}
+
 
       // Raha tonga amin'ny farany
       if (currentStep === steps.length - 1) {
