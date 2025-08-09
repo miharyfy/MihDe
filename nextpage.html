@@ -2,114 +2,16 @@
 <html lang="mg">
 <head>
   <meta charset="UTF-8" />
-  <title>Inscription/Login</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inscription/Login avec Email et Téléphone</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f0f2f5;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .container {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
-      width: 320px;
-      text-align: center;
-      animation: fadeInUp 0.7s ease forwards;
-    }
-    @keyframes fadeInUp {
-      0% {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    input, button {
-      width: 100%;
-      margin: 10px 0;
-      padding: 12px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-      box-sizing: border-box;
-      outline-offset: 2px;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    input:focus {
-      border-color: #1877f2;
-      box-shadow: 0 0 8px rgba(24,119,242,0.5);
-    }
-
-    button {
-      background-color: #1877f2;
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-      transition: background-color 0.3s ease, transform 0.15s ease;
-      user-select: none;
-    }
-
-    button:hover {
-      background-color: #0f5dc8;
-      transform: scale(1.05);
-    }
-
-    button:active {
-      transform: scale(0.98);
-    }
-
-    p.error {
-      color: red;
-      font-size: 14px;
-      min-height: 20px;
-      opacity: 0;
-      transition: opacity 0.4s ease;
-      margin: 5px 0 0 0;
-    }
-    p.error.visible {
-      opacity: 1;
-    }
-
-    /* Wrapper ho an'ny password + icon */
-    .password-wrapper {
-      position: relative;
-      width: 100%;
-    }
-    .password-wrapper input {
-      padding-right: 40px; /* espace ho an'ny icon */
-    }
-    .toggle-password {
-      position: absolute;
-      top: 50%;
-      right: 10px;
-      transform: translateY(-50%);
-      width: 24px;
-      height: 24px;
-      cursor: pointer;
-      fill: #888;
-      transition: fill 0.3s ease, transform 0.3s ease;
-      user-select: none;
-    }
-    .toggle-password:hover {
-      fill: #1877f2;
-      transform: translateY(-50%) scale(1.1);
-    }
-    .toggle-password.active {
-      fill: #1877f2;
-      transform: translateY(-50%) scale(1.2) rotate(20deg);
-    }
+    /* Style mitovy amin'ny anao ihany no ampiana */
+    body { font-family: Arial, sans-serif; background:#f0f2f5; display:flex; justify-content:center; align-items:center; height:100vh; margin:0; }
+    .container { background:#fff; padding:30px; border-radius:10px; box-shadow:0 2px 12px rgba(0,0,0,0.2); width:320px; text-align:center; }
+    input, button { width:100%; margin:10px 0; padding:12px; border-radius:6px; border:1px solid #ccc; font-size:16px; }
+    button { background:#1877f2; color:#fff; border:none; cursor:pointer; font-weight:600; }
+    button:hover { background:#0f5dc8; }
+    p.error { color:red; font-size:14px; min-height:20px; }
   </style>
 </head>
 <body>
@@ -117,19 +19,22 @@
 <div class="container">
   <h2>Inscription / Connexion</h2>
 
-  <input id="email" type="email" placeholder="Email" required autocomplete="email" />
-
-  <div class="password-wrapper">
-    <input id="password" type="password" placeholder="Mot de passe" required autocomplete="current-password" />
-    <!-- Eye icon SVG -->
-    <svg id="togglePassword" class="toggle-password" viewBox="0 0 24 24" >
-      <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
-      <circle cx="12" cy="12" r="2.5"/>
-    </svg>
+  <div id="emailSection">
+    <input id="email" type="email" placeholder="Email" autocomplete="email" />
+    <input id="password" type="password" placeholder="Mot de passe" autocomplete="current-password" />
+    <button onclick="signupEmail()">S'inscrire avec Email</button>
+    <button onclick="loginEmail()">Se connecter avec Email</button>
   </div>
 
-  <button onclick="signup()">S'inscrire</button>
-  <button onclick="login()">Se connecter</button>
+  <hr />
+
+  <div id="phoneSection">
+    <input id="phoneNumber" type="tel" placeholder="+261 32 12 345 67" />
+    <div id="recaptcha-container"></div>
+    <button onclick="sendVerificationCode()">Envoyer Code SMS</button>
+    <input id="verificationCode" type="text" placeholder="Code de vérification" style="display:none;" />
+    <button id="verifyCodeBtn" onclick="verifyCode()" style="display:none;">Vérifier Code</button>
+  </div>
 
   <p class="error" id="error"></p>
 </div>
@@ -140,12 +45,12 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-  // Firebase config - soloinao amin'ny anao
+  // Config Firebase (soloinao ny anao)
   const firebaseConfig = {
     apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
     authDomain: "mitalky.firebaseapp.com",
     projectId: "mitalky",
-    storageBucket: "mitalky.firebasestorage.app",
+    storageBucket: "mitalky.appspot.com",
     messagingSenderId: "753557195623",
     appId: "1:753557195623:web:abc3b37eca5d67c9157dc2"
   };
@@ -154,35 +59,12 @@
   const db = firebase.firestore();
 
   const errorElement = document.getElementById("error");
-  const togglePassword = document.getElementById('togglePassword');
-  const passwordInput = document.getElementById('password');
 
-  // Toggle password visibility with animation on icon
-  togglePassword.addEventListener('click', function () {
-    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-    passwordInput.setAttribute('type', type);
-
-    if(type === 'password') {
-      togglePassword.classList.remove('active');
-    } else {
-      togglePassword.classList.add('active');
-    }
-  });
-
-  function showError(message) {
-    errorElement.textContent = message;
-    errorElement.classList.add('visible');
-  }
-
-  function clearError() {
-    errorElement.textContent = "";
-    errorElement.classList.remove('visible');
-  }
-
-  function signup() {
+  // --- EMAIL SIGNUP with email verification ---
+  function signupEmail() {
     clearError();
     const email = document.getElementById("email").value.trim();
-    const password = passwordInput.value;
+    const password = document.getElementById("password").value;
 
     if (!email || !password) {
       showError("Veuillez remplir tous les champs.");
@@ -192,32 +74,34 @@
     auth.createUserWithEmailAndPassword(email, password)
       .then((userCredential) => {
         const user = userCredential.user;
-        const idManokana = generateUniqueID();
-
-        return db.collection("users").doc(user.uid).set({
-          email: email,
-          id: idManokana,
-          name: "",
-          photo: ""
-        });
+        // Envoi mail vérification
+        user.sendEmailVerification()
+          .then(() => {
+            alert("Un email de vérification a été envoyé. Veuillez vérifier votre boite mail.");
+            // Optionnel: crée doc user dans firestore
+            const idManokana = generateUniqueID();
+            return db.collection("users").doc(user.uid).set({
+              email: email,
+              id: idManokana,
+              name: "",
+              photo: ""
+            });
+          });
       })
-      .then(() => {
-        alert("Inscription réussie !");
-        window.location.href = "dashboard.html";
-      })
-      .catch((error) => {
+      .catch(error => {
         if (error.code === "auth/email-already-in-use") {
-          alert("Cet email est déjà utilisé. Veuillez vous connecter.");
+          showError("Cet email est déjà utilisé.");
         } else {
           showError(error.message);
         }
       });
   }
 
-  function login() {
+  // --- EMAIL LOGIN avec vérification email obligatoire ---
+  function loginEmail() {
     clearError();
     const email = document.getElementById("email").value.trim();
-    const password = passwordInput.value;
+    const password = document.getElementById("password").value;
 
     if (!email || !password) {
       showError("Veuillez remplir tous les champs.");
@@ -225,16 +109,87 @@
     }
 
     auth.signInWithEmailAndPassword(email, password)
-      .then(() => {
+      .then(({user}) => {
+        if (!user.emailVerified) {
+          showError("Veuillez vérifier votre email avant de vous connecter.");
+          auth.signOut();
+          return;
+        }
         alert("Connexion réussie !");
         window.location.href = "dashboard.html";
       })
-      .catch((error) => {
-        showError(error.message);
-      });
+      .catch(error => showError(error.message));
   }
 
-  // Ex: fonction pour générer ID unique (à modifier selon besoin)
+  // --- PHONE AUTH SETUP ---
+
+  // Récaptcha verifier initialisation
+  window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+    size: 'normal',
+    callback: (response) => {
+      // reCAPTCHA solved
+    },
+    'expired-callback': () => {
+      // Reset reCAPTCHA
+    }
+  });
+  recaptchaVerifier.render();
+
+  let confirmationResult;
+
+  function sendVerificationCode() {
+    clearError();
+    const phoneNumber = document.getElementById("phoneNumber").value.trim();
+    if (!phoneNumber) {
+      showError("Entrez un numéro de téléphone valide.");
+      return;
+    }
+    auth.signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
+      .then((result) => {
+        confirmationResult = result;
+        alert("Code de vérification envoyé par SMS.");
+        document.getElementById("verificationCode").style.display = "block";
+        document.getElementById("verifyCodeBtn").style.display = "block";
+      })
+      .catch(error => showError(error.message));
+  }
+
+  function verifyCode() {
+    clearError();
+    const code = document.getElementById("verificationCode").value.trim();
+    if (!code) {
+      showError("Entrez le code de vérification.");
+      return;
+    }
+    confirmationResult.confirm(code)
+      .then((result) => {
+        const user = result.user;
+        alert("Téléphone vérifié, connexion réussie !");
+        // Enregistrement Firestore user si nouveau
+        db.collection("users").doc(user.uid).get().then(doc => {
+          if (!doc.exists) {
+            const idManokana = generateUniqueID();
+            db.collection("users").doc(user.uid).set({
+              phone: user.phoneNumber,
+              id: idManokana,
+              name: "",
+              photo: ""
+            });
+          }
+        });
+        window.location.href = "dashboard.html";
+      })
+      .catch(error => showError("Code incorrect ou expiré."));
+  }
+
+  // Utils
+  function showError(msg) {
+    errorElement.textContent = msg;
+  }
+  function clearError() {
+    errorElement.textContent = "";
+  }
+
   function generateUniqueID() {
     return 'id-' + Math.random().toString(36).substr(2, 9);
   }
