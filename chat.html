@@ -97,6 +97,16 @@
     color: #555;
     margin-left: 10px;
   }
+  .delete-btn {
+    background:#e0245e; 
+    color: white;
+    border:none;
+    padding:6px 12px;
+    margin-top:10px;
+    border-radius:5px;
+    cursor:pointer;
+    font-size:0.9em;
+  }
 </style>
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -118,7 +128,6 @@
 <div id="pubList">Chargement...</div>
 
 <script>
-  // Config Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
     authDomain: "mitalky.firebaseapp.com",
@@ -145,7 +154,7 @@
   const pubList = document.getElementById('pubList');
   const errorMsg = document.getElementById('errorMsg');
 
-  // Fonction afficher pubs + boutons like + commentaires
+  // Afficher pubs, like, commentaires + boutons supprimer pub
   function renderPubs(docs) {
     if(docs.length === 0) {
       pubList.innerHTML = '<p>Aucune pub pour le moment.</p>';
@@ -173,10 +182,11 @@
       content += `<br/><button class="like-btn ${userLiked ? 'liked' : ''}" data-id="${id}">${userLiked ? '❤️ Like' : '🤍 Like'}</button>
                   <span class="likes-count">${likesCount} like${likesCount !== 1 ? 's' : ''}</span>`;
 
-      // Bouton pour afficher/cacher la section messages
       content += `<br/><button class="toggle-comments-btn" data-id="${id}">Afficher les messages</button>`;
 
-      // Section commentaires cachée (sera affichée au clic)
+      // Bouton Supprimer Pub
+      content += `<br/><button class="delete-pub-btn delete-btn" data-id="${id}">Supprimer Pub</button>`;
+
       content += `
         <div class="messages-section" id="messages-section-${id}" style="display:none;">
           <div class="messages-list" id="messages-list-${id}">Chargement des messages...</div>
@@ -219,6 +229,14 @@
       btn.addEventListener('click', () => {
         const pubId = btn.getAttribute('data-id');
         sendMessage(pubId);
+      });
+    });
+
+    // Suppression pub
+    document.querySelectorAll('.delete-pub-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const pubId = btn.getAttribute('data-id');
+        deletePub(pubId);
       });
     });
   }
@@ -281,11 +299,24 @@
           const dateStr = msg.createdAt ? new Date(msg.createdAt.seconds * 1000).toLocaleString() : 'Date inconnue';
           const div = document.createElement('div');
           div.className = 'message';
-          div.innerHTML = `<span class="message-user">${msg.userId}</span>
-                           <span class="message-time">${dateStr}</span>
-                           <p>${msg.text}</p>`;
+          div.innerHTML = `
+            <span class="message-user">${msg.userId}</span>
+            <span class="message-time">${dateStr}</span>
+            <p>${msg.text}</p>
+            <button class="delete-message-btn delete-btn" data-pub-id="${pubId}" data-msg-id="${doc.id}">Supprimer</button>
+          `;
           messagesList.appendChild(div);
         });
+
+        // Écouteurs suppression messages
+        messagesList.querySelectorAll('.delete-message-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const pubId = btn.getAttribute('data-pub-id');
+            const msgId = btn.getAttribute('data-msg-id');
+            deleteMessage(pubId, msgId);
+          });
+        });
+
       }).catch(error => {
         messagesList.innerHTML = `<p style="color:red;">Erreur chargement messages: ${error.message}</p>`;
       });
@@ -323,8 +354,39 @@
     });
   }
 
+  // Supprimer un message donné
+  function deleteMessage(pubId, messageId) {
+    if (!confirm("Voulez-vous vraiment supprimer ce message ?")) return;
+
+    db.collection('pubs').doc(pubId).collection('messages').doc(messageId)
+      .delete()
+      .then(() => {
+        loadMessages(pubId);
+      })
+      .catch(error => {
+        alert("Erreur suppression message : " + error.message);
+      });
+  }
+
+  // Supprimer une pub et ses messages (messages supprimés en batch)
+  async function deletePub(pubId) {
+    if (!confirm("Voulez-vous vraiment supprimer cette pub et tous ses messages ?")) return;
+
+    const pubRef = db.collection('pubs').doc(pubId);
+    try {
+      const messagesSnapshot = await pubRef.collection('messages').get();
+      const batch = db.batch();
+      messagesSnapshot.forEach(doc => {
+        batch.delete(doc.ref);
+      });
+      batch.delete(pubRef);
+      await batch.commit();
+    } catch (error) {
+      alert("Erreur suppression pub : " + error.message);
+    }
+  }
+
   // Chargement en temps réel des pubs
-  content += `<br/><button class="delete-pub-btn" data-id="${id}" style="background:#e0245e;">Supprimer Pub</button>`;
   db.collection('pubs').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
     renderPubs(snapshot.docs);
   }, error => {
@@ -363,72 +425,6 @@
       btn.textContent = 'Créer Pub';
     });
   });
-// Supprimer un message donné
-function deleteMessage(pubId, messageId) {
-  if (!confirm("Voulez-vous vraiment supprimer ce message ?")) return;
-
-  db.collection('pubs').doc(pubId).collection('messages').doc(messageId)
-    .delete()
-    .then(() => {
-      loadMessages(pubId); // rafraîchir
-  snapshot.forEach(doc => {
-  const msg = doc.data();
-  const dateStr = msg.createdAt ? new Date(msg.createdAt.seconds * 1000).toLocaleString() : 'Date inconnue';
-  const div = document.createElement('div');
-  div.className = 'message';
-
-  div.innerHTML = `
-    <span class="message-user">${msg.userId}</span>
-    <span class="message-time">${dateStr}</span>
-    <p>${msg.text}</p>
-    <button class="delete-message-btn" data-pub-id="${pubId}" data-msg-id="${doc.id}" style="background:#e0245e; font-size:0.8em; margin-top:5px;">Supprimer</button>
-  `;
-
-  messagesList.appendChild(div);
-});
-
-// Après la boucle forEach, ajouter écouteurs suppression message :
-messagesList.querySelectorAll('.delete-message-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const pubId = btn.getAttribute('data-pub-id');
-    const msgId = btn.getAttribute('data-msg-id');
-    deleteMessage(pubId, msgId);
-  });
-});
-
-    })
-    .catch(error => {
-      alert("Erreur suppression message : " + error.message);
-    });
-}
-
-// Supprimer une pub et ses messages (messages supprimés en batch)
-async function deletePub(pubId) {
-  if (!confirm("Voulez-vous vraiment supprimer cette pub et tous ses messages ?")) return;
-
-  const pubRef = db.collection('pubs').doc(pubId);
-  try {
-    // Supprimer les messages de la subcollection "messages"
-    const messagesSnapshot = await pubRef.collection('messages').get();
-    const batch = db.batch();
-    messagesSnapshot.forEach(doc => {
-      batch.delete(doc.ref);
-    });
-    batch.delete(pubRef); // supprimer la pub elle-même
-    await batch.commit();
-    // Pub supprimée, Firestore onSnapshot va rafraîchir la liste
-  } catch (error) {
-    alert("Erreur suppression pub : " + error.message);
-  }
-}
-// Bouton suppression pub
-document.querySelectorAll('.delete-pub-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const pubId = btn.getAttribute('data-id');
-    deletePub(pubId);
-  });
-});
-
 
 </script>
 
