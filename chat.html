@@ -3,184 +3,304 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Page de pubs avec réactions et messages privés</title>
+<title>Pub avec Firebase - MiTalk</title>
 <style>
   body {
     font-family: Arial, sans-serif;
-    max-width: 600px;
+    max-width: 700px;
     margin: 20px auto;
-    background: #f7f9fc;
+    background: #f0f2f5;
     color: #222;
   }
-  h1 {
-    text-align: center;
-    color: #1877f2;
-  }
+  h1 { text-align: center; color: #1877f2; }
   form {
     margin-bottom: 20px;
+    background: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgb(24 119 242 / 0.3);
   }
-  textarea {
+  input, textarea {
     width: 100%;
-    height: 60px;
-    resize: vertical;
-    padding: 8px;
-    font-size: 14px;
+    padding: 10px 12px;
+    margin: 8px 0;
     border-radius: 8px;
     border: 1px solid #ccc;
+    font-size: 14px;
+    box-sizing: border-box;
   }
   button {
     background: #1877f2;
     color: white;
     border: none;
-    padding: 10px 14px;
-    border-radius: 8px;
+    padding: 12px 16px;
+    border-radius: 10px;
     cursor: pointer;
-    font-weight: bold;
+    font-weight: 700;
+    margin-top: 8px;
   }
-  button:hover {
-    background: #145dbf;
-  }
+  button:hover { background: #145dbf; }
+
   .pub {
     background: white;
-    padding: 12px 16px;
-    border-radius: 12px;
-    margin-bottom: 15px;
-    box-shadow: 0 3px 8px rgba(24, 119, 242, 0.15);
+    border-radius: 14px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 3px 10px rgb(24 119 242 / 0.15);
   }
   .pub-header {
-    font-weight: bold;
-    margin-bottom: 8px;
+    font-weight: 700;
+    margin-bottom: 6px;
     color: #1877f2;
+    cursor: pointer;
   }
   .pub-text {
     margin-bottom: 10px;
-    font-size: 15px;
+    white-space: pre-wrap;
+  }
+  .pub-link {
+    color: #1877f2;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .actions {
+    margin-top: 10px;
   }
   .actions button {
-    margin-right: 12px;
-    font-size: 14px;
+    margin-right: 15px;
+    cursor: pointer;
   }
   .messages {
-    margin-top: 10px;
+    margin-top: 12px;
     border-top: 1px solid #eee;
     padding-top: 10px;
   }
   .message {
+    background: #e7f0fe;
+    padding: 8px 12px;
+    border-radius: 10px;
+    margin-bottom: 8px;
     font-size: 13px;
-    background: #e9f0fe;
-    padding: 6px 10px;
-    border-radius: 8px;
-    margin-bottom: 6px;
   }
   .message strong {
     color: #145dbf;
+  }
+  #userPubsBtn {
+    margin-bottom: 15px;
+    background: #3b5998;
+    border-radius: 12px;
+  }
+  #logoutBtn {
+    background: #dc3545;
+    border-radius: 12px;
+    float: right;
+    margin-top: -45px;
   }
 </style>
 </head>
 <body>
 
-<h1>Publier et réagir</h1>
+<h1>MiTalk - Publications</h1>
+<button id="logoutBtn" style="display:none">Déconnexion</button>
+<button id="userPubsBtn" style="display:none">Voir mes pubs</button>
 
-<form id="pubForm">
-  <textarea id="pubInput" placeholder="Écrivez votre pub ici..." required></textarea><br/>
+<form id="pubForm" style="display:none">
+  <textarea id="pubText" placeholder="Écrivez votre pub..." required></textarea>
+  <input id="pubURL" type="url" placeholder="Lien URL (optionnel)" />
   <button type="submit">Publier</button>
 </form>
 
 <div id="pubsContainer"></div>
 
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-// Simulate current user (auteur)
-const currentUser = { id: 'user123', name: 'Jean Dupont' };
-
-// Liste des pubs stockées en mémoire
-const pubs = [];
-
-// Affiche toutes les pubs
-function renderPubs() {
-  const container = document.getElementById('pubsContainer');
-  container.innerHTML = '';
-
-  pubs.forEach(pub => {
-    const pubDiv = document.createElement('div');
-    pubDiv.className = 'pub';
-
-    // Texte des réactions (nombre)
-    const likes = pub.reactions.like || 0;
-
-    pubDiv.innerHTML = `
-      <div class="pub-header">${pub.authorName}</div>
-      <div class="pub-text">${escapeHtml(pub.text)}</div>
-      <div class="actions">
-        <button onclick="reactToPub('${pub.id}', 'like')">👍 Like (${likes})</button>
-        <button onclick="openCommentForm('${pub.id}')">Commenter (message privé)</button>
-      </div>
-      <div class="messages" id="messages-${pub.id}">
-        ${pub.messages.map(m => `<div class="message"><strong>${escapeHtml(m.from)}:</strong> ${escapeHtml(m.text)}</div>`).join('')}
-      </div>
-    `;
-
-    container.appendChild(pubDiv);
-  });
-}
-
-// Échapper HTML pour sécurité
-function escapeHtml(text) {
-  if (!text) return '';
-  return text.replace(/[&<>"']/g, function(m) {
-    return {'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'": '&#39;'}[m];
-  });
-}
-
-// Gérer la publication d'une nouvelle pub
-document.getElementById('pubForm').addEventListener('submit', e => {
-  e.preventDefault();
-  const text = document.getElementById('pubInput').value.trim();
-  if (!text) return alert("Veuillez écrire quelque chose.");
-
-  // Créer un nouvel objet pub
-  const newPub = {
-    id: 'pub' + Date.now(),
-    authorId: currentUser.id,
-    authorName: currentUser.name,
-    text: text,
-    reactions: { like: 0 },
-    messages: []
+  // Your Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
+    authDomain: "mitalky.firebaseapp.com",
+    projectId: "mitalky",
+    storageBucket: "mitalky.appspot.com",
+    messagingSenderId: "753557195623",
+    appId: "1:753557195623:web:abc3b37eca5d67c9157dc2"
   };
-  pubs.unshift(newPub); // ajouter au début
-  document.getElementById('pubInput').value = '';
-  renderPubs();
-});
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-// Ajouter une réaction
-function reactToPub(pubId, reaction) {
-  const pub = pubs.find(p => p.id === pubId);
-  if (!pub) return alert('Pub non trouvée.');
+  let currentUser = null;
+  let viewingUserPubs = false; // filtre pubs d'utilisateur connecté
 
-  if (!pub.reactions[reaction]) pub.reactions[reaction] = 0;
-  pub.reactions[reaction]++;
-  renderPubs();
-}
+  // Login anonyme automatique (pour demo)
+  auth.signInAnonymously().catch(console.error);
 
-// Ouvrir formulaire commentaire (message privé)
-function openCommentForm(pubId) {
-  const message = prompt("Envoyez un message privé à l'auteur de la pub :");
-  if (!message) return;
-
-  const pub = pubs.find(p => p.id === pubId);
-  if (!pub) return alert('Pub non trouvée.');
-
-  // Ajouter message dans la pub, uniquement visible par l'auteur (simulé ici)
-  pub.messages.push({
-    from: currentUser.name,
-    text: message
+  auth.onAuthStateChanged(user => {
+    if(user) {
+      currentUser = user;
+      document.getElementById('pubForm').style.display = 'block';
+      document.getElementById('logoutBtn').style.display = 'inline-block';
+      document.getElementById('userPubsBtn').style.display = 'inline-block';
+      loadPubs();
+    } else {
+      currentUser = null;
+      document.getElementById('pubForm').style.display = 'none';
+      document.getElementById('logoutBtn').style.display = 'none';
+      document.getElementById('userPubsBtn').style.display = 'none';
+      document.getElementById('pubsContainer').innerHTML = '<p>Connectez-vous pour voir et publier.</p>';
+    }
   });
 
-  alert("Message privé envoyé à " + pub.authorName + ".");
-  renderPubs();
-}
+  // Logout
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    auth.signOut();
+  });
 
-// Initial render
-renderPubs();
+  // Ajouter une pub
+  document.getElementById('pubForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    if(!currentUser) return alert("Vous devez être connecté");
+
+    const text = document.getElementById('pubText').value.trim();
+    const url = document.getElementById('pubURL').value.trim();
+
+    if(!text) return alert("Le texte est obligatoire");
+
+    // Créer pub
+    await db.collection('pubs').add({
+      authorId: currentUser.uid,
+      authorName: currentUser.isAnonymous ? "Anonyme" : currentUser.email || "Utilisateur",
+      text: text,
+      url: url || null,
+      reactions: { like: 0 },
+      messages: [],
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    document.getElementById('pubText').value = '';
+    document.getElementById('pubURL').value = '';
+    viewingUserPubs = false;
+    loadPubs();
+  });
+
+  // Charger pubs depuis Firestore
+  function loadPubs() {
+    let query = db.collection('pubs').orderBy('createdAt', 'desc').limit(30);
+    if(viewingUserPubs && currentUser) {
+      query = query.where('authorId', '==', currentUser.uid);
+    }
+    query.onSnapshot(snapshot => {
+      const pubs = [];
+      snapshot.forEach(doc => {
+        pubs.push({ id: doc.id, ...doc.data() });
+      });
+      renderPubs(pubs);
+    });
+  }
+
+  // Montrer pubs
+  function renderPubs(pubs) {
+    const container = document.getElementById('pubsContainer');
+    container.innerHTML = '';
+    if(pubs.length === 0) {
+      container.innerHTML = '<p style="text-align:center;color:#777;">Aucune publication trouvée.</p>';
+      return;
+    }
+    pubs.forEach(pub => {
+      const pubDiv = document.createElement('div');
+      pubDiv.className = 'pub';
+
+      // Titre (auteur)
+      const author = escapeHtml(pub.authorName);
+      // Texte pub + url clickable
+      const textHTML = escapeHtml(pub.text).replace(/(https?:\/\/[^\s]+)/g, url => 
+        `<a href="${url}" target="_blank" rel="noopener" class="pub-link">${url}</a>`);
+
+      // Bouton like
+      const likes = pub.reactions?.like || 0;
+
+      // Messages privés
+      const messagesHTML = (pub.messages || []).map(m => `
+        <div class="message"><strong>${escapeHtml(m.from)}:</strong> ${escapeHtml(m.text)}</div>
+      `).join('');
+
+      pubDiv.innerHTML = `
+        <div class="pub-header" onclick="showUserPubs('${pub.authorId}')">${author}</div>
+        <div class="pub-text">${textHTML}</div>
+        ${pub.url ? `<a href="${pub.url}" target="_blank" rel="noopener" class="pub-link">${pub.url}</a>` : ''}
+        <div class="actions">
+          <button onclick="reactToPub('${pub.id}', 'like')">👍 Like (${likes})</button>
+          <button onclick="commentOnPub('${pub.id}')">💬 Message privé</button>
+        </div>
+        <div class="messages">${messagesHTML}</div>
+      `;
+      container.appendChild(pubDiv);
+    });
+  }
+
+  // Like
+  async function reactToPub(pubId, reaction) {
+    const pubRef = db.collection('pubs').doc(pubId);
+    await db.runTransaction(async tx => {
+      const doc = await tx.get(pubRef);
+      if(!doc.exists) throw "Pub non trouvée";
+
+      const data = doc.data();
+      const currentCount = data.reactions?.[reaction] || 0;
+      const newReactions = {...data.reactions, [reaction]: currentCount + 1};
+      tx.update(pubRef, { reactions: newReactions });
+    });
+  }
+
+  // Commentaire message privé
+  async function commentOnPub(pubId) {
+    const text = prompt("Envoyez un message privé à l'auteur de cette pub :");
+    if(!text) return;
+
+    const pubRef = db.collection('pubs').doc(pubId);
+    await db.runTransaction(async tx => {
+      const doc = await tx.get(pubRef);
+      if(!doc.exists) throw "Pub non trouvée";
+
+      const data = doc.data();
+      const messages = data.messages || [];
+      messages.push({
+        from: currentUser.uid === data.authorId ? "Vous" : "Anonyme",
+        text: text,
+        createdAt: new Date()
+      });
+      tx.update(pubRef, { messages });
+    });
+  }
+
+  // Voir pubs de l'utilisateur (profil)
+  function showUserPubs(uid) {
+    if(!currentUser) return alert("Connectez-vous d'abord.");
+    if(uid === currentUser.uid) {
+      viewingUserPubs = true;
+      loadPubs();
+    } else {
+      alert("Fonctionnalité pour voir les pubs des autres utilisateurs non encore implémentée.");
+    }
+  }
+
+  // Escape HTML
+  function escapeHtml(text) {
+    if(!text) return '';
+    return text.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  // Bouton voir mes pubs
+  document.getElementById('userPubsBtn').addEventListener('click', () => {
+    viewingUserPubs = !viewingUserPubs;
+    if(viewingUserPubs) {
+      document.getElementById('userPubsBtn').textContent = "Voir toutes les pubs";
+    } else {
+      document.getElementById('userPubsBtn').textContent = "Voir mes pubs";
+    }
+    loadPubs();
+  });
+
 </script>
 
 </body>
