@@ -206,7 +206,7 @@
         <div class="logo">M</div>
         <div>
           <div style="font-size:14px;color:#0b1220;font-weight:700">MiTalk</div>
-          <div style="font-size:12px;color:var(--muted)">Chat moderne</div>
+          <div style="font-size:12px;color:var(--muted)">Chat</div>
         </div>
       </div>
       <!-- close button for mobile -->
@@ -215,12 +215,12 @@
 
     <div class="searchWrap">
       <div class="search">
-        <input id="globalSearch" placeholder="Mitady olona amin'ny anarana na ID..." />
+        <input id="globalSearch" placeholder="Vous recherchez quelqu'un par son nom ou ID..." />
       </div>
 
       <div style="margin-top:10px" class="addById">
         <input id="inputAddId" placeholder="Ampidiro ID (oh: 101)" />
-        <button class="btn" id="btnAdd">Ampidiro</button>
+        <button class="btn" id="btnAdd">Entrer</button>
       </div>
     </div>
 
@@ -236,8 +236,8 @@
         <button class="hamburger" id="openSidebar">☰</button>
         <div id="activeAvatar" class="modalAvatar" style="width:40px;height:40px"></div>
         <div>
-          <div class="title" id="activeName">Safidio ny olona</div>
-          <div class="sub" id="activeSub">Tsy mbola mifidy</div>
+          <div class="title" id="activeName">Choisissez des personnes</div>
+          <div class="sub" id="activeSub">Ne choisis pas encore</div>
         </div>
       </div>
       <div>
@@ -247,12 +247,12 @@
 
     <div class="chatMain" id="chatMain">
       <!-- messages injected here -->
-      <div style="opacity:0.6;color:var(--muted);margin:auto">Tsy mbola nifampiresaka — misafidiana olona avy amin'ny lisitra na ampidirina ID</div>
+      <div style="opacity:0.6;color:var(--muted);margin:auto">n'a jamais discuté — sélectionnez une personne dans la liste ou saisissez votre ID</div>
     </div>
 
     <div class="chatInput">
       <textarea id="messageInput" placeholder="Soraty ny hafatra..."></textarea>
-      <button class="sendBtn" id="sendBtn">Alefa</button>
+      <button class="sendBtn" id="sendBtn">Envoyez-le</button>
     </div>
   </div>
 </div>
@@ -263,7 +263,7 @@
     <div class="modalHeader">
       <div id="modalAvatar" class="modalAvatar"></div>
       <div>
-        <div class="modalName" id="modalName">Anarana</div>
+        <div class="modalName" id="modalName">Nom</div>
         <div style="color:var(--muted);font-size:13px" id="modalEmail">email@example.com</div>
       </div>
     </div>
@@ -346,7 +346,7 @@
         : `<div class="avatar" style="background-image:url('${initialsAvatar(data.name||('User '+data.id))}');background-size:cover;background-position:center"></div>`;
       el.innerHTML = `${avatarHTML}
         <div class="userMeta">
-          <div class="userName">${data.name || 'Anarana tsy voafaritra'}</div>
+          <div class="userName">${data.name || 'Nom non défini'}</div>
           <div class="userSub">ID: ${data.id} • ${data.gmail || '—'}</div>
         </div>`;
       el.addEventListener('click', () => {
@@ -385,7 +385,7 @@
     const idNum = isNaN(idVal) ? idVal : parseInt(idVal);
     db.collection('users').where('id','==', idNum).get().then(snapshot=>{
       if(snapshot.empty){
-        alert('Tsy hita ilay ID ao amin\'ny users.');
+        alert("L'ID n'est pas trouvé dans les utilisateurs.");
       } else {
         const doc = snapshot.docs[0];
         selectUser(doc.id, doc.data());
@@ -424,7 +424,7 @@
     const container = document.getElementById('chatMain');
     container.innerHTML = '';
     const loader = document.createElement('div');
-    loader.style.opacity = .6; loader.style.color = 'var(--muted)'; loader.innerText = 'Manafatra hafatra...';
+    loader.style.opacity = .6; loader.style.color = 'var(--muted)'; loader.innerText = 'Message de commande....';
     container.appendChild(loader);
 
     unsubscribeMessages = db.collection('chats').doc(chatId).collection('messages')
@@ -434,7 +434,7 @@
         if(snapshot.empty){
           const emptyNote = document.createElement('div');
           emptyNote.style.color = 'var(--muted)'; emptyNote.style.margin = 'auto';
-          emptyNote.innerText = 'Tsy mbola misy hafatra — manorata aloha!';
+          emptyNote.innerText = 'Aucun message pour le moment — écrivez d’abord !';
           container.appendChild(emptyNote);
         } else {
           snapshot.forEach(doc=>{
@@ -445,7 +445,7 @@
               el.innerHTML = `<div style="font-weight:600;margin-bottom:6px;font-size:13px;color:#0b1220">Izaho</div>
                               <div>${escapeHtml(m.text)}</div>`;
             } else {
-              el.innerHTML = `<div style="font-weight:600;margin-bottom:6px;font-size:13px;color:#0b1220">${selectedProfile.name||'Izy'}</div>
+              el.innerHTML = `<div style="font-weight:600;margin-bottom:6px;font-size:13px;color:#0b1220">${selectedProfile.name||'Il est'}</div>
                               <div>${escapeHtml(m.text)}</div>`;
             }
             container.appendChild(el);
@@ -462,7 +462,7 @@
   // Send message
   document.getElementById('sendBtn').addEventListener('click', ()=> {
     const text = document.getElementById('messageInput').value.trim();
-    if(!selectedUid){ alert('Safidio aloha ny olona hifampiresahana.'); return; }
+    if(!selectedUid){ alert('Tout d’abord, choisissez les personnes à qui vous souhaitez parler.'); return; }
     if(!text) return;
     const chatId = [myUid, selectedUid].sort().join('_');
     db.collection('chats').doc(chatId).collection('messages').add({
@@ -472,7 +472,7 @@
     }).then(()=>{
       document.getElementById('messageInput').value = '';
     }).catch(err=>{
-      console.error(err); alert('Tsy afaka mandefa hafatra ankehitriny.');
+      console.error(err); alert("Impossible d'envoyer des messages pour le moment.");
     });
   });
 
@@ -503,13 +503,13 @@
   // Auth state: get current user profile from users collection
   auth.onAuthStateChanged(async user=>{
     if(!user){
-      alert('Tsy mbola logged in — midira aloha (login).');
+      alert("Pas encore connecté — veuillez d'abord vous connecter.");
       return;
     }
     myUid = user.uid;
     const doc = await db.collection('users').doc(myUid).get();
     if(!doc.exists){
-      alert('Tsy nahita profil anao ao amin\'ny users collection — mandehana mamorona profil aloha.');
+      alert("Nous n'avons pas pu trouver votre profil dans la collection d'utilisateurs. Créez d'abord un profil.");
       return;
     }
     myProfile = doc.data();
