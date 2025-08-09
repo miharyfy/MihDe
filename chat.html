@@ -39,8 +39,12 @@
     cursor: pointer;
     font-size: 16px;
   }
-  button:hover {
+  button:hover:not(:disabled) {
     background: #145dbf;
+  }
+  button:disabled {
+    background: #a3c0f9;
+    cursor: not-allowed;
   }
   .pub {
     background: white;
@@ -48,6 +52,7 @@
     padding: 15px;
     margin-top: 20px;
     box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+    position: relative;
   }
   .pub a {
     color: #1877f2;
@@ -55,6 +60,29 @@
   }
   .pub a:hover {
     text-decoration: underline;
+  }
+  .deleteBtn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: #ff4d4d;
+    border: none;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  .deleteBtn:hover {
+    background: #e04343;
+  }
+  #searchInput {
+    margin-top: 20px;
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
   }
 </style>
 
@@ -73,6 +101,9 @@
 <input type="text" id="pubUrl" placeholder="https://exemple.com" />
 
 <button id="btnCreatePub">Créer Pub</button>
+
+<h2>Recherche dans les Pubs</h2>
+<input type="text" id="searchInput" placeholder="Recherche texte ou URL..." />
 
 <h2>Liste des Pubs</h2>
 <div id="pubList">Chargement...</div>
@@ -96,15 +127,19 @@
   const pubUrl = document.getElementById('pubUrl');
   const btnCreatePub = document.getElementById('btnCreatePub');
   const pubList = document.getElementById('pubList');
+  const searchInput = document.getElementById('searchInput');
 
-  // Fonction pour afficher pubs
-  function renderPubs(docs) {
-    if(docs.length === 0) {
+  // Stocker pubs localement pour recherche
+  let pubsCache = [];
+
+  // Fonction pour afficher pubs avec suppression
+  function renderPubs(pubs) {
+    if(pubs.length === 0) {
       pubList.innerHTML = '<p>Aucune pub pour le moment.</p>';
       return;
     }
     pubList.innerHTML = '';
-    docs.forEach(doc => {
+    pubs.forEach(doc => {
       const data = doc.data();
       const div = document.createElement('div');
       div.className = 'pub';
@@ -112,15 +147,30 @@
       if(data.url){
         content += `<a href="${data.url}" target="_blank" rel="noopener noreferrer">${data.url}</a>`;
       }
-      content += `<small style="color:#999">Créée le: ${data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleString() : 'Date inconnue'}</small>`;
+      content += `<br><small style="color:#999">Créée le: ${data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleString() : 'Date inconnue'}</small>`;
       div.innerHTML = content;
+
+      // Bouton suppression
+      const btnDel = document.createElement('button');
+      btnDel.textContent = 'Supprimer';
+      btnDel.className = 'deleteBtn';
+      btnDel.onclick = () => {
+        if(confirm('Voulez-vous vraiment supprimer cette pub ?')) {
+          db.collection('pubs').doc(doc.id).delete().catch(err=>{
+            alert("Erreur suppression : " + err.message);
+          });
+        }
+      };
+      div.appendChild(btnDel);
+
       pubList.appendChild(div);
     });
   }
 
-  // Charger pubs en temps réel
+  // Charger pubs en temps réel et stocker dans cache
   db.collection('pubs').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
-    renderPubs(snapshot.docs);
+    pubsCache = snapshot.docs;
+    applySearchFilter();
   }, error => {
     pubList.innerHTML = `<p style="color:red;">Erreur de chargement des pubs : ${error.message}</p>`;
   });
@@ -154,6 +204,27 @@
       btnCreatePub.textContent = 'Créer Pub';
     });
   });
+
+  // Recherche simple en JS dans pubsCache
+  function applySearchFilter() {
+    const query = searchInput.value.trim().toLowerCase();
+    if(!query) {
+      renderPubs(pubsCache);
+      return;
+    }
+    const filtered = pubsCache.filter(doc => {
+      const data = doc.data();
+      return (data.text && data.text.toLowerCase().includes(query)) || 
+             (data.url && data.url.toLowerCase().includes(query));
+    });
+    renderPubs(filtered);
+  }
+
+  // Écouter l'input de recherche
+  searchInput.addEventListener('input', () => {
+    applySearchFilter();
+  });
+
 </script>
 
 </body>
