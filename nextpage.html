@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="mg">
+<html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Facebook-like Login</title>
+  <title>Facebook-like Login / Inscription</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
@@ -16,43 +16,52 @@
     }
     .container {
       background:#fff;
-      padding:30px 25px;
+      padding:30px;
       border-radius:10px;
       box-shadow:0 2px 12px rgba(0,0,0,0.2);
       width:360px;
       text-align:center;
-      position: relative;
     }
-    h2 {
+    .tabs {
+      display: flex;
       margin-bottom: 20px;
+      justify-content: center;
     }
-    input {
+    .tab {
+      flex: 1;
+      padding: 10px 0;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      font-weight: 600;
+      color: #555;
+      user-select: none;
+      transition: border-color 0.3s ease, color 0.3s ease;
+    }
+    .tab.active {
+      border-color: #1877f2;
+      color: #1877f2;
+    }
+    input, button {
       width: 100%;
       margin: 10px 0;
-      padding: 12px 40px 12px 12px;
+      padding: 12px;
       border-radius: 6px;
       border: 1px solid #ccc;
       font-size: 16px;
       box-sizing: border-box;
       outline-offset: 2px;
       transition: border-color 0.3s ease, box-shadow 0.3s ease;
-      position: relative;
     }
     input:focus {
       border-color: #1877f2;
       box-shadow: 0 0 8px rgba(24,119,242,0.5);
     }
     button {
-      width: 100%;
-      margin: 10px 0;
-      padding: 12px;
-      border-radius: 6px;
-      border: none;
       background:#1877f2;
       color:#fff;
+      border:none;
       cursor:pointer;
       font-weight:600;
-      font-size: 16px;
       transition: background-color 0.3s ease;
       user-select: none;
     }
@@ -63,7 +72,7 @@
       color: red;
       min-height: 20px;
       font-size: 14px;
-      margin: 5px 0;
+      margin-top: 5px;
     }
     .link-btn {
       background: none;
@@ -73,21 +82,24 @@
       padding: 0;
       font-size: 14px;
       text-decoration: underline;
-      margin: 10px 0 0;
+      margin-top: 5px;
       user-select: none;
     }
-    /* Toggle password eye */
+    /* Password + eye icon */
     .password-wrapper {
       position: relative;
       width: 100%;
     }
+    .password-wrapper input {
+      padding-right: 40px;
+    }
     .toggle-password {
       position: absolute;
       top: 50%;
-      right: 12px;
+      right: 10px;
       transform: translateY(-50%);
-      width: 22px;
-      height: 22px;
+      width: 24px;
+      height: 24px;
       cursor: pointer;
       fill: #888;
       transition: fill 0.3s ease, transform 0.3s ease;
@@ -101,86 +113,73 @@
       fill: #1877f2;
       transform: translateY(-50%) scale(1.2) rotate(20deg);
     }
-    /* Hidden elements */
-    #recaptcha-container, #verificationCode, #verifyCodeBtn,
-    #resetEmail, #resetBtn {
-      display: none;
-    }
-    /* Toggle form tabs */
-    .tabs {
+    /* Recaptcha container */
+    #recaptcha-container {
+      margin: 10px 0;
       display: flex;
       justify-content: center;
-      margin-bottom: 15px;
-      gap: 15px;
     }
-    .tab-btn {
-      cursor: pointer;
-      padding: 8px 18px;
-      font-weight: 600;
-      color: #666;
-      border-bottom: 3px solid transparent;
-      user-select: none;
+    /* Hide verification inputs by default */
+    #verificationCode, #verifyCodeBtn {
+      display: none;
     }
-    .tab-btn.active {
-      color: #1877f2;
-      border-color: #1877f2;
+    /* Reset password inputs hidden initially */
+    #resetEmail, #resetBtn {
+      display: none;
     }
   </style>
 </head>
 <body>
 
 <div class="container">
-
   <div class="tabs">
-    <div id="tab-login" class="tab-btn active" onclick="showForm('login')">Connexion</div>
-    <div id="tab-signup" class="tab-btn" onclick="showForm('signup')">Inscription</div>
+    <div id="tab-login" class="tab active" onclick="showForm('login')">Connexion</div>
+    <div id="tab-signup" class="tab" onclick="showForm('signup')">Inscription</div>
   </div>
 
-  <!-- Connexion form -->
+  <!-- Formulaire Connexion -->
   <div id="login-form">
     <input id="login-identifier" type="text" placeholder="Email ou numéro téléphone (+261...)" autocomplete="username" />
     <div class="password-wrapper">
       <input id="login-password" type="password" placeholder="Mot de passe" autocomplete="current-password" />
-      <svg id="toggleLoginPassword" class="toggle-password" viewBox="0 0 24 24">
+      <svg id="login-togglePassword" class="toggle-password" viewBox="0 0 24 24">
         <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
         <circle cx="12" cy="12" r="2.5"/>
       </svg>
     </div>
     <button onclick="login()">Se connecter</button>
     <button class="link-btn" onclick="showResetPassword()">Mot de passe oublié ?</button>
+    <input id="resetEmail" type="email" placeholder="Entrez votre email" />
+    <button id="resetBtn" class="link-btn" onclick="resetPassword()">Envoyer lien de réinitialisation</button>
   </div>
 
-  <!-- Inscription form -->
+  <!-- Formulaire Inscription -->
   <div id="signup-form" style="display:none;">
-    <input id="signup-identifier" type="text" placeholder="Email ou numéro téléphone (+261...)" autocomplete="username" />
+    <input id="signup-email" type="email" placeholder="Email" autocomplete="email" />
     <div class="password-wrapper">
       <input id="signup-password" type="password" placeholder="Mot de passe" autocomplete="new-password" />
-      <svg id="toggleSignupPassword" class="toggle-password" viewBox="0 0 24 24">
+      <svg id="signup-togglePassword" class="toggle-password" viewBox="0 0 24 24">
         <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
         <circle cx="12" cy="12" r="2.5"/>
       </svg>
     </div>
+    <input id="signup-phone" type="text" placeholder="Numéro téléphone (+261...)" autocomplete="tel" />
+    <div id="recaptcha-container"></div>
+    <input id="verificationCode" type="text" placeholder="Code de vérification SMS" />
+    <button id="verifyCodeBtn" onclick="verifyCode()">Vérifier Code</button>
     <button onclick="signup()">S'inscrire</button>
   </div>
-
-  <!-- Reset password -->
-  <input id="resetEmail" type="email" placeholder="Entrez votre email pour réinitialiser" />
-  <button id="resetBtn" class="link-btn" onclick="resetPassword()">Envoyer lien de réinitialisation</button>
-
-  <!-- SMS verification -->
-  <div id="recaptcha-container"></div>
-  <input id="verificationCode" type="text" placeholder="Code de vérification SMS" />
-  <button id="verifyCodeBtn" onclick="verifyCode()">Vérifier Code</button>
 
   <p class="error" id="error"></p>
 </div>
 
-<!-- Firebase -->
+<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
+  // Config Firebase - soloinao amin'ny anao
   const firebaseConfig = {
     apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
     authDomain: "mitalky.firebaseapp.com",
@@ -194,44 +193,26 @@
   const db = firebase.firestore();
 
   // Elements
-  const errorElement = document.getElementById('error');
-
-  // Tabs & forms
   const tabLogin = document.getElementById('tab-login');
   const tabSignup = document.getElementById('tab-signup');
   const loginForm = document.getElementById('login-form');
   const signupForm = document.getElementById('signup-form');
+  const errorElement = document.getElementById('error');
   const resetEmailInput = document.getElementById('resetEmail');
   const resetBtn = document.getElementById('resetBtn');
   const verificationCodeInput = document.getElementById('verificationCode');
   const verifyCodeBtn = document.getElementById('verifyCodeBtn');
 
-  // Password toggles
-  const toggleLoginPassword = document.getElementById('toggleLoginPassword');
-  const loginPasswordInput = document.getElementById('login-password');
-  const toggleSignupPassword = document.getElementById('toggleSignupPassword');
-  const signupPasswordInput = document.getElementById('signup-password');
+  // Password toggle buttons
+  const loginTogglePwd = document.getElementById('login-togglePassword');
+  const loginPwdInput = document.getElementById('login-password');
+  const signupTogglePwd = document.getElementById('signup-togglePassword');
+  const signupPwdInput = document.getElementById('signup-password');
 
-  // Confirmation for phone auth
+  // Variables for phone auth confirmation
   let confirmationResult = null;
 
-  // Show error
-  function showError(msg) {
-    errorElement.textContent = msg;
-  }
-  // Clear error
-  function clearError() {
-    errorElement.textContent = '';
-  }
-
-  // Show reset password inputs
-  function showResetPassword() {
-    resetEmailInput.style.display = 'block';
-    resetBtn.style.display = 'block';
-    clearError();
-  }
-
-  // Switch tabs (login/signup)
+  // Switch login/signup forms
   function showForm(form) {
     clearError();
     if (form === 'login') {
@@ -256,107 +237,29 @@
   }
 
   // Toggle password visibility
-  toggleLoginPassword.addEventListener('click', () => {
-    togglePasswordVisibility(loginPasswordInput, toggleLoginPassword);
+  loginTogglePwd.addEventListener('click', () => {
+    togglePassword(loginPwdInput, loginTogglePwd);
   });
-  toggleSignupPassword.addEventListener('click', () => {
-    togglePasswordVisibility(signupPasswordInput, toggleSignupPassword);
+  signupTogglePwd.addEventListener('click', () => {
+    togglePassword(signupPwdInput, signupTogglePwd);
   });
-
-  function togglePasswordVisibility(passwordInput, toggleIcon) {
-    if (passwordInput.type === 'password') {
-      passwordInput.type = 'text';
+  function togglePassword(pwdInput, toggleIcon) {
+    if (pwdInput.type === 'password') {
+      pwdInput.type = 'text';
       toggleIcon.classList.add('active');
     } else {
-      passwordInput.type = 'password';
+      pwdInput.type = 'password';
       toggleIcon.classList.remove('active');
     }
   }
 
-  // Validate email
-  function validateEmail(email) {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-  }
-  // Validate phone (+261...)
-  function validatePhone(phone) {
-    return /^\+261\d{8,9}$/.test(phone);
-  }
-  // Generate unique ID
-  function generateUniqueID() {
-    return 'id-' + Math.random().toString(36).substr(2, 9);
+  // Show password reset inputs
+  function showResetPassword() {
+    resetEmailInput.style.display = 'block';
+    resetBtn.style.display = 'block';
   }
 
-  // LOGIN function
-  function login() {
-    clearError();
-    const identifier = document.getElementById('login-identifier').value.trim();
-    const password = loginPasswordInput.value;
-
-    if (!identifier || !password) {
-      showError('Veuillez remplir tous les champs.');
-      return;
-    }
-
-    if (validateEmail(identifier)) {
-      // Email login
-      auth.signInWithEmailAndPassword(identifier, password)
-        .then(({ user }) => {
-          if (!user.emailVerified) {
-            showError("Veuillez vérifier votre email avant de vous connecter.");
-            auth.signOut();
-            return;
-          }
-          alert("Connexion réussie !");
-          window.location.href = "dashboard.html";
-        })
-        .catch(error => {
-          showError(error.message);
-        });
-    } else if (validatePhone(identifier)) {
-      // Phone login via SMS code
-      startPhoneAuth(identifier);
-    } else {
-      showError("Entrez un email ou un numéro téléphone valide.");
-    }
-  }
-
-  // SIGNUP function
-  function signup() {
-    clearError();
-    const identifier = document.getElementById('signup-identifier').value.trim();
-    const password = signupPasswordInput.value;
-
-    if (!identifier || !password) {
-      showError('Veuillez remplir tous les champs.');
-      return;
-    }
-
-    if (validateEmail(identifier)) {
-      // Create user email + password + send email verification
-      auth.createUserWithEmailAndPassword(identifier, password)
-        .then(({ user }) => {
-          user.sendEmailVerification();
-          alert("Inscription réussie ! Un mail de vérification a été envoyé.");
-          // Ajouter dans Firestore
-          const idManokana = generateUniqueID();
-          db.collection('users').doc(user.uid).set({
-            email: identifier,
-            id: idManokana,
-            name: "",
-            photo: ""
-          });
-          showForm('login');
-        })
-        .catch(error => showError(error.message));
-    } else if (validatePhone(identifier)) {
-      startPhoneAuth(identifier);
-    } else {
-      showError('Entrez un email ou un numéro téléphone valide.');
-    }
-  }
-
-  // Reset password
+  // Send password reset email
   function resetPassword() {
     clearError();
     const email = resetEmailInput.value.trim();
@@ -369,30 +272,103 @@
       .catch(error => showError(error.message));
   }
 
-  // Recaptcha for phone auth
-  window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-    size: 'normal',
-    callback: () => {},
-    'expired-callback': () => {}
-  });
-  recaptchaVerifier.render();
+  // Login function (email or phone)
+  function login() {
+    clearError();
+    const identifier = document.getElementById('login-identifier').value.trim();
+    const password = loginPwdInput.value;
 
-  // Phone auth: send SMS code
-  let confirmationResult = null;
-  function startPhoneAuth(phone) {
-    auth.signInWithPhoneNumber(phone, window.recaptchaVerifier)
-      .then(result => {
-        confirmationResult = result;
-        alert("Code SMS envoyé.");
-        verificationCodeInput.style.display = 'block';
-        verifyCodeBtn.style.display = 'block';
-        resetEmailInput.style.display = 'none';
-        resetBtn.style.display = 'none';
+    if (!identifier || !password) {
+      showError("Veuillez remplir tous les champs.");
+      return;
+    }
+
+    if (validateEmail(identifier)) {
+      // Email login
+      auth.signInWithEmailAndPassword(identifier, password)
+        .then(({user}) => {
+          if (!user.emailVerified) {
+            showError("Veuillez vérifier votre email avant de vous connecter.");
+            auth.signOut();
+            return;
+          }
+          alert("Connexion réussie !");
+          window.location.href = "dashboard.html";
+        })
+        .catch(error => showError(error.message));
+    } else if (validatePhone(identifier)) {
+      // Phone login - ici on demande le SMS code, mieux faire via inscription dédiée
+      startPhoneAuth(identifier);
+    } else {
+      showError("Entrez un email ou un numéro téléphone valide.");
+    }
+  }
+
+  // Signup function with email + phone + SMS verification
+  function signup() {
+    clearError();
+    const email = document.getElementById('signup-email').value.trim();
+    const password = signupPwdInput.value;
+    const phone = document.getElementById('signup-phone').value.trim();
+
+    if (!email || !password || !phone) {
+      showError("Veuillez remplir tous les champs.");
+      return;
+    }
+    if (!validateEmail(email)) {
+      showError("Email non valide.");
+      return;
+    }
+    if (!validatePhone(phone)) {
+      showError("Numéro de téléphone non valide.");
+      return;
+    }
+
+    // D'abord créer l'utilisateur email/password
+    auth.createUserWithEmailAndPassword(email, password)
+      .then(({user}) => {
+        user.sendEmailVerification();
+        alert("Inscription réussie ! Un mail de vérification a été envoyé.");
+
+        // On attend que l'utilisateur vérifie email avant la suite (optionnel ici)
+
+        // Stocker l'email dans Firestore
+        const idManokana = generateUniqueID();
+        db.collection("users").doc(user.uid).set({
+          email: email,
+          id: idManokana,
+          name: "",
+          photo: ""
+        });
+
+        // Commencer vérification téléphone (SMS)
+        startPhoneAuth(phone);
+
       })
       .catch(error => showError(error.message));
   }
 
-  // Verify SMS code
+  // Setup recaptcha for phone auth
+  window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+    size: 'normal',
+    callback: (response) => {},
+    'expired-callback': () => {}
+  });
+  recaptchaVerifier.render();
+
+  // Démarrer auth téléphone et envoyer code SMS
+  function startPhoneAuth(phone) {
+    auth.signInWithPhoneNumber(phone, window.recaptchaVerifier)
+      .then((result) => {
+        confirmationResult = result;
+        alert("Code SMS envoyé.");
+        verificationCodeInput.style.display = 'block';
+        verifyCodeBtn.style.display = 'block';
+      })
+      .catch(error => showError(error.message));
+  }
+
+  // Vérifier code SMS
   function verifyCode() {
     clearError();
     const code = verificationCodeInput.value.trim();
@@ -401,8 +377,9 @@
       return;
     }
     confirmationResult.confirm(code)
-      .then(({ user }) => {
+      .then(({user}) => {
         alert("Téléphone vérifié, connexion réussie !");
+        // Ajouter user dans Firestore si nouveau
         db.collection("users").doc(user.uid).get().then(doc => {
           if (!doc.exists) {
             const idManokana = generateUniqueID();
@@ -417,6 +394,24 @@
         window.location.href = "dashboard.html";
       })
       .catch(() => showError("Code SMS incorrect ou expiré."));
+  }
+
+  // Utils
+  function validateEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  }
+  function validatePhone(phone) {
+    return /^\+261\d{8,9}$/.test(phone);
+  }
+  function showError(msg) {
+    errorElement.textContent = msg;
+  }
+  function clearError() {
+    errorElement.textContent = "";
+  }
+  function generateUniqueID() {
+    return 'id-' + Math.random().toString(36).substr(2, 9);
   }
 </script>
 
