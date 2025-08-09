@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Pub avec Like</title>
+<title>Pub avec Like & Suppression</title>
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -31,21 +31,29 @@
   .pub a:hover {
     text-decoration: underline;
   }
-  .like-btn {
+  .like-btn, .delete-btn {
     background: transparent;
     border: none;
-    color: #1877f2;
-    font-weight: bold;
     cursor: pointer;
+    font-weight: bold;
     margin-top: 10px;
+    font-size: 14px;
+  }
+  .like-btn {
+    color: #1877f2;
+    margin-right: 15px;
   }
   .liked {
     color: #e0245e; /* rose rouge like */
   }
+  .delete-btn {
+    color: #cc0000;
+    float: right;
+  }
   .likes-count {
     font-size: 0.9em;
     color: #555;
-    margin-left: 10px;
+    margin-left: 5px;
   }
 </style>
 
@@ -59,7 +67,6 @@
 <div id="pubList">Chargement...</div>
 
 <script>
-  // Config Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
     authDomain: "mitalky.firebaseapp.com",
@@ -69,11 +76,9 @@
     appId: "1:753557195623:web:abc3b37eca5d67c9157dc2"
   };
 
-  // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  // Générer un userId simulé unique stocké en localStorage
   function getUserId() {
     let userId = localStorage.getItem('userId');
     if(!userId) {
@@ -86,7 +91,6 @@
 
   const pubList = document.getElementById('pubList');
 
-  // Fonction pour afficher les pubs avec Like button
   function renderPubs(docs) {
     if(docs.length === 0) {
       pubList.innerHTML = '<p>Aucune pub pour le moment.</p>';
@@ -106,32 +110,43 @@
       }
       content += `<br/><small style="color:#999">Créée le: ${data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleString() : 'Date inconnue'}</small>`;
 
-      // Likes info
       const likesCount = data.likesCount || 0;
       const likesBy = data.likesBy || [];
 
-      // Vérifier si user a liké
       const userLiked = likesBy.includes(userId);
 
-      content += `<br/><button class="like-btn ${userLiked ? 'liked' : ''}" data-id="${id}">
-                    ${userLiked ? '❤️ Like' : '🤍 Like'}
-                  </button>
-                  <span class="likes-count">${likesCount} like${likesCount !== 1 ? 's' : ''}</span>`;
+      content += `
+        <button class="like-btn ${userLiked ? 'liked' : ''}" data-id="${id}">
+          ${userLiked ? '❤️ Like' : '🤍 Like'}
+        </button>
+        <span class="likes-count">${likesCount} like${likesCount !== 1 ? 's' : ''}</span>
+        <button class="delete-btn" data-id="${id}" title="Supprimer cette pub">🗑 Supprimer</button>
+      `;
 
       div.innerHTML = content;
       pubList.appendChild(div);
     });
 
-    // Ajouter écouteurs sur boutons like
+    // Like btn listeners
     document.querySelectorAll('.like-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const pubId = btn.getAttribute('data-id');
         toggleLike(pubId, btn);
       });
     });
+
+    // Delete btn listeners
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const pubId = btn.getAttribute('data-id');
+        if(confirm("Voulez-vous vraiment supprimer cette pub ?")) {
+          db.collection('pubs').doc(pubId).delete()
+          .catch(err => alert("Erreur lors de la suppression : " + err.message));
+        }
+      });
+    });
   }
 
-  // Fonction toggle like/unlike
   function toggleLike(pubId, btn) {
     const pubRef = db.collection('pubs').doc(pubId);
 
@@ -144,11 +159,9 @@
       let likesCount = data.likesCount || 0;
 
       if(likesBy.includes(userId)) {
-        // Unlike
         likesBy = likesBy.filter(uid => uid !== userId);
         likesCount = Math.max(0, likesCount - 1);
       } else {
-        // Like
         likesBy.push(userId);
         likesCount++;
       }
@@ -157,26 +170,11 @@
         likesBy: likesBy,
         likesCount: likesCount
       });
-    }).then(() => {
-      // Màj bouton like immédiatement
-      const userLikedNow = btn.classList.contains('liked');
-      if(userLikedNow) {
-        btn.classList.remove('liked');
-        btn.textContent = '🤍 Like';
-        const countSpan = btn.nextElementSibling;
-        countSpan.textContent = (parseInt(countSpan.textContent) - 1) + ' like' + ((parseInt(countSpan.textContent) - 1) !== 1 ? 's' : '');
-      } else {
-        btn.classList.add('liked');
-        btn.textContent = '❤️ Like';
-        const countSpan = btn.nextElementSibling;
-        countSpan.textContent = (parseInt(countSpan.textContent) + 1) + ' likes';
-      }
     }).catch(error => {
       alert("Erreur lors du Like: " + error);
     });
   }
 
-  // Chargement en temps réel des pubs
   db.collection('pubs').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
     renderPubs(snapshot.docs);
   }, error => {
