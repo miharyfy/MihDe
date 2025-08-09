@@ -97,22 +97,15 @@
     color: #555;
     margin-left: 10px;
   }
-  .delete-btn {
-    background:#e0245e; 
-    color: white;
-    border:none;
-    padding:6px 12px;
-    margin-top:10px;
-    border-radius:5px;
-    cursor:pointer;
-    font-size:0.9em;
-  }
 </style>
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
+
+<h2>Votre nom (obligatoire avant de créer ou commenter)</h2>
+<input type="text" id="userNameInput" placeholder="Entrez votre nom" />
 
 <h2>Créer une Pub</h2>
 <label for="pubText">Texte de la Pub :</label>
@@ -128,6 +121,7 @@
 <div id="pubList">Chargement...</div>
 
 <script>
+  // Config Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
     authDomain: "mitalky.firebaseapp.com",
@@ -153,8 +147,9 @@
 
   const pubList = document.getElementById('pubList');
   const errorMsg = document.getElementById('errorMsg');
+  const userNameInput = document.getElementById('userNameInput');
 
-  // Afficher pubs, like, commentaires + boutons supprimer pub
+  // Fonction afficher pubs + boutons like + commentaires
   function renderPubs(docs) {
     if(docs.length === 0) {
       pubList.innerHTML = '<p>Aucune pub pour le moment.</p>';
@@ -169,7 +164,8 @@
       const div = document.createElement('div');
       div.className = 'pub';
 
-      let content = `<p>${data.text}</p>`;
+      // Affichage avec nom de l'auteur
+      content = `<p><strong>${data.userName || 'Anonyme'}</strong>: ${data.text}</p>`;
       if(data.url){
         content += `<a href="${data.url}" target="_blank" rel="noopener noreferrer">${data.url}</a><br/>`;
       }
@@ -182,14 +178,14 @@
       content += `<br/><button class="like-btn ${userLiked ? 'liked' : ''}" data-id="${id}">${userLiked ? '❤️ Like' : '🤍 Like'}</button>
                   <span class="likes-count">${likesCount} like${likesCount !== 1 ? 's' : ''}</span>`;
 
+      // Bouton pour afficher/cacher la section messages
       content += `<br/><button class="toggle-comments-btn" data-id="${id}">Afficher les messages</button>`;
 
-      // Bouton Supprimer Pub
-      content += `<br/><button class="delete-pub-btn delete-btn" data-id="${id}">Supprimer Pub</button>`;
-
+      // Section commentaires cachée (sera affichée au clic)
       content += `
         <div class="messages-section" id="messages-section-${id}" style="display:none;">
           <div class="messages-list" id="messages-list-${id}">Chargement des messages...</div>
+          <input type="text" id="input-name-${id}" placeholder="Votre nom" style="width: 100%; margin-bottom: 5px; border-radius:6px; padding:8px; border:1px solid #ccc;">
           <textarea id="input-message-${id}" rows="2" placeholder="Écrire un message..."></textarea>
           <button class="send-message-btn" data-id="${id}">Envoyer</button>
           <div class="error" id="error-msg-${id}"></div>
@@ -229,14 +225,6 @@
       btn.addEventListener('click', () => {
         const pubId = btn.getAttribute('data-id');
         sendMessage(pubId);
-      });
-    });
-
-    // Suppression pub
-    document.querySelectorAll('.delete-pub-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const pubId = btn.getAttribute('data-id');
-        deletePub(pubId);
       });
     });
   }
@@ -299,24 +287,11 @@
           const dateStr = msg.createdAt ? new Date(msg.createdAt.seconds * 1000).toLocaleString() : 'Date inconnue';
           const div = document.createElement('div');
           div.className = 'message';
-          div.innerHTML = `
-            <span class="message-user">${msg.userId}</span>
-            <span class="message-time">${dateStr}</span>
-            <p>${msg.text}</p>
-            <button class="delete-message-btn delete-btn" data-pub-id="${pubId}" data-msg-id="${doc.id}">Supprimer</button>
-          `;
+          div.innerHTML = `<span class="message-user">${msg.userName || msg.userId}</span>
+                           <span class="message-time">${dateStr}</span>
+                           <p>${msg.text}</p>`;
           messagesList.appendChild(div);
         });
-
-        // Écouteurs suppression messages
-        messagesList.querySelectorAll('.delete-message-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const pubId = btn.getAttribute('data-pub-id');
-            const msgId = btn.getAttribute('data-msg-id');
-            deleteMessage(pubId, msgId);
-          });
-        });
-
       }).catch(error => {
         messagesList.innerHTML = `<p style="color:red;">Erreur chargement messages: ${error.message}</p>`;
       });
@@ -324,11 +299,17 @@
 
   // Envoyer un message dans la subcollection "messages" du pub
   function sendMessage(pubId) {
+    const inputName = document.getElementById(`input-name-${pubId}`);
     const input = document.getElementById(`input-message-${pubId}`);
     const errorDiv = document.getElementById(`error-msg-${pubId}`);
     const text = input.value.trim();
+    const userName = inputName.value.trim();
     errorDiv.textContent = '';
 
+    if(!userName) {
+      errorDiv.textContent = "Le nom est obligatoire.";
+      return;
+    }
     if(!text) {
       errorDiv.textContent = "Le message est obligatoire.";
       return;
@@ -340,6 +321,7 @@
 
     db.collection('pubs').doc(pubId).collection('messages').add({
       userId: userId,
+      userName: userName,
       text: text,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
@@ -354,38 +336,6 @@
     });
   }
 
-  // Supprimer un message donné
-  function deleteMessage(pubId, messageId) {
-    if (!confirm("Voulez-vous vraiment supprimer ce message ?")) return;
-
-    db.collection('pubs').doc(pubId).collection('messages').doc(messageId)
-      .delete()
-      .then(() => {
-        loadMessages(pubId);
-      })
-      .catch(error => {
-        alert("Erreur suppression message : " + error.message);
-      });
-  }
-
-  // Supprimer une pub et ses messages (messages supprimés en batch)
-  async function deletePub(pubId) {
-    if (!confirm("Voulez-vous vraiment supprimer cette pub et tous ses messages ?")) return;
-
-    const pubRef = db.collection('pubs').doc(pubId);
-    try {
-      const messagesSnapshot = await pubRef.collection('messages').get();
-      const batch = db.batch();
-      messagesSnapshot.forEach(doc => {
-        batch.delete(doc.ref);
-      });
-      batch.delete(pubRef);
-      await batch.commit();
-    } catch (error) {
-      alert("Erreur suppression pub : " + error.message);
-    }
-  }
-
   // Chargement en temps réel des pubs
   db.collection('pubs').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
     renderPubs(snapshot.docs);
@@ -397,7 +347,13 @@
   document.getElementById('btnCreatePub').addEventListener('click', () => {
     const text = document.getElementById('pubText').value.trim();
     const url = document.getElementById('pubUrl').value.trim();
+    const userName = userNameInput.value.trim();
     errorMsg.textContent = '';
+
+    if(!userName) {
+      errorMsg.textContent = "Le nom est obligatoire pour créer une pub.";
+      return;
+    }
 
     if(!text) {
       errorMsg.textContent = "Le texte de la pub est obligatoire.";
@@ -409,6 +365,7 @@
     btn.textContent = 'Envoi en cours...';
 
     db.collection('pubs').add({
+      userName: userName,
       text: text,
       url: url || '',
       likesCount: 0,
@@ -425,7 +382,6 @@
       btn.textContent = 'Créer Pub';
     });
   });
-
 </script>
 
 </body>
