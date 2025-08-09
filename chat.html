@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Pub avec Like</title>
+<title>Exemple Pub avec Like</title>
 <style>
   body {
     font-family: Arial, sans-serif;
-    max-width: 600px;
+    max-width: 700px;
     margin: 30px auto;
     background: #f0f4ff;
     padding: 20px;
@@ -40,188 +40,112 @@
     margin-top: 10px;
   }
   .liked {
-    color: #e0245e; /* rose rouge like */
+    color: #e0245e; /* rouge like */
   }
   .likes-count {
     font-size: 0.9em;
     color: #555;
     margin-left: 10px;
   }
+  /* Style tuto */
+  .tuto {
+    background: #fffbe6;
+    border: 1px solid #ffda44;
+    border-radius: 6px;
+    padding: 10px 15px;
+    margin-top: 30px;
+  }
+  pre {
+    background: #e6f0ff;
+    padding: 10px;
+    border-radius: 5px;
+    overflow-x: auto;
+  }
 </style>
-
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
-<h2>Liste des Pubs</h2>
-<div id="pubList">Chargement...</div>
+<h2>Exemples de Pubs statiques</h2>
+
+<div id="pubList">
+  <!-- Pub 1 -->
+  <div class="pub" id="pub1">
+    <p>🎉 Super promotion: -50% sur tous les articles !</p>
+    <a href="https://example.com/promo" target="_blank" rel="noopener noreferrer">Visitez notre site</a>
+    <br/>
+    <button class="like-btn" data-id="pub1">🤍 Like</button><span class="likes-count">0 likes</span>
+  </div>
+
+  <!-- Pub 2 -->
+  <div class="pub" id="pub2">
+    <p>🚀 Boostez votre productivité avec notre logiciel innovant.</p>
+    <a href="https://example.com/logiciel" target="_blank" rel="noopener noreferrer">En savoir plus</a>
+    <br/>
+    <button class="like-btn" data-id="pub2">🤍 Like</button><span class="likes-count">0 likes</span>
+  </div>
+
+  <!-- Pub 3 -->
+  <div class="pub" id="pub3">
+    <p>🍔 Nouveau restaurant en ville - livraison gratuite ce week-end !</p>
+    <a href="https://example.com/restaurant" target="_blank" rel="noopener noreferrer">Voir le menu</a>
+    <br/>
+    <button class="like-btn" data-id="pub3">🤍 Like</button><span class="likes-count">0 likes</span>
+  </div>
+</div>
+
+<!-- Petit tutoriel simple -->
+<div class="tuto">
+  <h3>Comment créer une pub simple en HTML :</h3>
+  <pre>
+&lt;div class="pub"&gt;
+  &lt;p&gt;Votre message publicitaire ici&lt;/p&gt;
+  &lt;a href="https://votresite.com" target="_blank"&gt;Visitez notre site&lt;/a&gt;
+  &lt;br/&gt;
+  &lt;button class="like-btn" data-id="identifiant_unique"&gt;🤍 Like&lt;/button&gt;&lt;span class="likes-count"&gt;0 likes&lt;/span&gt;
+&lt;/div&gt;
+  </pre>
+</div>
 
 <script>
-  // Config Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
-    authDomain: "mitalky.firebaseapp.com",
-    projectId: "mitalky",
-    storageBucket: "mitalky.appspot.com",
-    messagingSenderId: "753557195623",
-    appId: "1:753557195623:web:abc3b37eca5d67c9157dc2"
-  };
+  // Simple gestion likes locale (sans base de données)
+  // Stocker likes dans localStorage, pour persistance locale
 
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
+  const likesData = JSON.parse(localStorage.getItem('likesData') || '{}');
 
-  // Générer un userId simulé unique stocké en localStorage
-  function getUserId() {
-    let userId = localStorage.getItem('userId');
-    if(!userId) {
-      userId = 'user_' + Math.random().toString(36).substr(2, 9);
-      localStorage.setItem('userId', userId);
+  function updateLikesCount(pubId, count) {
+    const pubDiv = document.getElementById(pubId);
+    if(pubDiv){
+      const countSpan = pubDiv.querySelector('.likes-count');
+      if(countSpan) countSpan.textContent = count + (count !== 1 ? ' likes' : ' like');
     }
-    return userId;
-  }
-  const userId = getUserId();
-
-  const pubList = document.getElementById('pubList');
-
-  // Exemple de pub "sample" mivantana aseho raha mbola tsy misy ao amin'ny Firestore
-  const samplePubData = [{
-    id: 'sample1',
-    text: "Découvrez notre super offre ! 🎉",
-    url: "https://exemple.com",
-    createdAt: new Date(),
-    likesCount: 12,
-    likesBy: ["user_abc", "user_xyz"]
-  }];
-
-  // Fonction pour afficher pubs avec gestion du pub sample si vide
-  function renderPubs(docs) {
-    pubList.innerHTML = '';
-
-    if(docs.length === 0) {
-      // Aucune pub dans Firestore, afficher sample
-      samplePubData.forEach(pub => {
-        const div = document.createElement('div');
-        div.className = 'pub';
-
-        let content = `<p>${pub.text}</p>`;
-        if(pub.url){
-          content += `<a href="${pub.url}" target="_blank" rel="noopener noreferrer">${pub.url}</a>`;
-        }
-        content += `<br/><small style="color:#999">Créée le: ${pub.createdAt.toLocaleString()}</small>`;
-
-        const likesCount = pub.likesCount || 0;
-        const likesBy = pub.likesBy || [];
-        const userLiked = likesBy.includes(userId);
-
-        content += `<br/><button class="like-btn ${userLiked ? 'liked' : ''}" data-id="${pub.id}">
-                      ${userLiked ? '❤️ Like' : '🤍 Like'}
-                    </button>
-                    <span class="likes-count">${likesCount} like${likesCount !== 1 ? 's' : ''}</span>`;
-
-        div.innerHTML = content;
-        pubList.appendChild(div);
-      });
-
-      // Pas de gestion des likes sample car pas en DB
-      return;
-    }
-
-    // Sinon afficher pubs réelles Firestore
-    docs.forEach(doc => {
-      const data = doc.data();
-      const id = doc.id;
-
-      const div = document.createElement('div');
-      div.className = 'pub';
-
-      let content = `<p>${data.text}</p>`;
-      if(data.url){
-        content += `<a href="${data.url}" target="_blank" rel="noopener noreferrer">${data.url}</a>`;
-      }
-      content += `<br/><small style="color:#999">Créée le: ${data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleString() : 'Date inconnue'}</small>`;
-
-      const likesCount = data.likesCount || 0;
-      const likesBy = data.likesBy || [];
-      const userLiked = likesBy.includes(userId);
-
-      content += `<br/><button class="like-btn ${userLiked ? 'liked' : ''}" data-id="${id}">
-                    ${userLiked ? '❤️ Like' : '🤍 Like'}
-                  </button>
-                  <span class="likes-count">${likesCount} like${likesCount !== 1 ? 's' : ''}</span>`;
-
-      div.innerHTML = content;
-      pubList.appendChild(div);
-    });
-
-    // Ajouter écouteurs sur boutons like
-    document.querySelectorAll('.like-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const pubId = btn.getAttribute('data-id');
-        toggleLike(pubId, btn);
-      });
-    });
   }
 
-  // Fonction toggle like/unlike
   function toggleLike(pubId, btn) {
-    if(pubId.startsWith('sample')) {
-      alert("Cette pub est un exemple, impossible de liker.");
-      return; // Pas possible liker sample
+    if(likesData[pubId]){
+      likesData[pubId] = false;
+      btn.classList.remove('liked');
+      btn.textContent = '🤍 Like';
+      updateLikesCount(pubId, 0);
+    } else {
+      likesData[pubId] = true;
+      btn.classList.add('liked');
+      btn.textContent = '❤️ Like';
+      updateLikesCount(pubId, 1);
     }
-    const pubRef = db.collection('pubs').doc(pubId);
-
-    db.runTransaction(async (transaction) => {
-      const doc = await transaction.get(pubRef);
-      if(!doc.exists) throw "Pub introuvable";
-
-      const data = doc.data();
-      let likesBy = data.likesBy || [];
-      let likesCount = data.likesCount || 0;
-
-      if(likesBy.includes(userId)) {
-        // Unlike
-        likesBy = likesBy.filter(uid => uid !== userId);
-        likesCount = Math.max(0, likesCount - 1);
-      } else {
-        // Like
-        likesBy.push(userId);
-        likesCount++;
-      }
-
-      transaction.update(pubRef, {
-        likesBy: likesBy,
-        likesCount: likesCount
-      });
-    }).then(() => {
-      // Mise à jour précise à partir de Firestore
-      pubRef.get().then(doc => {
-        if(doc.exists){
-          const data = doc.data();
-          const userLikedNow = data.likesBy.includes(userId);
-          if(userLikedNow) {
-            btn.classList.add('liked');
-            btn.textContent = '❤️ Like';
-          } else {
-            btn.classList.remove('liked');
-            btn.textContent = '🤍 Like';
-          }
-          const countSpan = btn.nextElementSibling;
-          countSpan.textContent = `${data.likesCount} like${data.likesCount !== 1 ? 's' : ''}`;
-        }
-      });
-    }).catch(error => {
-      alert("Erreur lors du Like: " + error);
-    });
+    localStorage.setItem('likesData', JSON.stringify(likesData));
   }
 
-  // Chargement en temps réel des pubs Firestore
-  db.collection('pubs').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
-    renderPubs(snapshot.docs);
-  }, error => {
-    pubList.innerHTML = `<p style="color:red;">Erreur de chargement des pubs : ${error.message}</p>`;
+  document.querySelectorAll('.like-btn').forEach(btn => {
+    const pubId = btn.getAttribute('data-id');
+    if(likesData[pubId]) {
+      btn.classList.add('liked');
+      btn.textContent = '❤️ Like';
+      updateLikesCount(pubId, 1);
+    }
+
+    btn.addEventListener('click', () => {
+      toggleLike(pubId, btn);
+    });
   });
 </script>
 
