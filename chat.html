@@ -3,116 +3,82 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Créer une Pub avec Firebase</title>
+<title>Test Pub Firebase</title>
 <style>
   body {
     font-family: Arial, sans-serif;
-    max-width: 480px;
+    max-width: 600px;
     margin: 30px auto;
-    background: #f9fafb;
+    background: #f9f9f9;
     padding: 20px;
-    border-radius: 14px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    border-radius: 8px;
   }
   h2 {
-    text-align: center;
     color: #1877f2;
-    margin-bottom: 24px;
   }
   label {
     display: block;
-    margin-bottom: 6px;
-    font-weight: 600;
-    color: #333;
+    margin-top: 15px;
+    font-weight: bold;
   }
-  input[type="text"], input[type="url"], textarea {
+  input[type="text"], textarea {
     width: 100%;
-    padding: 10px 12px;
-    margin-bottom: 16px;
-    border-radius: 8px;
-    border: 1.8px solid #ccc;
-    font-size: 14px;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
     box-sizing: border-box;
-    transition: border-color 0.3s ease;
-  }
-  input[type="text"]:focus, input[type="url"]:focus, textarea:focus {
-    border-color: #1877f2;
-    outline: none;
-  }
-  textarea {
-    resize: vertical;
-    min-height: 90px;
-  }
-  .error {
-    color: #cc0000;
-    font-size: 13px;
-    margin-top: -12px;
-    margin-bottom: 12px;
   }
   button {
-    background-color: #1877f2;
+    margin-top: 15px;
+    background: #1877f2;
     color: white;
     border: none;
-    padding: 14px 20px;
-    font-size: 16px;
-    font-weight: 700;
-    border-radius: 12px;
+    padding: 12px 20px;
+    border-radius: 8px;
     cursor: pointer;
-    width: 100%;
-    transition: background-color 0.3s ease;
+    font-size: 16px;
   }
   button:hover {
-    background-color: #145dbf;
+    background: #145dbf;
   }
-  .pubsList {
-    margin-top: 32px;
+  .pub {
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 20px;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
   }
-  .pubItem {
-    background: #e7f0fe;
-    border-radius: 12px;
-    padding: 14px 16px;
-    margin-bottom: 12px;
-    word-wrap: break-word;
+  .pub a {
+    color: #1877f2;
+    text-decoration: none;
   }
-  .pubItem a {
-    color: #145dbf;
+  .pub a:hover {
     text-decoration: underline;
-  }
-  .pubText {
-    white-space: pre-wrap;
-  }
-  .pubMeta {
-    font-size: 12px;
-    color: #666;
-    margin-top: 8px;
   }
 </style>
 
-<!-- Firebase SDKs -->
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
 </head>
 <body>
 
 <h2>Créer une Pub</h2>
 
-<form id="pubForm" novalidate>
-  <label for="pubText">Texte de la pub <span style="color:#cc0000;">*</span></label>
-  <textarea id="pubText" placeholder="Écrivez votre publicité ici..." required></textarea>
-  <div id="textError" class="error" style="display:none;">Le texte est obligatoire.</div>
-  
-  <label for="pubURL">Lien URL (optionnel)</label>
-  <input type="url" id="pubURL" placeholder="https://exemple.com" />
-  <div id="urlError" class="error" style="display:none;">Veuillez entrer une URL valide.</div>
-  
-  <button type="submit">Valider la pub</button>
-</form>
+<label for="pubText">Texte de la Pub :</label>
+<textarea id="pubText" rows="3" placeholder="Écrivez votre message publicitaire ici..."></textarea>
 
-<div class="pubsList" id="pubsList"></div>
+<label for="pubUrl">Lien du site (optionnel) :</label>
+<input type="text" id="pubUrl" placeholder="https://exemple.com" />
+
+<button id="btnCreatePub">Créer Pub</button>
+
+<h2>Liste des Pubs</h2>
+<div id="pubList">Chargement...</div>
 
 <script>
-  // Firebase config
+  // Votre config Firebase (changez par la vôtre)
   const firebaseConfig = {
     apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
     authDomain: "mitalky.firebaseapp.com",
@@ -121,91 +87,71 @@
     messagingSenderId: "753557195623",
     appId: "1:753557195623:web:abc3b37eca5d67c9157dc2"
   };
+
+  // Initialiser Firebase
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  const form = document.getElementById('pubForm');
-  const textInput = document.getElementById('pubText');
-  const urlInput = document.getElementById('pubURL');
-  const textError = document.getElementById('textError');
-  const urlError = document.getElementById('urlError');
-  const pubsList = document.getElementById('pubsList');
+  const pubText = document.getElementById('pubText');
+  const pubUrl = document.getElementById('pubUrl');
+  const btnCreatePub = document.getElementById('btnCreatePub');
+  const pubList = document.getElementById('pubList');
 
-  // Escape HTML helper to prevent XSS
-  function escapeHtml(str) {
-    if(!str) return '';
-    return str.replace(/[&<>"']/g, m => ({
-      '&':'&amp;',
-      '<':'&lt;',
-      '>':'&gt;',
-      '"':'&quot;',
-      "'":'&#39;'
-    }[m]));
-  }
-
-  // Show all pubs from Firestore in real time
-  function showPubsRealtime() {
-    db.collection('pubs').orderBy('createdAt', 'desc')
-      .onSnapshot(snapshot => {
-        pubsList.innerHTML = '';
-        if(snapshot.empty){
-          pubsList.innerHTML = '<p style="color:#666;text-align:center;">Pas encore de pub.</p>';
-          return;
-        }
-        snapshot.forEach(doc => {
-          const p = doc.data();
-          const pubText = escapeHtml(p.text).replace(/\n/g, '<br>');
-          const pubURL = p.url ? `<br><a href="${escapeHtml(p.url)}" target="_blank" rel="noopener">${escapeHtml(p.url)}</a>` : '';
-          const date = p.createdAt ? new Date(p.createdAt.seconds * 1000).toLocaleString() : '';
-          const pubHTML = `
-            <div class="pubItem">
-              <div class="pubText">${pubText}${pubURL}</div>
-              <div class="pubMeta">Créé le ${date}</div>
-            </div>`;
-          pubsList.insertAdjacentHTML('beforeend', pubHTML);
-        });
-      });
-  }
-
-  showPubsRealtime();
-
-  // Form submit
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-
-    // Reset errors
-    textError.style.display = 'none';
-    urlError.style.display = 'none';
-
-    let valid = true;
-
-    // Validate text
-    if(textInput.value.trim() === '') {
-      textError.style.display = 'block';
-      valid = false;
+  // Fonction pour afficher pubs
+  function renderPubs(docs) {
+    if(docs.length === 0) {
+      pubList.innerHTML = '<p>Aucune pub pour le moment.</p>';
+      return;
     }
-
-    // Validate URL if not empty
-    if(urlInput.value.trim() !== '') {
-      try {
-        new URL(urlInput.value.trim());
-      } catch {
-        urlError.style.display = 'block';
-        valid = false;
+    pubList.innerHTML = '';
+    docs.forEach(doc => {
+      const data = doc.data();
+      const div = document.createElement('div');
+      div.className = 'pub';
+      let content = `<p>${data.text}</p>`;
+      if(data.url){
+        content += `<a href="${data.url}" target="_blank" rel="noopener noreferrer">${data.url}</a>`;
       }
+      content += `<small style="color:#999">Créée le: ${data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleString() : 'Date inconnue'}</small>`;
+      div.innerHTML = content;
+      pubList.appendChild(div);
+    });
+  }
+
+  // Charger pubs en temps réel
+  db.collection('pubs').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
+    renderPubs(snapshot.docs);
+  }, error => {
+    pubList.innerHTML = `<p style="color:red;">Erreur de chargement des pubs : ${error.message}</p>`;
+  });
+
+  // Créer une pub
+  btnCreatePub.addEventListener('click', () => {
+    const text = pubText.value.trim();
+    const url = pubUrl.value.trim();
+
+    if(!text) {
+      alert('Le texte de la pub est obligatoire.');
+      return;
     }
 
-    if(!valid) return;
+    btnCreatePub.disabled = true;
+    btnCreatePub.textContent = 'Envoi en cours...';
 
-    // Add pub to Firestore
     db.collection('pubs').add({
-      text: textInput.value.trim(),
-      url: urlInput.value.trim() || null,
+      text: text,
+      url: url || '',
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
-      form.reset();
-    }).catch(err => {
-      alert('Erreur lors de la création de la pub: ' + err.message);
+      pubText.value = '';
+      pubUrl.value = '';
+      btnCreatePub.disabled = false;
+      btnCreatePub.textContent = 'Créer Pub';
+      alert('Pub créée avec succès !');
+    }).catch(error => {
+      alert('Erreur lors de la création de la pub : ' + error.message);
+      btnCreatePub.disabled = false;
+      btnCreatePub.textContent = 'Créer Pub';
     });
   });
 </script>
