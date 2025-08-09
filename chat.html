@@ -97,6 +97,19 @@
     color: #555;
     margin-left: 10px;
   }
+  /* Bouton Supprimer pub */
+  .delete-pub-btn {
+    background: transparent;
+    border: none;
+    color: red;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 10px;
+    margin-top: 10px;
+  }
+  .delete-pub-btn:hover {
+    text-decoration: underline;
+  }
 </style>
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -149,7 +162,7 @@
   const errorMsg = document.getElementById('errorMsg');
   const userNameInput = document.getElementById('userNameInput');
 
-  // Fonction afficher pubs + boutons like + commentaires
+  // Fonction afficher pubs + boutons like + commentaires + supprimer
   function renderPubs(docs) {
     if(docs.length === 0) {
       pubList.innerHTML = '<p>Aucune pub pour le moment.</p>';
@@ -165,7 +178,7 @@
       div.className = 'pub';
 
       // Affichage avec nom de l'auteur
-      content = `<p><strong>${data.userName || 'Anonyme'}</strong>: ${data.text}</p>`;
+      let content = `<p><strong>${data.userName || 'Anonyme'}</strong>: ${data.text}</p>`;
       if(data.url){
         content += `<a href="${data.url}" target="_blank" rel="noopener noreferrer">${data.url}</a><br/>`;
       }
@@ -180,6 +193,9 @@
 
       // Bouton pour afficher/cacher la section messages
       content += `<br/><button class="toggle-comments-btn" data-id="${id}">Afficher les messages</button>`;
+
+      // Bouton supprimer pub
+      content += `<button class="delete-pub-btn" data-id="${id}">Supprimer la pub</button>`;
 
       // Section commentaires cachée (sera affichée au clic)
       content += `
@@ -216,6 +232,20 @@
         } else {
           section.style.display = 'none';
           btn.textContent = "Afficher les messages";
+        }
+      });
+    });
+
+    // Suppression pub
+    document.querySelectorAll('.delete-pub-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const pubId = btn.getAttribute('data-id');
+        if(confirm("Êtes-vous sûr de vouloir supprimer cette pub ?")) {
+          db.collection('pubs').doc(pubId).delete()
+            .then(() => {
+              alert("Pub supprimée avec succès !");
+            })
+            .catch(err => alert("Erreur lors de la suppression : " + err.message));
         }
       });
     });
