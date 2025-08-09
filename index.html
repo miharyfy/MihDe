@@ -30,7 +30,7 @@
       transition: all 0.3s ease-in-out;
       position: relative;
       overflow: hidden;
-      height: 140px; /* hanamafy ny haavon'ny div dot+text */
+      /* Tsy novaina ny haavony */
     }
 
     .container:hover {
@@ -65,7 +65,7 @@
 
     .dot-text-container {
       position: relative;
-      height: 50px;
+      height: 50px; /* Raha mila kely kokoa, azonao soloina */
       margin: 30px 0;
     }
 
@@ -81,6 +81,7 @@
       color: #444;
       transition: opacity 0.4s ease, transform 0.4s ease;
       max-width: 350px;
+      /* Tsy novaina hafa */
     }
 
     .dot-text.active {
@@ -176,7 +177,7 @@
 
       if (currentStep === steps.length - 1) {
         setTimeout(() => {
-          window.location.href = "nextpage.html"; // ovaina araka izay tadiavina
+          window.location.href = "nextpage.html";
         }, 1000);
       }
     }
