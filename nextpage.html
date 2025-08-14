@@ -10,7 +10,7 @@
   input, button { width:100%; padding:12px; margin:8px 0; border-radius:6px; border:1px solid #ccc; box-sizing:border-box; }
   button { background:#1877f2; color:white; border:none; cursor:pointer; }
   button:hover { background:#145dbf; }
-  #resetSection { display:none; margin-top:10px; }
+  #resetSection, #nameContainer { display:none; margin-top:10px; }
   #walletContainer { display:none; }
 </style>
 </head>
@@ -33,7 +33,15 @@
   <p id="authError" style="color:red;"></p>
 </div>
 
-<!-- Wallet / Dashboard -->
+<!-- Nom après signup -->
+<div class="container" id="nameContainer">
+  <h2>Bienvenue !</h2>
+  <p>Veuillez entrer votre nom complet :</p>
+  <input type="text" id="fullName" placeholder="Nom complet" required>
+  <button onclick="saveName()">Enregistrer et aller au Dashboard</button>
+</div>
+
+<!-- Wallet -->
 <div class="container" id="walletContainer">
   <h2>Portefeuille Crypto</h2>
   <p>Utilisateur: <span id="userEmail"></span></p>
@@ -47,7 +55,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-  // ---------------- CONFIG FIREBASE ----------------
   const firebaseConfig = {
     apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
     authDomain: "mitalky.firebaseapp.com",
@@ -59,9 +66,9 @@
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
-  // --------------------------------------------------
 
   const authContainer = document.getElementById('authContainer');
+  const nameContainer = document.getElementById('nameContainer');
   const walletContainer = document.getElementById('walletContainer');
   const userEmailSpan = document.getElementById('userEmail');
   const authError = document.getElementById('authError');
@@ -70,8 +77,22 @@
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
     auth.createUserWithEmailAndPassword(email, password)
-      .then(() => initWallet())
+      .then(() => {
+        authContainer.style.display = 'none';
+        nameContainer.style.display = 'block'; // Afficher le form de nom
+      })
       .catch(e => authError.textContent = e.message);
+  }
+
+  function saveName() {
+    const fullName = document.getElementById('fullName').value;
+    const user = auth.currentUser;
+    if(!user) return;
+    db.collection('wallets').doc(user.uid).set({ balance: 0, name: fullName })
+      .then(() => {
+        nameContainer.style.display = 'none';
+        initWallet();
+      });
   }
 
   function login() {
@@ -110,7 +131,7 @@
 
     const userDoc = db.collection('wallets').doc(user.uid);
     userDoc.get().then(doc => {
-      if(!doc.exists) userDoc.set({balance:0});
+      if(!doc.exists) userDoc.set({ balance:0 });
       updateBalance();
     });
   }
@@ -126,7 +147,7 @@
   }
 
   function goDashboard() {
-    window.location.href = 'dashboard.html'; // Redirection vers le dashboard
+    window.location.href = 'dashboard.html';
   }
 
   auth.onAuthStateChanged(user => {
