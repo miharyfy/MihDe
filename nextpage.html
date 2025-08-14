@@ -6,15 +6,17 @@
 <title>Connexion / Inscription - Mi-talky</title>
 <style>
   body { font-family: Arial, sans-serif; background: #f0f2f5; margin:0; display:flex; justify-content:center; align-items:center; min-height:100vh; }
-  .container { background:white; padding:30px; border-radius:12px; width:350px; box-shadow:0 4px 15px rgba(0,0,0,0.2); text-align:center; }
+  .container { background:white; padding:30px; border-radius:12px; width:350px; box-shadow:0 4px 15px rgba(0,0,0,0.2); text-align:center; margin-bottom:20px; }
   input, button { width:100%; padding:12px; margin:8px 0; border-radius:6px; border:1px solid #ccc; box-sizing:border-box; }
   button { background:#1877f2; color:white; border:none; cursor:pointer; }
   button:hover { background:#145dbf; }
   #resetSection { display:none; margin-top:10px; }
+  #walletContainer { display:none; }
 </style>
 </head>
 <body>
 
+<!-- Connexion / Inscription -->
 <div class="container" id="authContainer">
   <h2>Connexion / Inscription</h2>
   <input type="email" id="email" placeholder="Email" required>
@@ -31,10 +33,12 @@
   <p id="authError" style="color:red;"></p>
 </div>
 
-<div class="container" id="walletContainer" style="display:none;">
+<!-- Wallet / Dashboard -->
+<div class="container" id="walletContainer">
   <h2>Portefeuille Crypto</h2>
   <p>Utilisateur: <span id="userEmail"></span></p>
   <p>Balance: <span id="balance">0</span> BTC</p>
+  <button onclick="goDashboard()">Aller au Dashboard</button>
   <button onclick="logout()">Se déconnecter</button>
 </div>
 
@@ -119,6 +123,10 @@
         const bal = doc.data()?.balance || 0;
         document.getElementById('balance').textContent = bal.toFixed(4);
       });
+  }
+
+  function goDashboard() {
+    window.location.href = 'dashboard.html'; // Redirection vers le dashboard
   }
 
   auth.onAuthStateChanged(user => {
