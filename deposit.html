@@ -73,7 +73,7 @@ auth.onAuthStateChanged(user=>{
 });
 
 // Déposer
-document.getElementById("depositBtn").addEventListener("click", ()=>{
+document.getElementById("depositBtn").addEventListener("click", async ()=>{
     const btc = parseFloat(document.getElementById("btcAmount").value) || 0;
     const eth = parseFloat(document.getElementById("ethAmount").value) || 0;
     const usdt = parseFloat(document.getElementById("usdtAmount").value) || 0;
@@ -81,19 +81,24 @@ document.getElementById("depositBtn").addEventListener("click", ()=>{
     const user = auth.currentUser;
     if(!user) return;
 
-    const walletRef = db.collection("wallets").doc(user.uid);
-    walletRef.get().then(doc=>{
-        const current = doc.exists ? doc.data() : {btc:0,eth:0,usdt:0};
-        walletRef.set({
-            btc: current.btc + btc,
-            eth: current.eth + eth,
-            usdt: current.usdt + usdt
-        }).then(()=>{
-            document.getElementById("message").innerText = "Dépôt effectué avec succès !";
-        }).catch(err=>{
-            document.getElementById("message").innerText = "Erreur : "+err.message;
+    // Envoyer requête à votre backend pour créer une transaction FaucetPay
+    try {
+        const response = await fetch("/api/depositFaucetPay", {
+            method:"POST",
+            headers: { "Content-Type":"application/json" },
+            body: JSON.stringify({ uid:user.uid, btc, eth, usdt })
         });
-    });
+        const result = await response.json();
+
+        if(result.success){
+            document.getElementById("message").innerText = "Dépôt en attente de confirmation...";
+            // Vous pouvez ensuite utiliser un listener Firebase pour mettre à jour balance quand FaucetPay confirme
+        } else {
+            document.getElementById("message").innerText = "Erreur : "+result.message;
+        }
+    } catch(err){
+        document.getElementById("message").innerText = "Erreur serveur : "+err.message;
+    }
 });
 
 // Retour Wallet
