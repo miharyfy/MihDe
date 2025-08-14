@@ -1,135 +1,129 @@
 <!DOCTYPE html>
-<html lang="mg">
+<html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Inscription / Connexion</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f0f2f5;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .container {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
-      width: 350px;
-      text-align: center;
-      animation: fadeInUp 0.7s ease forwards;
-    }
-    @keyframes fadeInUp {
-      0% { opacity: 0; transform: translateY(20px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-    input, button {
-      width: 100%;
-      margin: 8px 0;
-      padding: 12px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-      box-sizing: border-box;
-      outline-offset: 2px;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }
-    input:focus {
-      border-color: #1877f2;
-      box-shadow: 0 0 8px rgba(24,119,242,0.5);
-    }
-    button {
-      background-color: #1877f2;
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-      transition: background-color 0.3s ease, transform 0.15s ease;
-      user-select: none;
-    }
-    button:hover { background-color: #0f5dc8; transform: scale(1.05); }
-    button:active { transform: scale(0.98); }
-    p.error {
-      color: red;
-      font-size: 14px;
-      min-height: 20px;
-      opacity: 0;
-      transition: opacity 0.4s ease;
-      margin: 5px 0 0 0;
-    }
-    p.error.visible { opacity: 1; }
-    .password-wrapper { position: relative; width: 100%; }
-    .password-wrapper input { padding-right: 40px; }
-    .toggle-password {
-      position: absolute;
-      top: 50%;
-      right: 10px;
-      transform: translateY(-50%);
-      width: 24px;
-      height: 24px;
-      cursor: pointer;
-      fill: #888;
-      transition: fill 0.3s ease, transform 0.3s ease;
-      user-select: none;
-    }
-    .toggle-password:hover { fill: #1877f2; transform: translateY(-50%) scale(1.1); }
-    .toggle-password.active { fill: #1877f2; transform: translateY(-50%) scale(1.2) rotate(20deg); }
-    #resetPasswordSection { display: none; margin-top: 10px; }
-    #resetPasswordSection input, #resetPasswordSection button { margin-top: 8px; }
-    h2 { margin-bottom: 15px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connexion / Inscription - Mi-talky</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f0f2f5; margin:0; display:flex; justify-content:center; align-items:center; min-height:100vh; }
+  .container { background:white; padding:30px; border-radius:12px; width:350px; box-shadow:0 4px 15px rgba(0,0,0,0.2); text-align:center; }
+  input, button { width:100%; padding:12px; margin:8px 0; border-radius:6px; border:1px solid #ccc; box-sizing:border-box; }
+  button { background:#1877f2; color:white; border:none; cursor:pointer; }
+  button:hover { background:#145dbf; }
+  #resetSection { display:none; margin-top:10px; }
+</style>
 </head>
 <body>
 
-<div class="container">
-  <h2>Inscription / Connexion</h2>
+<div class="container" id="authContainer">
+  <h2>Connexion / Inscription</h2>
+  <input type="email" id="email" placeholder="Email" required>
+  <input type="password" id="password" placeholder="Mot de passe" required>
+  <button onclick="signup()">S'inscrire</button>
+  <button onclick="login()">Se connecter</button>
+  <button onclick="toggleReset()" style="background:none;color:#1877f2;border:none;text-decoration:underline;">Mot de passe oublié ?</button>
 
-  <form method="POST" action="nextpage.php" id="authForm">
-    <input name="email" type="email" placeholder="Email" autocomplete="email" required />
-    <div class="password-wrapper">
-      <input name="password" type="password" placeholder="Mot de passe" autocomplete="current-password" required />
-      <svg id="togglePassword" class="toggle-password" viewBox="0 0 24 24" >
-        <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
-        <circle cx="12" cy="12" r="2.5"/>
-      </svg>
-    </div>
-
-    <button type="submit" name="action" value="signup">S'inscrire</button>
-    <button type="submit" name="action" value="login">Se connecter</button>
-  </form>
-
-  <button id="showResetBtn" style="margin-top: 10px; background: none; color: #1877f2; border:none; cursor:pointer; text-decoration: underline;">Mot de passe oublié ?</button>
-
-  <div id="resetPasswordSection">
-    <form method="POST" action="nextpage.php">
-      <input name="resetEmail" type="email" placeholder="Entrez votre email pour réinitialiser" required />
-      <button type="submit" name="action" value="reset">Envoyer lien de réinitialisation</button>
-    </form>
+  <div id="resetSection">
+    <input type="email" id="resetEmail" placeholder="Votre email">
+    <button onclick="resetPassword()">Envoyer lien de réinitialisation</button>
   </div>
 
-  <p class="error" id="error"></p>
+  <p id="authError" style="color:red;"></p>
 </div>
 
+<div class="container" id="walletContainer" style="display:none;">
+  <h2>Portefeuille Crypto</h2>
+  <p>Utilisateur: <span id="userEmail"></span></p>
+  <p>Balance: <span id="balance">0</span> BTC</p>
+  <button onclick="logout()">Se déconnecter</button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
 <script>
-  const togglePassword = document.getElementById('togglePassword');
-  const passwordInput = document.querySelector('.password-wrapper input');
-  const showResetBtn = document.getElementById('showResetBtn');
-  const resetPasswordSection = document.getElementById('resetPasswordSection');
+  // ---------------- CONFIG FIREBASE ----------------
+  const firebaseConfig = {
+    apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
+    authDomain: "mitalky.firebaseapp.com",
+    projectId: "mitalky",
+    storageBucket: "mitalky.appspot.com",
+    messagingSenderId: "753557195623",
+    appId: "1:753557195623:web:abc3b37eca5d67c9157dc2"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  // --------------------------------------------------
 
-  togglePassword.addEventListener('click', () => {
-    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-    passwordInput.setAttribute('type', type);
-    togglePassword.classList.toggle('active');
-  });
+  const authContainer = document.getElementById('authContainer');
+  const walletContainer = document.getElementById('walletContainer');
+  const userEmailSpan = document.getElementById('userEmail');
+  const authError = document.getElementById('authError');
 
-  showResetBtn.addEventListener('click', () => {
-    resetPasswordSection.style.display = resetPasswordSection.style.display === 'block' ? 'none' : 'block';
+  function signup() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    auth.createUserWithEmailAndPassword(email, password)
+      .then(() => initWallet())
+      .catch(e => authError.textContent = e.message);
+  }
+
+  function login() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    auth.signInWithEmailAndPassword(email, password)
+      .then(() => initWallet())
+      .catch(e => authError.textContent = e.message);
+  }
+
+  function logout() {
+    auth.signOut().then(() => {
+      authContainer.style.display = 'block';
+      walletContainer.style.display = 'none';
+    });
+  }
+
+  function toggleReset() {
+    const resetSection = document.getElementById('resetSection');
+    resetSection.style.display = resetSection.style.display === 'block' ? 'none' : 'block';
+  }
+
+  function resetPassword() {
+    const email = document.getElementById('resetEmail').value;
+    auth.sendPasswordResetEmail(email)
+      .then(() => alert('Lien de réinitialisation envoyé !'))
+      .catch(e => authError.textContent = e.message);
+  }
+
+  function initWallet() {
+    const user = auth.currentUser;
+    if(!user) return;
+    userEmailSpan.textContent = user.email;
+    authContainer.style.display = 'none';
+    walletContainer.style.display = 'block';
+
+    const userDoc = db.collection('wallets').doc(user.uid);
+    userDoc.get().then(doc => {
+      if(!doc.exists) userDoc.set({balance:0});
+      updateBalance();
+    });
+  }
+
+  function updateBalance() {
+    const user = auth.currentUser;
+    if(!user) return;
+    db.collection('wallets').doc(user.uid).get()
+      .then(doc => {
+        const bal = doc.data()?.balance || 0;
+        document.getElementById('balance').textContent = bal.toFixed(4);
+      });
+  }
+
+  auth.onAuthStateChanged(user => {
+    if(user) initWallet();
   });
 </script>
-
 </body>
 </html>
