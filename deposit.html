@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>Déposer - Portefeuille Crypto</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<style>
+body {
+    margin:0; padding:0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg,#1877f2,#6ea0f8);
+    display:flex; justify-content:center; align-items:center; min-height:100vh;
+}
+.container {
+    background:white; width:90%; max-width:400px; padding:30px 25px;
+    border-radius:20px; box-shadow:0 10px 25px rgba(24,119,242,.4);
+    text-align:center;
+}
+h2 { color:#1877f2; margin-bottom:25px; font-weight:700; }
+input {
+    width:100%; padding:12px; margin:8px 0; border-radius:10px;
+    border:1px solid #ccc; font-size:16px; box-sizing:border-box;
+}
+button {
+    margin-top:15px; width:100%; padding:12px 0; font-size:16px;
+    border:none; border-radius:12px; cursor:pointer;
+    background:#1877f2; color:white; font-weight:600;
+    transition:background 0.3s ease, transform 0.15s ease;
+}
+button:hover { background:#145dbf; transform:scale(1.05); }
+p.message { margin-top:15px; font-size:14px; color:green; }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Déposer des Cryptos</h2>
+
+    <input type="number" id="btcAmount" placeholder="Montant BTC" min="0" step="0.0001">
+    <input type="number" id="ethAmount" placeholder="Montant ETH" min="0" step="0.0001">
+    <input type="number" id="usdtAmount" placeholder="Montant USDT" min="0" step="0.01">
+
+    <button id="depositBtn">Déposer</button>
+    <button id="backBtn" style="margin-top:10px;">Retour au Wallet</button>
+
+    <p class="message" id="message"></p>
+</div>
+
+<script>
+// Config Firebase (identique aux autres pages)
+const firebaseConfig = {
+    apiKey: "VOTRE_API_KEY",
+    authDomain: "VOTRE_PROJECT.firebaseapp.com",
+    projectId: "VOTRE_PROJECT_ID",
+    storageBucket: "VOTRE_PROJECT.appspot.com",
+    messagingSenderId: "VOTRE_SENDER_ID",
+    appId: "VOTRE_APP_ID"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// Vérifier utilisateur connecté
+auth.onAuthStateChanged(user=>{
+    if(!user){
+        window.location.href="login.html";
+    }
+});
+
+// Déposer
+document.getElementById("depositBtn").addEventListener("click", ()=>{
+    const btc = parseFloat(document.getElementById("btcAmount").value) || 0;
+    const eth = parseFloat(document.getElementById("ethAmount").value) || 0;
+    const usdt = parseFloat(document.getElementById("usdtAmount").value) || 0;
+
+    const user = auth.currentUser;
+    if(!user) return;
+
+    const walletRef = db.collection("wallets").doc(user.uid);
+    walletRef.get().then(doc=>{
+        const current = doc.exists ? doc.data() : {btc:0,eth:0,usdt:0};
+        walletRef.set({
+            btc: current.btc + btc,
+            eth: current.eth + eth,
+            usdt: current.usdt + usdt
+        }).then(()=>{
+            document.getElementById("message").innerText = "Dépôt effectué avec succès !";
+        }).catch(err=>{
+            document.getElementById("message").innerText = "Erreur : "+err.message;
+        });
+    });
+});
+
+// Retour Wallet
+document.getElementById("backBtn").addEventListener("click", ()=>{
+    window.location.href="wallet.html";
+});
+</script>
+
+</body>
+</html>
