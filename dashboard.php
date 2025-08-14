@@ -87,6 +87,10 @@ $email = $_SESSION['email'];
         <p><strong>ID :</strong> <?php echo htmlspecialchars($id); ?></p>
         <p><strong>Email :</strong> <?php echo htmlspecialchars($email); ?></p>
     </div>
+    <!-- Bouton Wallet -->
+    <form method="GET" action="wallet.php">
+        <button type="submit">Portefeuille Crypto</button>
+    </form>
 
     <form method="POST" action="logout.php">
         <button type="submit">Sortir</button>
