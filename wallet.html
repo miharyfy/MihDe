@@ -55,12 +55,21 @@ const BASE_URL = "https://faucetpay.io/api/v1/";
 
 async function getBalance() {
     try {
-        const res = await fetch(`${BASE_URL}balance?api_key=${API_KEY}`);
+        const form = new FormData();
+        form.append("api_key", API_KEY);
+
+        const res = await fetch("https://faucetpay.io/api/v1/balance", {
+            method: "POST",
+            body: form
+        });
+
         const data = await res.json();
         if(data.status === "success") {
             document.getElementById("btc").innerText = parseFloat(data.balance.BTC).toFixed(4);
             document.getElementById("eth").innerText = parseFloat(data.balance.ETH).toFixed(4);
             document.getElementById("usdt").innerText = parseFloat(data.balance.USDT).toFixed(2);
+        } else {
+            alert("Erreur: " + data.message);
         }
     } catch(err) {
         console.error(err);
