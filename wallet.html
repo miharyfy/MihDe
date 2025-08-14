@@ -39,7 +39,7 @@ button:hover { background:#145dbf; transform:scale(1.05); }
     <div class="userName" id="userName">Utilisateur: Demo</div>
 
     <div class="balance" id="balanceDiv">
-        <p><strong>BTC :</strong> <span id="btc">1</span></p>
+        <p><strong>BTC :</strong> <span id="btc">0</span></p>
         <p><strong>ETH :</strong> <span id="eth">0</span></p>
         <p><strong>USDT :</strong> <span id="usdt">0</span></p>
     </div>
@@ -53,17 +53,22 @@ button:hover { background:#145dbf; transform:scale(1.05); }
 const API_KEY = "2e61ecef60d96cf142cca90f417dde1913d72b4ab8ed5ab9d9798152768d3026";
 const BASE_URL = "https://faucetpay.io/api/v1/";
 
+async function postRequest(endpoint, params) {
+    const form = new FormData();
+    form.append("api_key", API_KEY);
+    for (const key in params) {
+        form.append(key, params[key]);
+    }
+    const res = await fetch(BASE_URL + endpoint, {
+        method: "POST",
+        body: form
+    });
+    return await res.json();
+}
+
 async function getBalance() {
     try {
-        const form = new FormData();
-        form.append("api_key", API_KEY);
-
-        const res = await fetch("https://faucetpay.io/api/v1/balance", {
-            method: "POST",
-            body: form
-        });
-
-        const data = await res.json();
+        const data = await postRequest("balance", {});
         if(data.status === "success") {
             document.getElementById("btc").innerText = parseFloat(data.balance.BTC).toFixed(4);
             document.getElementById("eth").innerText = parseFloat(data.balance.ETH).toFixed(4);
@@ -82,8 +87,7 @@ async function deposit() {
     const amount = prompt("Montant à déposer:");
     if(!coin || !amount) return;
     try {
-        const res = await fetch(`${BASE_URL}deposit?api_key=${API_KEY}&coin=${coin}&amount=${amount}`);
-        const data = await res.json();
+        const data = await postRequest("deposit", {coin, amount});
         alert(data.status + ": " + data.message);
         getBalance();
     } catch(err) { console.error(err); }
@@ -95,8 +99,7 @@ async function withdraw() {
     const address = prompt("Adresse de retrait:");
     if(!coin || !amount || !address) return;
     try {
-        const res = await fetch(`${BASE_URL}withdraw?api_key=${API_KEY}&coin=${coin}&amount=${amount}&address=${address}`);
-        const data = await res.json();
+        const data = await postRequest("withdraw", {coin, amount, address});
         alert(data.status + ": " + data.message);
         getBalance();
     } catch(err) { console.error(err); }
@@ -105,17 +108,15 @@ async function withdraw() {
 async function transfer() {
     const coin = prompt("Entrer la crypto (BTC, ETH, USDT):");
     const amount = prompt("Montant à transférer:");
-    const user = prompt("Utilisateur FaucetPay cible:");
-    if(!coin || !amount || !user) return;
+    const username = prompt("Utilisateur FaucetPay cible:");
+    if(!coin || !amount || !username) return;
     try {
-        const res = await fetch(`${BASE_URL}transfer?api_key=${API_KEY}&coin=${coin}&amount=${amount}&username=${user}`);
-        const data = await res.json();
+        const data = await postRequest("transfer", {coin, amount, username});
         alert(data.status + ": " + data.message);
         getBalance();
     } catch(err) { console.error(err); }
 }
 
-// Évènements boutons
 document.getElementById("depositBtn").addEventListener("click", deposit);
 document.getElementById("withdrawBtn").addEventListener("click", withdraw);
 document.getElementById("transferBtn").addEventListener("click", transfer);
