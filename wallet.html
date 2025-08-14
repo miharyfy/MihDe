@@ -20,11 +20,13 @@ body {
     border-radius:20px; box-shadow:0 10px 25px rgba(24,119,242,.4);
     text-align:center;
 }
-h2 { color:#1877f2; margin-bottom:25px; font-weight:700; }
+h2 { color:#1877f2; margin-bottom:15px; font-weight:700; }
+.userName { margin-bottom:20px; font-size:18px; font-weight:600; color:#333; }
 .balance {
     text-align:left; background:#f0f2f5; padding:15px; border-radius:12px; margin-bottom:20px;
     font-size:16px;
 }
+.balance p { margin:8px 0; }
 button {
     margin-top:10px; width:100%; padding:12px 0; font-size:16px;
     border:none; border-radius:12px; cursor:pointer;
@@ -38,6 +40,7 @@ button:hover { background:#145dbf; transform:scale(1.05); }
 
 <div class="container">
     <h2>Portefeuille Crypto</h2>
+    <div class="userName" id="userName">Utilisateur: ...</div>
 
     <div class="balance" id="balanceDiv">
         <p><strong>BTC :</strong> <span id="btc">0</span></p>
@@ -48,6 +51,7 @@ button:hover { background:#145dbf; transform:scale(1.05); }
     <button id="depositBtn">Deposit</button>
     <button id="withdrawBtn">Withdraw</button>
     <button id="transferBtn">Transfer</button>
+    <button id="dashboardBtn">Dashboard</button>
     <button id="logoutBtn" style="margin-top:15px;">Logout</button>
 </div>
 
@@ -66,35 +70,45 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+const userNameDiv = document.getElementById("userName");
+
 // Vérifier utilisateur connecté
 auth.onAuthStateChanged(user=>{
     if(!user){
         window.location.href="login.html";
     } else {
+        loadUserInfo(user.uid);
         loadBalance(user.uid);
     }
 });
+
+// Charger informations utilisateur
+function loadUserInfo(uid){
+    db.collection("wallets").doc(uid).get().then(doc=>{
+        if(doc.exists){
+            const data = doc.data();
+            userNameDiv.textContent = "Utilisateur: " + (data.name || auth.currentUser.email);
+        } else {
+            userNameDiv.textContent = "Utilisateur: " + auth.currentUser.email;
+        }
+    });
+}
 
 // Charger solde
 function loadBalance(uid){
     db.collection("wallets").doc(uid).get().then(doc=>{
         const data = doc.exists ? doc.data() : {btc:0,eth:0,usdt:0};
-        document.getElementById("btc").innerText = data.btc.toFixed(4);
-        document.getElementById("eth").innerText = data.eth.toFixed(4);
-        document.getElementById("usdt").innerText = data.usdt.toFixed(2);
+        document.getElementById("btc").innerText = (data.btc || 0).toFixed(4);
+        document.getElementById("eth").innerText = (data.eth || 0).toFixed(4);
+        document.getElementById("usdt").innerText = (data.usdt || 0).toFixed(2);
     });
 }
 
 // Boutons
-document.getElementById("depositBtn").addEventListener("click", ()=>{
-    window.location.href="deposit.html";
-});
-document.getElementById("withdrawBtn").addEventListener("click", ()=>{
-    window.location.href="withdraw.html";
-});
-document.getElementById("transferBtn").addEventListener("click", ()=>{
-    window.location.href="transfert.html";
-});
+document.getElementById("depositBtn").addEventListener("click", ()=>{ window.location.href="deposit.html"; });
+document.getElementById("withdrawBtn").addEventListener("click", ()=>{ window.location.href="withdraw.html"; });
+document.getElementById("transferBtn").addEventListener("click", ()=>{ window.location.href="transfert.html"; });
+document.getElementById("dashboardBtn").addEventListener("click", ()=>{ window.location.href="dashboard.html"; });
 document.getElementById("logoutBtn").addEventListener("click", ()=>{
     auth.signOut().then(()=>{ window.location.href="login.html"; });
 });
