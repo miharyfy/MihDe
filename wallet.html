@@ -4,10 +4,6 @@
 <meta charset="UTF-8" />
 <title>Wallet - Portefeuille Crypto</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <style>
 body {
     margin:0; padding:0;
@@ -40,7 +36,7 @@ button:hover { background:#145dbf; transform:scale(1.05); }
 
 <div class="container">
     <h2>Portefeuille Crypto</h2>
-    <div class="userName" id="userName">Utilisateur: ...</div>
+    <div class="userName" id="userName">Utilisateur: Demo</div>
 
     <div class="balance" id="balanceDiv">
         <p><strong>BTC :</strong> <span id="btc">0</span></p>
@@ -48,70 +44,74 @@ button:hover { background:#145dbf; transform:scale(1.05); }
         <p><strong>USDT :</strong> <span id="usdt">0</span></p>
     </div>
 
-    <button id="depositBtn">Deposit</button>
-    <button id="withdrawBtn">Withdraw</button>
-    <button id="transferBtn">Transfer</button>
-    <button id="dashboardBtn">Dashboard</button>
-    <button id="logoutBtn" style="margin-top:15px;">Logout</button>
+    <button id="depositBtn">Déposer</button>
+    <button id="withdrawBtn">Retirer</button>
+    <button id="transferBtn">Transférer</button>
 </div>
 
 <script>
-// Config Firebase
-const firebaseConfig = {
-    apiKey: "AIzaSyAzcnb-eswHt_pDi7tCvcIBzlzejCprJfE",
-    authDomain: "mitalky.firebaseapp.com",
-    projectId: "mitalky",
-    storageBucket: "mitalky.appspot.com",
-    messagingSenderId: "753557195623",
-    appId: "1:753557195623:web:abc3b37eca5d67c9157dc2"
-};
+const API_KEY = "2e61ecef60d96cf142cca90f417dde1913d72b4ab8ed5ab9d9798152768d3026";
+const BASE_URL = "https://faucetpay.io/api/v1/";
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-const userNameDiv = document.getElementById("userName");
-
-// Vérifier utilisateur connecté
-auth.onAuthStateChanged(user=>{
-    if(!user){
-        window.location.href="login.html";
-    } else {
-        loadUserInfo(user.uid);
-        loadBalance(user.uid);
-    }
-});
-
-// Charger informations utilisateur
-function loadUserInfo(uid){
-    db.collection("wallets").doc(uid).get().then(doc=>{
-        if(doc.exists){
-            const data = doc.data();
-            userNameDiv.textContent = "Utilisateur: " + (data.name || auth.currentUser.email);
-        } else {
-            userNameDiv.textContent = "Utilisateur: " + auth.currentUser.email;
+async function getBalance() {
+    try {
+        const res = await fetch(`${BASE_URL}balance?api_key=${API_KEY}`);
+        const data = await res.json();
+        if(data.status === "success") {
+            document.getElementById("btc").innerText = parseFloat(data.balance.BTC).toFixed(4);
+            document.getElementById("eth").innerText = parseFloat(data.balance.ETH).toFixed(4);
+            document.getElementById("usdt").innerText = parseFloat(data.balance.USDT).toFixed(2);
         }
-    });
+    } catch(err) {
+        console.error(err);
+        alert("Erreur lors du chargement du solde");
+    }
 }
 
-// Charger solde
-function loadBalance(uid){
-    db.collection("wallets").doc(uid).get().then(doc=>{
-        const data = doc.exists ? doc.data() : {btc:0,eth:0,usdt:0};
-        document.getElementById("btc").innerText = (data.btc || 0).toFixed(4);
-        document.getElementById("eth").innerText = (data.eth || 0).toFixed(4);
-        document.getElementById("usdt").innerText = (data.usdt || 0).toFixed(2);
-    });
+async function deposit() {
+    const coin = prompt("Entrer la crypto (BTC, ETH, USDT):");
+    const amount = prompt("Montant à déposer:");
+    if(!coin || !amount) return;
+    try {
+        const res = await fetch(`${BASE_URL}deposit?api_key=${API_KEY}&coin=${coin}&amount=${amount}`);
+        const data = await res.json();
+        alert(data.status + ": " + data.message);
+        getBalance();
+    } catch(err) { console.error(err); }
 }
 
-// Boutons
-document.getElementById("depositBtn").addEventListener("click", ()=>{ window.location.href="deposit.html"; });
-document.getElementById("withdrawBtn").addEventListener("click", ()=>{ window.location.href="withdraw.html"; });
-document.getElementById("transferBtn").addEventListener("click", ()=>{ window.location.href="transfert.html"; });
-document.getElementById("dashboardBtn").addEventListener("click", ()=>{ window.location.href="dashboard.html"; });
-document.getElementById("logoutBtn").addEventListener("click", ()=>{
-    auth.signOut().then(()=>{ window.location.href="login.html"; });
-});
+async function withdraw() {
+    const coin = prompt("Entrer la crypto (BTC, ETH, USDT):");
+    const amount = prompt("Montant à retirer:");
+    const address = prompt("Adresse de retrait:");
+    if(!coin || !amount || !address) return;
+    try {
+        const res = await fetch(`${BASE_URL}withdraw?api_key=${API_KEY}&coin=${coin}&amount=${amount}&address=${address}`);
+        const data = await res.json();
+        alert(data.status + ": " + data.message);
+        getBalance();
+    } catch(err) { console.error(err); }
+}
+
+async function transfer() {
+    const coin = prompt("Entrer la crypto (BTC, ETH, USDT):");
+    const amount = prompt("Montant à transférer:");
+    const user = prompt("Utilisateur FaucetPay cible:");
+    if(!coin || !amount || !user) return;
+    try {
+        const res = await fetch(`${BASE_URL}transfer?api_key=${API_KEY}&coin=${coin}&amount=${amount}&username=${user}`);
+        const data = await res.json();
+        alert(data.status + ": " + data.message);
+        getBalance();
+    } catch(err) { console.error(err); }
+}
+
+// Évènements boutons
+document.getElementById("depositBtn").addEventListener("click", deposit);
+document.getElementById("withdrawBtn").addEventListener("click", withdraw);
+document.getElementById("transferBtn").addEventListener("click", transfer);
+
+getBalance();
 </script>
 
 </body>
