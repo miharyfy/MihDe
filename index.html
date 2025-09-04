@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dicter Chatbot Neon</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" />
+<style>
+:root{
+  --bg:#0a0a0f;
+  --neon-color:#00f0ff;
+  --neon-glow:0 0 12px #00f0ff,0 0 24px #00f0ff,0 0 36px #00f0ff;
+  --input-bg:rgba(0,0,0,0.2);
+  --input-border:#00f0ff;
+  --text-color:#e6f7ff;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background-color:var(--bg);font-family:sans-serif;color:var(--text-color);padding:10px;}
+#neon-circle{
+  width:180px;
+  height:180px;
+  border-radius:50%;
+  background:radial-gradient(circle, var(--neon-color) 0%, transparent 70%);
+  box-shadow:var(--neon-glow);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:30px;
+  font-size:32px;
+  cursor:pointer;
+}
+@keyframes pulse {
+  0%{transform:scale(1);box-shadow:0 0 12px var(--neon-color),0 0 24px var(--neon-color),0 0 36px var(--neon-color);}
+  50%{transform:scale(1.1);box-shadow:0 0 20px var(--neon-color),0 0 36px var(--neon-color),0 0 60px var(--neon-color);}
+  100%{transform:scale(1);box-shadow:0 0 12px var(--neon-color),0 0 24px var(--neon-color),0 0 36px var(--neon-color);}
+}
+.pulse { animation: pulse 1.2s linear infinite; }
+#input-container{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:20px;width:100%;max-width:400px;}
+#user-input{
+  padding:12px 16px;
+  border-radius:12px;
+  border:2px solid var(--input-border);
+  background-color:var(--input-bg);
+  color:var(--text-color);
+  flex:1;
+  text-align:center;
+  font-size:16px;
+  outline:none;
+  box-shadow:var(--neon-glow);
+}
+#send-btn{
+  padding:12px 16px;
+  border:none;
+  border-radius:12px;
+  background-color:var(--neon-color);
+  color:#000;
+  font-weight:bold;
+  cursor:pointer;
+  box-shadow:var(--neon-glow);
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.toast{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  background:rgba(0,0,0,0.8);
+  color:var(--neon-color);
+  padding:12px 20px;
+  border-radius:12px;
+  box-shadow:var(--neon-glow);
+  opacity:0;
+  transition:opacity 0.3s ease;
+}
+.toast.show{opacity:1;}
+@media (max-width:500px){
+  #neon-circle{width:140px;height:140px;font-size:24px;}
+  #input-container{max-width:90%;}
+}
+</style>
+</head>
+<body>
+
+<div id="neon-circle"><i class="fa-solid fa-microphone"></i></div>
+<div id="input-container">
+  <input type="text" id="user-input" placeholder="Ecrivez votre question...">
+  <button id="send-btn"><i class="fa-solid fa-paper-plane"></i> Envoyer</button>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+const OPENAI_API_KEY = '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';
+const inputEl = document.getElementById('user-input');
+const sendBtn = document.getElementById('send-btn');
+const neonCircle = document.getElementById('neon-circle');
+const toastEl = document.getElementById('toast');
+
+// ---- Toast ----
+function showToast(message){
+  toastEl.textContent = message;
+  toastEl.classList.add('show');
+  setTimeout(()=>{ toastEl.classList.remove('show'); },4000);
+}
+
+// ---- Speak AI ----
+function speak(text){
+  if('speechSynthesis' in window){
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang='fr-FR';
+    utterance.rate=0.9;
+    utterance.onstart = ()=>{ neonCircle.classList.add('pulse'); };
+    utterance.onend = ()=>{ neonCircle.classList.remove('pulse'); };
+    window.speechSynthesis.speak(utterance);
+  }
+}
+
+// ---- OpenAI call ----
+async function callOpenAI(message){
+  try{
+    const res = await fetch('https://api.openai.com/v1/chat/completions',{ 
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':`Bearer ${OPENAI_API_KEY}`
+      },
+      body:JSON.stringify({
+        model:'gpt-4o-mini',
+        messages:[{role:'user', content:message}]
+      })
+    });
+    const data = await res.json();
+    const reply = data.choices[0].message.content;
+    showToast(reply);
+    speak(reply);
+    let history = JSON.parse(localStorage.getItem('chat_history_v3')||'[]');
+    history.push({question: message, answer: reply});
+    localStorage.setItem('chat_history_v3',JSON.stringify(history));
+  }catch(e){ showToast('Erreur: '+e.message); }
+}
+
+// ---- Send input ----
+sendBtn.addEventListener('click',()=>{
+  const msg = inputEl.value.trim();
+  if(!msg) return;
+  inputEl.value='';
+  callOpenAI(msg);
+});
+
+inputEl.addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ sendBtn.click(); }});
+
+// ---- Voice recognition ----
+let recognition;
+if('webkitSpeechRecognition' in window){
+  recognition = new webkitSpeechRecognition();
+  recognition.continuous = false;
+  recognition.lang = 'fr-FR';
+  recognition.interimResults = false;
+
+  neonCircle.addEventListener('click', ()=>{
+    neonCircle.classList.add('pulse');
+    recognition.start();
+  });
+
+  recognition.onresult = (event)=>{
+    const transcript = event.results[0][0].transcript;
+    inputEl.value = transcript;
+    callOpenAI(transcript);
+  };
+
+  recognition.onend = ()=>{
+    neonCircle.classList.remove('pulse');
+  };
+}else{
+  console.warn("Votre navigateur ne supporte pas la reconnaissance vocale.");
+}
+</script>
+
+</body>
+</html>
